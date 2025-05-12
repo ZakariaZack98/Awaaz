@@ -37,26 +37,26 @@ const SignUp = () => {
     }
   };
 
-  // const uploadImageToCloudinary = async () => {
-  //   if (!profilePic) return null;
-  //   setUploading(true);
-  //   const data = new FormData();
-  //   data.append("file", profilePic);
-  //   data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // Replace with your Cloudinary upload preset
-  //   try {
-  //     const res = await fetch(`https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`, {
-  //       method: "POST",
-  //       body: data,
-  //     });
-  //     const result = await res.json();
-  //     setUploading(false);
-  //     return result.secure_url;
-  //   } catch (err) {
-  //     console.error("Error uploading image:", err);
-  //     setUploading(false);
-  //     return null;
-  //   }
-  // };
+  const uploadImageToCloudinary = async () => {
+    if (!profilePic) return null;
+    setUploading(true);
+    const data = new FormData();
+    data.append("file", profilePic);
+    data.append("upload_preset", "awaaj_app"); // Replace with your Cloudinary upload preset
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`, {
+        method: "POST",
+        body: data,
+      });
+      const result = await res.json();
+      setUploading(false);
+      return result.secure_url;
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      setUploading(false);
+      return null;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,7 +65,7 @@ const SignUp = () => {
       return;
     }
 
-    let profilePicUrl = "Cloudinary setup Not Yet Done!";
+    let profilePicUrl = "";
     if (profilePic) {
       profilePicUrl = await uploadImageToCloudinary();
       if (!profilePicUrl) {
@@ -82,29 +82,44 @@ const SignUp = () => {
         profilePicUrl,
       }
     ))
-    console.log("Signing up with data:", formData);
 
     // ...additional sign-up logic...
 
     // Create User in Database/Firebase
     createUserWithEmailAndPassword(auth, formData.email, formData.password)
       .then((userInfo) => {
-        console.log(auth.currentUser);
         // Update User in Auth
         updateProfile(auth.currentUser, {
           displayName: formData.fullName,
           photoURL: formData.profilePicUrl,
         })
-        console.log(auth.currentUser);
       })
       .then(() => {
         // Store User data in database
-        set(ref(db, `User/${auth.currentUser.uid}`), {
-          userid: auth.currentUser.uid,
-          fullName: auth.currentUser.displayName || formData.fullName,
+        set(ref(db, `users/${auth.currentUser.uid}`), {
           username: formData.username,
           email: auth.currentUser.email || formData.email,
-          profile_picture: auth?.currentUser?.photoURL || formData.profilePicUrl,
+          imgUrl: auth?.currentUser?.photoURL || formData.profilePicUrl,
+          fullName: auth.currentUser.displayName || formData.fullName,
+          bio: "null",
+          blockedIds: {
+            uid1: true,
+            uid2: true
+          },
+          blockedIds: {
+            uid3: true,
+            uid4: true
+          },
+          socialHandles: {
+            facebook: {
+              name: "Facebook",
+              url: "https://fb.com/xyz"
+            },
+            twitter: {
+              name: "Twitter",
+              url: "https://twitter.com/xyz"
+            }
+          }
         });
       })
       .catch((error) => {
@@ -117,11 +132,33 @@ const SignUp = () => {
     const provider = new GoogleAuthProvider()
     signInWithPopup(auth, provider)
       .then((userinfo) => {
-        set(ref(db, `User/${userinfo?.user?.uid}`), {
-          userid: userinfo?.user?.uid,
-          fullName: userinfo?.user?.displayName,
+        const lastname = userinfo?.user?.displayName.split(' ')[1];
+        console.log(lastname);
+        console.log()
+        set(ref(db, `users/${userinfo?.user?.uid}`), {
+          username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
           email: userinfo?.user?.email,
-          profile_picture: userinfo?.user?.photoURL
+          imgUrl: userinfo?.user?.photoURL,
+          fullName: userinfo?.user?.displayName,
+          bio: "null",
+          blockedIds: {
+            uid1: true,
+            uid2: true
+          },
+          blockedIds: {
+            uid3: true,
+            uid4: true
+          },
+          socialHandles: {
+            facebook: {
+              name: "Facebook",
+              url: "https://fb.com/xyz"
+            },
+            twitter: {
+              name: "Twitter",
+              url: "https://twitter.com/xyz"
+            }
+          }
         });
       })
       .catch((error) => {
@@ -133,23 +170,37 @@ const SignUp = () => {
     const provider = new FacebookAuthProvider();
     signInWithPopup(auth, provider)
       .then((userinfo) => {
-        set(ref(db, `User/${userinfo?.user?.uid}`), {
-          userid: userinfo?.user?.uid,
-          fullName: userinfo?.user?.displayName,
+        set(ref(db, `users/${userinfo?.user?.uid}`), {
+          username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
           email: userinfo?.user?.email,
-          profile_picture: userinfo?.user?.photoURL
+          imgUrl: userinfo?.user?.photoURL,
+          fullName: userinfo?.user?.displayName,
+          bio: "null",
+          blockedIds: {
+            uid1: true,
+            uid2: true
+          },
+          blockedIds: {
+            uid3: true,
+            uid4: true
+          },
+          socialHandles: {
+            facebook: {
+              name: "Facebook",
+              url: "https://fb.com/xyz"
+            },
+            twitter: {
+              name: "Twitter",
+              url: "https://twitter.com/xyz"
+            }
+          }
         });
-
       })
       .catch((error) => {
         console.log("Facebook Login Error", error);
 
       });
   };
-
-
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-5">

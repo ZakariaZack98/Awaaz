@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { auth } from "../../../Database/Firebase.config";
 import { Facebook, Mail, Lock } from 'lucide-react';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
 
 const SignUp = () => {
+  const auth = getAuth();
+  const db = getDatabase();
+
+
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -31,26 +37,26 @@ const SignUp = () => {
     }
   };
 
-  const uploadImageToCloudinary = async () => {
-    if (!profilePic) return null;
-    setUploading(true);
-    const data = new FormData();
-    data.append("file", profilePic);
-    data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // Replace with your Cloudinary upload preset
-    try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`, {
-        method: "POST",
-        body: data,
-      });
-      const result = await res.json();
-      setUploading(false);
-      return result.secure_url;
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      setUploading(false);
-      return null;
-    }
-  };
+  // const uploadImageToCloudinary = async () => {
+  //   if (!profilePic) return null;
+  //   setUploading(true);
+  //   const data = new FormData();
+  //   data.append("file", profilePic);
+  //   data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // Replace with your Cloudinary upload preset
+  //   try {
+  //     const res = await fetch(`https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`, {
+  //       method: "POST",
+  //       body: data,
+  //     });
+  //     const result = await res.json();
+  //     setUploading(false);
+  //     return result.secure_url;
+  //   } catch (err) {
+  //     console.error("Error uploading image:", err);
+  //     setUploading(false);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +65,7 @@ const SignUp = () => {
       return;
     }
 
-    let profilePicUrl = "";
+    let profilePicUrl = "Cloudinary setup Not Yet Done!";
     if (profilePic) {
       profilePicUrl = await uploadImageToCloudinary();
       if (!profilePicUrl) {
@@ -69,13 +75,81 @@ const SignUp = () => {
     }
 
     // Implement your signup logic here with Firebase Auth or your backend
-    console.log("Signing up with data:", {
-      ...formData,
-      profilePicUrl,
-    });
+
+    setFormData((prev) => (
+      {
+        ...formData,
+        profilePicUrl,
+      }
+    ))
+    console.log("Signing up with data:", formData);
 
     // ...additional sign-up logic...
+
+    // Create User in Database/Firebase
+    createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      .then((userInfo) => {
+        console.log(auth.currentUser);
+        // Update User in Auth
+        updateProfile(auth.currentUser, {
+          displayName: formData.fullName,
+          photoURL: formData.profilePicUrl,
+        })
+        console.log(auth.currentUser);
+      })
+      .then(() => {
+        // Store User data in database
+        set(ref(db, `User/${auth.currentUser.uid}`), {
+          userid: auth.currentUser.uid,
+          fullName: auth.currentUser.displayName || formData.fullName,
+          username: formData.username,
+          email: auth.currentUser.email || formData.email,
+          profile_picture: auth?.currentUser?.photoURL || formData.profilePicUrl,
+        });
+      })
+      .catch((error) => {
+        console.log("Create user in DB error", error);
+      });
+  }
+
+  // Handle google SignUp
+  const handlegoogle = () => {
+    const provider = new GoogleAuthProvider()
+    signInWithPopup(auth, provider)
+      .then((userinfo) => {
+        set(ref(db, `User/${userinfo?.user?.uid}`), {
+          userid: userinfo?.user?.uid,
+          fullName: userinfo?.user?.displayName,
+          email: userinfo?.user?.email,
+          profile_picture: userinfo?.user?.photoURL
+        });
+      })
+      .catch((error) => {
+        console.log("Google SignIn error", error);
+      })
   };
+  // Handle Facebook SignUp
+  const handlefacebook = () => {
+    const provider = new FacebookAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((userinfo) => {
+        set(ref(db, `User/${userinfo?.user?.uid}`), {
+          userid: userinfo?.user?.uid,
+          fullName: userinfo?.user?.displayName,
+          email: userinfo?.user?.email,
+          profile_picture: userinfo?.user?.photoURL
+        });
+
+      })
+      .catch((error) => {
+        console.log("Facebook Login Error", error);
+
+      });
+  };
+
+
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-5">
@@ -84,12 +158,12 @@ const SignUp = () => {
         <div className="space-y-3 mb-4">
           {/* Social Sign In Options */}
           <div className="space-y-4 mb-6">
-            <button className="flex items-center justify-center w-full bg-blue-500 text-white py-2 px-4 rounded font-medium hover:bg-blue-600 transition duration-200 cursor-pointer">
+            <button onClick={handlefacebook} className="flex items-center justify-center w-full bg-blue-500 text-white py-2 px-4 rounded font-medium hover:bg-blue-600 transition duration-200 cursor-pointer">
               <Facebook size={20} className="mr-2" />
               Continue with Facebook
             </button>
 
-            <button className="flex items-center justify-center w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded font-medium hover:bg-gray-50 transition duration-200 cursor-pointer">
+            <button onClick={handlegoogle} className="flex items-center justify-center w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded font-medium hover:bg-gray-50 transition duration-200 cursor-pointer">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
                   fill="#EA4335"

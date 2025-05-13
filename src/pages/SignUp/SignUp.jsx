@@ -3,8 +3,9 @@ import { auth } from "../../../Database/Firebase.config";
 import { Facebook, Mail, Lock } from 'lucide-react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
-import { handlefacebook, handlegoogle } from "../../components/Signupsignin/Signupsignin";
+
 import { useNavigate } from "react-router-dom";
+import { handlefacebook, handlegoogle } from "../../utils/Signupsignin.utils";
 
 const SignUp = () => {
   const auth = getAuth();
@@ -77,14 +78,6 @@ const SignUp = () => {
     }
 
     // Implement your signup logic here with Firebase Auth or your backend
-
-    setFormData((prev) => (
-      {
-        ...formData,
-        profilePicUrl,
-      }
-    ))
-
     // ...additional sign-up logic...
 
     // Create User in Database/Firebase
@@ -93,7 +86,7 @@ const SignUp = () => {
         // Update User in Auth
         updateProfile(auth.currentUser, {
           displayName: formData.fullName,
-          photoURL: formData.profilePicUrl,
+          photoURL: profilePicUrl,
         })
       })
       .then(() => {
@@ -102,7 +95,7 @@ const SignUp = () => {
           userId: auth?.currentUser?.uid,
           username: formData.username,
           email: auth.currentUser.email || formData.email,
-          imgUrl: auth?.currentUser?.photoURL || formData.profilePicUrl,
+          imgUrl: auth?.currentUser?.photoURL || profilePicUrl,
           fullName: auth.currentUser.displayName || formData.fullName,
         });
       })

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Facebook, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
-import { handlefacebook, handlegoogle } from '../../components/Signupsignin/Signupsignin';
+import { handlefacebook, handlegoogle } from '../../utils/Signupsignin.utils';
 
 
 const SignIn = () => {
@@ -18,7 +18,6 @@ const SignIn = () => {
       .then((userInfo) => {
         return sendEmailVerification(auth.currentUser);
       }).then(() => {
-        alert("Email has been sent");
         navigate("/")
       })
       .catch((error) => {

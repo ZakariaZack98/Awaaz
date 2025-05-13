@@ -28,7 +28,6 @@ export const handlegoogle = (navigate) => {
             console.log("Google loggin error", error);
         })
 };
-console.log(auth.currentUser);
 
 // Handle Facebook (SignUp with facebook)
 export const handlefacebook = (navigate) => {

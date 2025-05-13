@@ -17,7 +17,7 @@ export const handlegoogle = (navigate) => {
                 fullName: userinfo?.user?.displayName
 
             }).then(() => {
-                if (!auth.currentUser.emailVerified) {
+                if (!auth?.currentUser?.emailVerified) {
                     sendEmailVerification(auth.currentUser)
                 }
                 navigate("/")
@@ -41,7 +41,7 @@ export const handlefacebook = (navigate) => {
                 imgUrl: userinfo?.user?.photoURL,
                 fullName: userinfo?.user?.displayName,
             }).then(() => {
-                if (!auth.currentUser.emailVerified) {
+                if (!auth?.currentUser?.emailVerified) {
                     sendEmailVerification(auth.currentUser)
                 }
                 navigate("/")

@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { auth } from "../../../Database/Firebase.config";
 import { Facebook, Mail, Lock } from 'lucide-react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
+import { handlefacebook, handlegoogle } from "../../components/common/Signupsignin/Signupsignin";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const auth = getAuth();
   const db = getDatabase();
-
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -42,7 +43,7 @@ const SignUp = () => {
     setUploading(true);
     const data = new FormData();
     data.append("file", profilePic);
-    data.append("upload_preset", "awaaj_app"); // Replace with your Cloudinary upload preset
+    data.append("upload_preset", "awaaz_app"); // Replace with your Cloudinary upload preset
     try {
       const res = await fetch(`https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`, {
         method: "POST",
@@ -51,6 +52,7 @@ const SignUp = () => {
       const result = await res.json();
       setUploading(false);
       return result.secure_url;
+
     } catch (err) {
       console.error("Error uploading image:", err);
       setUploading(false);
@@ -65,7 +67,7 @@ const SignUp = () => {
       return;
     }
 
-    let profilePicUrl = "";
+    let profilePicUrl = " ";
     if (profilePic) {
       profilePicUrl = await uploadImageToCloudinary();
       if (!profilePicUrl) {
@@ -97,110 +99,56 @@ const SignUp = () => {
       .then(() => {
         // Store User data in database
         set(ref(db, `users/${auth.currentUser.uid}`), {
+          userId: auth?.currentUser?.uid,
           username: formData.username,
           email: auth.currentUser.email || formData.email,
           imgUrl: auth?.currentUser?.photoURL || formData.profilePicUrl,
           fullName: auth.currentUser.displayName || formData.fullName,
-          bio: "null",
-          blockedIds: {
-            uid1: true,
-            uid2: true
-          },
-          blockedIds: {
-            uid3: true,
-            uid4: true
-          },
-          socialHandles: {
-            facebook: {
-              name: "Facebook",
-              url: "https://fb.com/xyz"
-            },
-            twitter: {
-              name: "Twitter",
-              url: "https://twitter.com/xyz"
-            }
-          }
         });
       })
       .catch((error) => {
         console.log("Create user in DB error", error);
+        alert(error)
       });
   }
 
-  // Handle google SignUp
-  const handlegoogle = () => {
-    const provider = new GoogleAuthProvider()
-    signInWithPopup(auth, provider)
-      .then((userinfo) => {
-        const lastname = userinfo?.user?.displayName.split(' ')[1];
-        console.log(lastname);
-        console.log()
-        set(ref(db, `users/${userinfo?.user?.uid}`), {
-          username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
-          email: userinfo?.user?.email,
-          imgUrl: userinfo?.user?.photoURL,
-          fullName: userinfo?.user?.displayName,
-          bio: "null",
-          blockedIds: {
-            uid1: true,
-            uid2: true
-          },
-          blockedIds: {
-            uid3: true,
-            uid4: true
-          },
-          socialHandles: {
-            facebook: {
-              name: "Facebook",
-              url: "https://fb.com/xyz"
-            },
-            twitter: {
-              name: "Twitter",
-              url: "https://twitter.com/xyz"
-            }
-          }
-        });
-      })
-      .catch((error) => {
-        console.log("Google SignIn error", error);
-      })
-  };
-  // Handle Facebook SignUp
-  const handlefacebook = () => {
-    const provider = new FacebookAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((userinfo) => {
-        set(ref(db, `users/${userinfo?.user?.uid}`), {
-          username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
-          email: userinfo?.user?.email,
-          imgUrl: userinfo?.user?.photoURL,
-          fullName: userinfo?.user?.displayName,
-          bio: "null",
-          blockedIds: {
-            uid1: true,
-            uid2: true
-          },
-          blockedIds: {
-            uid3: true,
-            uid4: true
-          },
-          socialHandles: {
-            facebook: {
-              name: "Facebook",
-              url: "https://fb.com/xyz"
-            },
-            twitter: {
-              name: "Twitter",
-              url: "https://twitter.com/xyz"
-            }
-          }
-        });
-      })
-      .catch((error) => {
-        console.log("Facebook Login Error", error);
+  // // Handle google (SignUp with Google)
+  // const handlegoogle = () => {
+  //   const provider = new GoogleAuthProvider()
+  //   signInWithPopup(auth, provider)
+  //     .then((userinfo) => {
+  //       console.log(userinfo?.user);
 
-      });
-  };
+  //       set(ref(db, `users/${userinfo?.user?.uid}`), {
+  //         userId: userinfo?.user?.uid,
+  //         username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
+  //         email: userinfo?.user?.email,
+  //         imgUrl: userinfo?.user?.photoURL,
+  //         fullName: userinfo?.user?.displayName
+  //       }).catch((error) => {
+  //         console.log("Google SignIn error", error);
+  //       })
+  //     })
+
+  // };
+  // // Handle Facebook (SignUp with facebook)
+  // const handlefacebook = () => {
+  //   const provider = new FacebookAuthProvider();
+  //   signInWithPopup(auth, provider)
+  //     .then((userinfo) => {
+  //       set(ref(db, `users/${userinfo?.user?.uid}`), {
+  //         userId: userinfo?.user?.uid,
+  //         username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
+  //         email: userinfo?.user?.email,
+  //         imgUrl: userinfo?.user?.photoURL,
+  //         fullName: userinfo?.user?.displayName,
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.log("Facebook Login Error", error);
+
+  //     });
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-5">
@@ -209,12 +157,12 @@ const SignUp = () => {
         <div className="space-y-3 mb-4">
           {/* Social Sign In Options */}
           <div className="space-y-4 mb-6">
-            <button onClick={handlefacebook} className="flex items-center justify-center w-full bg-blue-500 text-white py-2 px-4 rounded font-medium hover:bg-blue-600 transition duration-200 cursor-pointer">
+            <button onClick={() => handlefacebook(navigate)} className="flex items-center justify-center w-full bg-blue-500 text-white py-2 px-4 rounded font-medium hover:bg-blue-600 transition duration-200 cursor-pointer">
               <Facebook size={20} className="mr-2" />
               Continue with Facebook
             </button>
 
-            <button onClick={handlegoogle} className="flex items-center justify-center w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded font-medium hover:bg-gray-50 transition duration-200 cursor-pointer">
+            <button onClick={() => handlegoogle(navigate)} className="flex items-center justify-center w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded font-medium hover:bg-gray-50 transition duration-200 cursor-pointer">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
                   fill="#EA4335"

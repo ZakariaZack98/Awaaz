@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Facebook, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
-import { handlefacebook, handlegoogle } from '../../components/common/Signupsignin/Signupsignin';
+import { handlefacebook, handlegoogle } from '../../components/Signupsignin/Signupsignin';
+
 
 const SignIn = () => {
   const auth = getAuth();
@@ -25,7 +26,6 @@ const SignIn = () => {
       });
 
   };
-
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 py-5">

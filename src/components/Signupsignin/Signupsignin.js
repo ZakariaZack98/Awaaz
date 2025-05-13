@@ -11,7 +11,7 @@ export const handlegoogle = (navigate) => {
         .then((userinfo) => {
             set(ref(db, `users/${userinfo?.user?.uid}`), {
                 userId: userinfo?.user?.uid,
-                username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
+                username: `${userinfo?.user?.displayName.split(' ').slice(-1)[0].toLowerCase()}${Math.round(Math.random() * 1000)}`,
                 email: userinfo?.user?.email,
                 imgUrl: userinfo?.user?.photoURL,
                 fullName: userinfo?.user?.displayName
@@ -37,7 +37,7 @@ export const handlefacebook = (navigate) => {
         .then((userinfo) => {
             set(ref(db, `users/${userinfo?.user?.uid}`), {
                 userId: userinfo?.user?.uid,
-                username: `${userinfo?.user?.displayName.split(' ')[1].toLowerCase()}${Math.round(Math.random() * 1000)}`,
+                username: `${userinfo?.user?.displayName.split(' ').slice(-1)[0].toLowerCase()}${Math.round(Math.random() * 1000)}`,
                 email: userinfo?.user?.email,
                 imgUrl: userinfo?.user?.photoURL,
                 fullName: userinfo?.user?.displayName,

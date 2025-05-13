@@ -21,7 +21,7 @@ userObject = {
 //* FLAT OBJECT TO STORE ALL POSTS ====================
 allPosts = {
   postId: {
-    id: postId,
+    id: auth.currentUser.uid + Date.now(),
     timeStamp: Date.now(),
     posterId: auth.currentUser.uid,
     posterName: currentUser.displayName, //? denormalized name
@@ -50,7 +50,7 @@ postMetaData = {
 //* FLAT OBJECT TO STORE ALL COMMENTS ================
 allComments = {
   commentId: {
-    id: commentId,
+    id: auth.currentUser.uid + Date.now(),
     timeStamp: Date.now(),
     createdAt: GetTimeNow(),
     postId: "postId", //? link back to post
@@ -70,7 +70,7 @@ allComments = {
 //* FLAT OBJECT TO STORE ALL REPLIES ==================
 allReplies = {
   replyId: {
-    id: replyId,
+    id: auth.currentUser.uid + Date.now(),
     timeStamp: Date.now(),
     createdAt: GetTimeNow(),
     commentId: "commentId", //? link back to comment
@@ -86,7 +86,7 @@ allReplies = {
 //* FLAT OBJECT TO STORE STORIES ======================
 allStories = {
   storyId: {
-    id: storyId,
+    id: auth.currentUser.uid + Date.now(),
     timeStamp: Date.now(),
     posterId: auth.currentUser.uid,
     posterName: currentUser.displayName,
@@ -107,6 +107,7 @@ allStories = {
 //* FLAT OBJECT TO STORE NOTIFICATIONS ===============
 notifications = {
   notificationId: {
+    id: this.toUserId + Date.now(), //? receiver's id + timestamp
     type: "like", //? or "comment", "follow", etc.
     postId: "postId",
     fromUserId: "userId",

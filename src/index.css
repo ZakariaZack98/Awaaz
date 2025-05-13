@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+:root {
+  --mainFontColor: rgb(75, 75, 75);
+}
+
+@theme {
+  --color-mainfontColor: var(--mainFontColor);
+}

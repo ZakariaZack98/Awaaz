@@ -98,6 +98,7 @@ const SignUp = () => {
           imgUrl: auth?.currentUser?.photoURL || profilePicUrl,
           fullName: auth.currentUser.displayName || formData.fullName,
         });
+        navigate("/signin")
       })
       .catch((error) => {
         console.log("Create user in DB error", error);

@@ -19,7 +19,7 @@ const CommonLayout = () => {
       {userVerified ? (
         <>
           <Sidebar />
-          <div className="w-4/5 p-5">
+          <div className="w-4/5 p-5 bg-[whitesmoke] text-mainfontColor">
             <Outlet />
           </div>
         </>

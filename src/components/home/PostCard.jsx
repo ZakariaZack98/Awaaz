@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { GoDotFill } from 'react-icons/go';
 import ImageSlider from '../common/ImageSlider';
+import PostCardActions from './PostCardActions';
 
 const PostCard = () => {
   // const {id, text, poseterId, posterName, posterImgUrl, createdAt, imgUrls, videoUrl, likeCounts} = postData;
+  const [openPostActions, setOpenPostActions] = useState(false);
   return (
     <div className='p-3 bg-white rounded-md shadow-md'>
       <div className="header flex justify-between items-center pb-2">
@@ -19,8 +21,15 @@ const PostCard = () => {
             <p className="opacity-70 text-[13px]">{'2 hours ago'}</p>
           </div>
         </div>
-        <span>
-          <BsThreeDotsVertical/>
+        <span className='relative'>
+          <BsThreeDotsVertical className='cursor-pointer' onClick={() => setOpenPostActions(prev => !prev)}/>
+          {
+            openPostActions && (
+              <div className='absolute right-0 top-5 z-50'>
+                <PostCardActions/>
+              </div>
+            )
+          }
         </span>
       </div>
       <div className="media">

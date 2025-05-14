@@ -64,7 +64,7 @@ const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc
             width: "100%",
             height: "100%",
           }}>
-          <Slider {...settings} className="border border-[rgba(0,0,0,0.18)] rounded-md" style={{ maxHeight: "500px"}}>
+          <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ maxHeight: "500px"}}>
             {imgUrlArray?.map((url) => (
               <div className="w-full h-125 overflow-hidden">
                 <img src={url} style={{ width: "100%", height: "100%", objectFit: "contain" }} />

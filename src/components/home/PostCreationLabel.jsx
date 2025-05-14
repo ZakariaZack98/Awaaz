@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { _ } from "../../lib/lib";
 import { IoMdCloseCircle } from "react-icons/io";
 import { GetTimeNow } from "../../utils/date.utils";
@@ -6,6 +6,7 @@ import { uploadFiles } from "../../utils/fileuploads.utils"; // Import the uploa
 import { toast } from "react-toastify";
 import { ref, set } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
+import { DataContext } from "../../contexts/DataContexts";
 
 const PostCreationLabel = () => {
   const iconsAndLabels = _.postCreationIconsAndLabels;
@@ -15,6 +16,7 @@ const PostCreationLabel = () => {
   const [photoFiles, setPhotoFiles] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPath, setVideoPath] = useState("");
+  const {currentUser} = useContext(DataContext);
 
   // TODO: SHOW THE PREVIEW OF THE UPLOADED PHOTOS UNDER THE UPLOAD PROPMPT
   const handlePreview = (e, filetype) => {
@@ -61,6 +63,7 @@ const PostCreationLabel = () => {
     const newPost = {
       id: postId,
       timeStamp: Date.now(),
+      posterUsername: currentUser.username,
       posterId: auth.currentUser.uid,
       posterName: auth.currentUser.displayName,
       posterImgUrl: auth.currentUser.photoURL,
@@ -68,7 +71,7 @@ const PostCreationLabel = () => {
       visibility: "public", // default
       text: caption,
       imgUrls,
-      videoUrl, // now always a string
+      videoUrl,
       likeCounts: 0,
       hashtags: caption.split(" ").filter((word) => word.startsWith("#")),
     };
@@ -89,14 +92,13 @@ const PostCreationLabel = () => {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full z-50">
       <div className="flex flex-col p-3 rounded-md shadow-md bg-white">
         <div className="top flex items-center justify-between gap-x-2 pb-3 border-b border-gray-200">
           <picture className="w-10 h-10">
             <img
               src={
-                //* currentUser.profile_picture
-                null ||
+                currentUser?.imgUrl ||
                 "https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png"
               }
               className="w-10 h-10 rounded-full object-cover object-center"

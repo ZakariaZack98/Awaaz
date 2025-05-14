@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ref, onValue, off } from "firebase/database";
 import {
   AiFillHome,
   AiOutlineSearch,
@@ -13,14 +12,21 @@ import { FiSend } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
 import { BiMenu } from "react-icons/bi";
 import SidebarMenu from "./SidebarMenu";
+import { DataContext } from "../../contexts/DataContexts";
+import { FetchUserData } from "../../utils/fetchData.utils";
 import { auth } from "../../../Database/Firebase.config";
-import { db } from "../../../Database/Firebase.config";
 
 const Sidebar = () => {
   const location = useLocation();
-  const [currentUseData, setCurrentUseData] = useState([]);
   const navigate = useNavigate();
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
+  const {currentUser, setCurrentUser} = useContext(DataContext);
+
+  useEffect(() => {
+    FetchUserData(auth.currentUser?.uid)
+    .then(data => setCurrentUser(data))
+    .catch(console.error)
+  }, [auth.currentUser?.uid])
 
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },

@@ -99,6 +99,7 @@ const SignUp = () => {
           fullName: auth.currentUser.displayName || formData.fullName,
           activePosts: 0
         });
+        navigate("/signin")
       })
       .catch((error) => {
         console.log("Create user in DB error", error);

@@ -5,6 +5,7 @@ import { FiEdit } from 'react-icons/fi';
 import { IoMdDoneAll } from 'react-icons/io';
 import { FaFacebookSquare } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+import { toast } from 'react-toastify';
 
 const Settings = () => {
     const db = getDatabase()
@@ -12,22 +13,20 @@ const Settings = () => {
     // State for handle edited profile
     const [fullname, setFullname] = useState("");
     const [editFullname, seteditFullname] = useState(false);
-    const [profilePic, setProfilePic] = useState(false);
+    const [profilePicUpdate, setProfilePicUpdate] = useState("");
     const [theme, setTheme] = useState("Light");
     const [followersVisibility, setFollowersVisibility] = useState('Public');
     const [followingVisibility, setFollowingVisibility] = useState('Public');
     const [socialHandels, setSocialHandels] = useState('Public');
     const [bio, setBio] = useState('');
     const [gender, setGender] = useState("Unselected")
-
     // State for Social handle
     const [selectedPlatform, setSelectedPlatform] = useState('Facebook');
     const [socialLink, setSocialLink] = useState('');
     const platforms = ['Facebook', 'X (Twitter)', 'YouTube', 'Instagram', 'LinkedIn'];
-    // Store User data after fetch
     const [userData, setUserData] = useState()
+    const [refetch, setRefetch] = useState(0)
 
-    console.log(userData);
 
     // fetch user data from database
     useEffect(() => {
@@ -37,8 +36,9 @@ const Settings = () => {
                 const snapshot = await get(userRef);
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-
                     // eatch state update from database data
+                    console.log(data);
+                    setProfilePicUpdate(data.imgUrl)
                     setFullname(data.fullName)
                     setFollowersVisibility(data.followersVisibility || 'Public');
                     setFollowingVisibility(data.followingVisibility || 'Public');
@@ -52,40 +52,40 @@ const Settings = () => {
             }
         };
         fetchUserData();
-    }, []);
-    console.log(socialHandels);
-
+    }, [refetch]);
 
     /**
      * !need to implement an input field when clicked profile pic
      * @Second option is cloudinaary upload widget
-     * 
      */
-    // const updateProfilePic = async () => {
-    //     const data = new FormData();
-    //     data.append("file", profilePic);
-    //     data.append("upload_preset", "awaaz_app"); // Replace with your Cloudinary upload preset
-    //     try {
-    //         const res = await fetch(`https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`, {
-    //             method: "POST",
-    //             body: data,
-    //         });
-    //         const result = await res.json();
-    //         setProfilePic(result.secure_url);
 
-    //     } catch (err) {
-    //         console.error("Error uploading image:", err);
-    //     }
-    // };
+    // Update profile picture
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "awaaz_app");
+        try {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`, {
+                method: "POST",
+                body: data,
+            });
+            const result = await res.json();
+            setProfilePicUpdate(result.secure_url)
+
+        } catch (err) {
+            console.error("Error uploading image:", err);
+        }
+    };
 
     const handleUpdateUser = () => {
-        alert("clicked")
+        toast.info('Updating Profile')
         set(ref(db, `users/${auth.currentUser.uid}`), {
             userId: auth.currentUser.uid,
             username: userData.username,
             fullName: fullname || "Set name",
             email: userData.email,
-            imgUrl: userData.imgUrl,
+            imgUrl: profilePicUpdate,
             gender: gender,
             bio: bio,
             defaultTheme: theme,
@@ -96,8 +96,10 @@ const Settings = () => {
                 twitter: { name: "Twitter", url: "https://twitter.com/xyz" },
             }
         }).then(() => {
-            alert("Update complete")
-
+            toast.success('Profile is updated')
+            setTimeout(() => {
+                setRefetch((prev) => prev + 1)
+            }, 2000);
         }).catch((err) => {
             console.log("user update error", err);
         })
@@ -108,9 +110,8 @@ const Settings = () => {
             {userData ?
                 <div className="max-w-xl mx-auto p-6" >
                     <h1 className="text-2xl font-semibold mb-6" >Edit profile</h1 >
-
                     <div className="flex items-center gap-4 mb-6">
-                        <img src={userData?.imgUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
+                        <img src={profilePicUpdate} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
                         <div>
                             <div className='flex items-center gap-x-2'>
                                 {editFullname ?
@@ -131,7 +132,25 @@ const Settings = () => {
                                     : <FiEdit onClick={() => seteditFullname(!editFullname)} className='text-gray-500 hover:text-blue-500 cursor-pointer' />
                                 }
                             </div>
-                            <button className="text-blue-500 font-medium cursor-pointer">Change photo</button>
+                            {/* <button className="text-blue-500 font-medium cursor-pointer"></button> */}
+                            <div className="inline-block">
+                                <div className="">
+                                    <label
+                                        htmlFor="upload"
+                                        className="  text-blue-800 cursor-pointer">
+                                        Change photo
+                                    </label>
+                                    <input
+                                        type="file"
+                                        multiple
+                                        id="upload"
+                                        name="upload"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 

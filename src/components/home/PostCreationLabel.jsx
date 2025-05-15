@@ -73,7 +73,6 @@ const PostCreationLabel = () => {
       text: caption,
       imgUrls,
       videoUrl,
-      likeCounts: 0,
       hashtags: caption.split(" ").filter((word) => word.startsWith("#")),
     };
     try {

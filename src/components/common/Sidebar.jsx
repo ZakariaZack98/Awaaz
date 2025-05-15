@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ref, onValue, off } from "firebase/database";
 import {
   AiFillHome,
   AiOutlineSearch,
@@ -13,14 +12,21 @@ import { FiSend } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
 import { BiMenu } from "react-icons/bi";
 import SidebarMenu from "./SidebarMenu";
+import { DataContext } from "../../contexts/DataContexts";
+import { FetchUserData } from "../../utils/fetchData.utils";
 import { auth } from "../../../Database/Firebase.config";
-import { db } from "../../../Database/Firebase.config";
 
 const Sidebar = () => {
   const location = useLocation();
-  const [currentUseData, setCurrentUseData] = useState([]);
   const navigate = useNavigate();
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
+  const {currentUser, setCurrentUser} = useContext(DataContext);
+
+  useEffect(() => {
+    FetchUserData(auth.currentUser?.uid)
+    .then(data => setCurrentUser(data))
+    .catch(console.error)
+  }, [auth.currentUser?.uid])
 
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },
@@ -33,22 +39,10 @@ const Sidebar = () => {
     { label: "Profile", icon: CgProfile, path: "/profile" },
     { label: "More", icon: BiMenu, path: "/more" },
   ];
-  // useEffect(() => {
-  //   const uid = auth.currentUser?.uid;
-  //   if (!uid) return;
-  //   const userRef = ref(db, `users/${uid}`);
-  //   onValue(userRef, (snapshot) => {
-  //     if (snapshot.exists()) {
-  //       setCurrentUseData(snapshot.val());
-  //     }
-  //   });
-  // }, []);
-  // console.log(currentUseData);
-
   return (
-    <div className="w-1/5 h-screen overflow-hidden p-5 border-r border-gray-300">
-      <div className="w-64 h-full p-4 flex flex-col">
-        <h1 className="text-2xl font-bold mb-10 ml-2 font-sans">Instagram</h1>
+    <div className="w-1/5 h-screen overflow-hidden p-5 border-gray-300 text-mainfontColor">
+      <div className="w-64 h-full py-4 flex flex-col">
+        <h1 className="text-2xl font-bold mb-10  font-sans">Awaaz</h1>
 
         <nav className="flex flex-col gap-2">
           {navItems.map(({ label, icon: Icon, path }, index) => {

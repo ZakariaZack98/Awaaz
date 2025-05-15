@@ -97,6 +97,7 @@ const SignUp = () => {
           email: auth.currentUser.email || formData.email,
           imgUrl: auth?.currentUser?.photoURL || profilePicUrl,
           fullName: auth.currentUser.displayName || formData.fullName,
+          activePosts: 0
         });
       })
       .catch((error) => {

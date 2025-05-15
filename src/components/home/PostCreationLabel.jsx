@@ -60,6 +60,7 @@ const PostCreationLabel = () => {
     }
     const postId = auth.currentUser.uid + Date.now();
     const postRef = ref(db, `/posts/${postId}`);
+    const activePostRef = ref(db, `users/${auth.currentUser.uid}/activePosts`);
     const newPost = {
       id: postId,
       timeStamp: Date.now(),
@@ -76,7 +77,7 @@ const PostCreationLabel = () => {
       hashtags: caption.split(" ").filter((word) => word.startsWith("#")),
     };
     try {
-      await set(postRef, newPost);
+      await Promise.all([set(postRef, newPost), set(activePostRef, currentUser.activePosts + 1 || 1)]);
       toast.success("Posting successfull");
       setOpenUploadPrompt(false);
     } catch (error) {

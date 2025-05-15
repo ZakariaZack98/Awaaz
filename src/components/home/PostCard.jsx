@@ -10,12 +10,13 @@ import { CiFaceSmile } from "react-icons/ci";
 import EmojiPicker from "emoji-picker-react";
 import { auth, db } from "../../../Database/Firebase.config";
 import moment from "moment";
-import { AddComment, CheckIfLiked, CheckIfSaved, FetchLikesCommentsCount, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
+import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, FetchLikesCommentsCount, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 
 const PostCard = ({ postData }) => {
   const { id, text, posterUsername, posterId, posterName, posterImgUrl, createdAt, imgUrls, videoUrl } = postData;
   const [openPostActions, setOpenPostActions] = useState(false);
+  const [followed, setFollowed] = useState(true);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likesCount, setLikesCount] = useState(12);
@@ -30,9 +31,10 @@ const PostCard = ({ postData }) => {
   Promise.all([
     FetchLikesCommentsCount(id),
     CheckIfLiked(id),
-    CheckIfSaved(id)
+    CheckIfSaved(id),
+    CheckIfFollowed(postData.posterId)
   ])
-  .then(([data, liked, saved]) => {
+  .then(([data, liked, saved, followed]) => {
     const [likes, comments] = data;
     if(likes) {
       setLikesCount(likes)
@@ -42,6 +44,7 @@ const PostCard = ({ postData }) => {
     } else setCommentsCount(0)
     setLiked(liked)
     setSaved(saved)
+    setFollowed(followed)
   })
   .catch(err => console.error(err))
 }, [])
@@ -125,7 +128,7 @@ const PostCard = ({ postData }) => {
           <BsThreeDotsVertical className="cursor-pointer" onClick={() => setOpenPostActions((prev) => !prev)} />
           {openPostActions && (
             <div className="absolute right-0 top-5 z-50">
-              <PostCardActions />
+              <PostCardActions postData={postData} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
             </div>
           )}
         </span>

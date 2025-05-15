@@ -17,15 +17,11 @@ export const FetchLikesCommentsCount = async postId => {
   }
 };
 
-// TODO: CHECK IF A POST IS LIKED BY USER OR NOT =========
-export const CheckIfLiked = async postId => {
-  const likeRef = ref(db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}`);
-  try {
-    const snapshot = await get(likeRef);
-    return snapshot.exists()
-  } catch (error) {
-    console.error('error checking post is liked or not', error)
-  }
+// TODO: CHECK IF FOLLOWED ===============================
+export const CheckIfFollowed = async userId => {
+  const followRef = ref(db, `followings/${auth.currentUser.uid}/${userId}`);
+  const snapshot = await get(followRef);
+  return snapshot.exists();
 }
 
 // TODO: UNFOLLOW A USER ==================================
@@ -53,6 +49,17 @@ export const Follow = async (userId) => {
     console.log(error);
   }
 };
+
+// TODO: CHECK IF A POST IS LIKED BY USER OR NOT =========
+export const CheckIfLiked = async postId => {
+  const likeRef = ref(db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}`);
+  try {
+    const snapshot = await get(likeRef);
+    return snapshot.exists()
+  } catch (error) {
+    console.error('error checking post is liked or not', error)
+  }
+}
 
 // TODO: LIKE A POST ======================================
 export const LikePost = async (postId) => {

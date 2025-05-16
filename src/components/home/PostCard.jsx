@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import PostHeader from "../common/PostHeader";
 import { mockData } from "../../lib/mockData";
 import Post from "../../pages/Post/Post";
+import PostActionIcons from "../common/PostActionIcons";
 
 const PostCard = ({ postData = mockData.postData }) => {
   const { id, text, posterName, imgUrls, videoUrl } = postData;
@@ -104,7 +105,7 @@ const PostCard = ({ postData = mockData.postData }) => {
   return (
     <div className="p-3 bg-white rounded-md shadow-md">
       {
-        openPost && <Post setOpenPost={setOpenPost} postData={postData} followed={followed} setFollowed={setFollowed} saved={saved} setSaved={setSaved}/>
+        openPost && <Post setOpenPost={setOpenPost} postData={postData} followed={followed} setFollowed={setFollowed} liked={liked} likesCount={likesCount} saved={saved} setSaved={setSaved} handleLike={handleLike} handleSave={handleSave}/>
       }
       {/* //================ HEADING ====================== */}
       <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
@@ -127,29 +128,8 @@ const PostCard = ({ postData = mockData.postData }) => {
         )
       }
       {/* ========== ICONS ================== */}
-      <div className="icons flex justify-between py-3 text-2xl">
-        <div className="flex items-center gap-x-4">
-          <span>
-            {liked ? (
-              <FaHeart className="text-red-600 cursor-pointer" onClick={() => handleLike()} />
-            ) : (
-              <FaRegHeart className="cursor-pointer" onClick={() => handleLike()} />
-            )}
-          </span>
-          <span>
-            <IoChatbubbleOutline className=" cursor-pointer" />
-          </span>
-          <span>
-            <PiPaperPlaneTilt className=" cursor-pointer" />
-          </span>
-        </div>
-        <span onClick={() => setSaved(!saved)}>
-          {saved ? (
-            <FaBookmark className="text-red-600 cursor-pointer" onClick={() => handleSave()} />
-          ) : (
-            <FaRegBookmark className="cursor-pointer" onClick={() => handleSave()} />
-          )}
-        </span>
+      <div className="py-2">
+        <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave}/>
       </div>
       {/* ============= LIKES & COMMENTS ============== */}
       <p className="font-semibold text-sm">{likesCount} likes</p>

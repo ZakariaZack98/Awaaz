@@ -17,13 +17,13 @@ const PostHeader = ({ postData, openPostActions, setOpenPostActions, followed, s
             }
             className="rounded-full w-10 h-10"
           />
-          <div className="flex items-start gap-x-2">
+          <div className="flex items-baseline gap-x-2">
             <div className="flex flex-col">
-              <p className="text-sm font-semibold">{posterName || "Name Missing"}</p>
+              <p className="text-sm font-semibold leading-3">{posterName || "Name Missing"}</p>
               <p className="opacity-70 text-[13px]">{posterUsername ? `@${posterUsername}` : "@username"}</p>
             </div>
             <span>
-              <GoDotFill />
+              <GoDotFill className="translate-y-1"/>
             </span>
             <p className="opacity-70 text-[13px]">{moment(createdAt).fromNow()}</p>
           </div>

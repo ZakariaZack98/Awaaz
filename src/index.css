@@ -8,6 +8,11 @@
   --color-mainfontColor: var(--mainFontColor);
 }
 
+.slick-track {
+  display: flex !important;
+  align-items: center;
+}
+
 .slick-dots {
   background-color: transparent !important;
 }

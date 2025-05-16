@@ -7,6 +7,7 @@ import PostActionIcons from "../../components/common/PostActionIcons";
 import { get, limitToFirst, query, ref } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import { FetchUserData } from "../../utils/fetchData.utils";
+import CommentField from "../../components/common/CommentField";
 
 const Post = ({
   postData = mockData.postData,
@@ -19,6 +20,10 @@ const Post = ({
   handleSave,
   saved,
   setSaved,
+  comment,
+  setComment,
+  handleComment,
+  onlyText
 }) => {
   const { id, text, posterName, imgUrls, videoUrl } = postData;
   const [openPostActions, setOpenPostActions] = useState(false);
@@ -43,11 +48,11 @@ const Post = ({
       }
     };
     getFirstLikerName();
-  }, []);
+  }, [liked]);
 
   return (
     <div
-      className="w-screen h-screen absolute top-0 left-0 flex justify-center items-center bg-[rgba(0,0,0,0.48)]"
+      className="w-screen h-screen absolute top-0 left-0 flex justify-center items-center bg-[rgba(0,0,0,0.7)]"
       style={{ zIndex: 500 }}>
       <div className="absolute top-5 right-5 cursor-pointer text-white">
         <span className="text-3xl">
@@ -55,17 +60,19 @@ const Post = ({
         </span>
       </div>
       <div
-        className="postBox w-[70dvw] h-[92dvh] flex bg-white"
+        className={`postBox h-[92dvh] flex overflow-hidden ${onlyText ? 'w-[40dvw]' : 'w-[70dvw]'}`}
         style={{ boxShadow: "0px 0px 10px 10px rgba(0,0,0,0.1)" }}>
-        <div className="media h-full w-1/2 bg-black flex items-center">
-          {imgUrls?.length > 1 && <ImageSlider inPost={true} imgUrlArray={imgUrls} />}
-          {imgUrls?.length === 1 && (
-            <img src={imgUrls[0]} alt="" className="w-full h-ful object-conatin object-center" />
-          )}
-          {videoUrl && videoUrl?.length > 0 && <video src={videoUrl} controls className="w-full"></video>}
-        </div>
-        <div className="rightSection h-full w-1/2 flex flex-col border-b border-t border-e">
-          <div className="header h-1/10 border-b border-[rgba(0,0,0,0.26)] p-2">
+        {
+          !onlyText && (
+            <div className="media h-full w-1/2 bg-black flex items-center">
+              {imgUrls?.length > 1 && <ImageSlider inPost={true} imgUrlArray={imgUrls} />}
+              {imgUrls?.length === 1 && <img src={imgUrls[0]} alt="" className="w-full h-ful object-conatin object-center" />}
+              {videoUrl && videoUrl?.length > 0 && <video src={videoUrl} controls className="w-full"></video>}
+            </div>
+          )
+        }
+        <div className={`rightSection h-full ${onlyText ? 'w-full' : 'w-1/2'} flex flex-col justify-between border-b border-t border-e bg-white`}>
+          <div className="header h-15 border-b border-[rgba(0,0,0,0.26)] p-2">
             <PostHeader
               postData={postData}
               openPostActions={openPostActions}
@@ -77,7 +84,7 @@ const Post = ({
             />
           </div>
           <div className="caption&comments h-[68%]"></div>
-          <div className="likes&others h-[12%] border-t border-[rgba(0,0,0,0.26)] p-3">
+          <div className="likes&others h-17 border-t border-[rgba(0,0,0,0.26)] p-3">
             <div className="flex flex-col justify-center gap-y-1">
               <PostActionIcons
                 postId={id}
@@ -105,7 +112,9 @@ const Post = ({
               )}
             </div>
           </div>
-          <div className="footer h-1/10 border-t border-[rgba(0,0,0,0.26)]"></div>
+          <div className="commentField h-13 border-t border-[rgba(0,0,0,0.26)] px-3">
+            <CommentField postId={id} comment={comment} setComment={setComment} handleComment={handleComment} inPost/>
+          </div>
         </div>
       </div>
     </div>

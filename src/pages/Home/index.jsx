@@ -23,7 +23,8 @@ const Index = () => {
   }, [])
 
   return (
-    <div className='flex w-9/10 h-full overflow-y-scroll mx-auto ' style={{scrollbarWidth: 'none'}}>
+    <div className="w-full h-full overflow-y-scroll">
+      <div className='flex w-9/10 h-full  mx-auto '>
       <div className="feed w-2/3 px-10 ">
         {/* <Post/> */}
         <PostCreationLabel/>
@@ -43,9 +44,10 @@ const Index = () => {
           }
         </div>
       </div>
-      <div className="people w-1/3">
+      <div className="people w-1/3 fixed top-4 -right-[7dvw]">
         <p>This is suggestion part</p>
       </div>
+    </div>
     </div>
   )
 }

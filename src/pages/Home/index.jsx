@@ -3,6 +3,7 @@ import PostCreationLabel from '../../components/home/PostCreationLabel'
 import PostCard from '../../components/home/PostCard'
 import { get, ref } from 'firebase/database';
 import { db } from '../../../Database/Firebase.config';
+import Post from '../Post/Post';
 
 const Index = () => {
   const [feedPostData, setFeedPostData] = useState([]);
@@ -24,6 +25,7 @@ const Index = () => {
   return (
     <div className='flex w-9/10 h-full overflow-y-scroll mx-auto ' style={{scrollbarWidth: 'none'}}>
       <div className="feed w-2/3 px-10 ">
+        {/* <Post/> */}
         <PostCreationLabel/>
         <div className="feed my-3">
           {

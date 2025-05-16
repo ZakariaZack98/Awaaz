@@ -136,7 +136,7 @@ const PostCard = ({ postData }) => {
       {/* ========== MEDIA PART =========== */}
       {imgUrls && imgUrls.length > 1 && (
         <div className="media">
-          <ImageSlider imgUrlArray={imgUrls} />
+          <ImageSlider imgUrlArray={imgUrls}/>
         </div>
       )}
       {

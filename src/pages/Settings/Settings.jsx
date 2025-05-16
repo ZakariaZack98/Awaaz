@@ -4,360 +4,309 @@ import { getAuth } from "firebase/auth";
 import { FiEdit } from "react-icons/fi";
 import { IoMdDoneAll } from "react-icons/io";
 import {
-    FaFacebookSquare,
-    FaInstagram,
-    FaLinkedin,
-    FaYoutube,
+  FaFacebookSquare,
+  FaInstagram,
+  FaLinkedin,
+  FaYoutube,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import SettingSkeleton from "../../components/Skeleton/SettingSkeleton";
+import { DataContext } from "../../contexts/DataContexts";
+import { useContext } from "react";
+import AddSocialPrompt from "./AddSocialPrompt";
 
 const Settings = () => {
-    const db = getDatabase();
-    const auth = getAuth();
-    // State for handle edited profile. also updaet & hold fetch data
-    const [fullname, setFullname] = useState("");
-    const [editFullname, seteditFullname] = useState(false);
-    const [profilePicUpdate, setProfilePicUpdate] = useState("");
-    const [theme, setTheme] = useState("Light");
-    const [followersVisibility, setFollowersVisibility] = useState("Public");
-    const [followingVisibility, setFollowingVisibility] = useState("Public");
-    const [socialHandels, setSocialHandels] = useState("");
-    const [bio, setBio] = useState("");
-    const [gender, setGender] = useState("Unselected");
-    const [userData, setUserData] = useState();
+  const db = getDatabase();
+  const auth = getAuth();
+  const { currentUser } = useContext(DataContext);
 
-    // State for Social handle
-    const [selectedPlatform, setSelectedPlatform] = useState("Facebook");
-    const [socialLink, setSocialLink] = useState("");
-    const platforms = [
-        "Facebook",
-        "X (Twitter)",
-        "YouTube",
-        "Instagram",
-        "LinkedIn",
-    ];
-    const [refetch, setRefetch] = useState(0);
+  // State for handle edited profile. also updaet & hold fetch data
+  const [fullname, setFullname] = useState("");
+  const [editFullname, seteditFullname] = useState(false);
+  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState("");
+  const [theme, setTheme] = useState("Light");
+  const [followersVisibility, setFollowersVisibility] = useState("Public");
+  const [followingVisibility, setFollowingVisibility] = useState("Public");
+  const [bio, setBio] = useState("");
+  const [gender, setGender] = useState("Unselected");
 
-    // fetch user data from database
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userRef = ref(db, `users/${auth?.currentUser?.uid}`);
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    // eatch state update from database data
-                    setProfilePicUpdate(data.imgUrl);
-                    setFullname(data.fullName);
-                    setFollowersVisibility(data.followersVisibility || "Public");
-                    setFollowingVisibility(data.followingVisibility || "Public");
-                    setSocialHandels(data.socialHandles || {});
-                    setBio(data.bio || "");
-                    setGender(data.gender || "Unselected");
-                    setUserData(data);
-                }
-            } catch (error) {
-                console.error("Error fetch data", error);
-            }
-        };
-        fetchUserData();
-    }, [refetch]);
+  // State for Social handle
+  const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
+  const [socialHandels, setSocialHandels] = useState("");
 
-    /**
-     * Todo: to implement an input field when clicked profile pic
-     * !Second option is cloudinaary upload widget
-     */
+  // Update state
+  useEffect(() => {
+    // eatch state update from database data
+    setProfilePicUpdateUrl(currentUser?.imgUrl);
+    setFullname(currentUser?.fullName);
+    setFollowersVisibility(currentUser?.followersVisibility || "Public");
+    setFollowingVisibility(currentUser?.followingVisibility || "Public");
+    setSocialHandels(currentUser?.socialHandles || {});
+    setBio(currentUser?.bio || "");
+    setGender(currentUser?.gender || "Unselected");
+    setTheme(currentUser?.defaultTheme);
+  }, [currentUser]);
 
-    // Update profile picture
-    const handleFileChange = async (e) => {
-        const file = e.target.files[0];
-        const data = new FormData();
-        data.append("file", file);
-        data.append("upload_preset", "awaaz_app");
-        try {
-            const res = await fetch(
-                `https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`,
-                {
-                    method: "POST",
-                    body: data,
-                }
-            );
-            const result = await res.json();
-            setProfilePicUpdate(result.secure_url);
-        } catch (err) {
-            console.error("Error uploading image:", err);
+  // Update profile picture
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "awaaz_app");
+    try {
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/dubcsgtfg/image/upload`,
+        {
+          method: "POST",
+          body: data,
         }
-    };
+      );
+      const result = await res.json();
+      setProfilePicUpdateUrl(result.secure_url);
+    } catch (err) {
+      console.error("Error uploading image:", err);
+    }
+  };
 
-    const handleUpdateUser = () => {
-        toast.info("Updating Profile");
-        set(ref(db, `users/${auth.currentUser.uid}`), {
-            userId: auth.currentUser.uid,
-            username: userData.username,
-            fullName: fullname || "Set name",
-            email: userData.email,
-            imgUrl: profilePicUpdate,
-            gender: gender,
-            bio: bio,
-            defaultTheme: theme,
-            followersVisibility: followersVisibility,
-            followingVisibility: followingVisibility,
-            socialHandles: socialHandels,
-            // {
-            //     facebook: { name: "Facebook", url: "https://fb.com/xyz" },
-            //     twitter: { name: "Twitter", url: "https://twitter.com/xyz" },
-            // }
-        })
-            .then(() => {
-                setSocialLink("");
-                toast.success("Profile is updated");
-                setTimeout(() => {
-                    setRefetch((prev) => prev + 1);
-                }, 10);
-            })
-            .catch((err) => {
-                console.log("user update error", err);
-            });
-    };
+  const handleUpdateUser = () => {
+    toast.info("Updating Profile");
+    set(ref(db, `users/${auth.currentUser.uid}`), {
+      userId: auth.currentUser.uid,
+      username: currentUser.username,
+      fullName: fullname || "Set name",
+      email: currentUser.email,
+      imgUrl: profilePicUpdateUrl,
+      gender: gender,
+      bio: bio,
+      defaultTheme: theme,
+      followersVisibility: followersVisibility,
+      followingVisibility: followingVisibility,
+      socialHandles: socialHandels,
+      // {
+      //     facebook: { name: "Facebook", url: "https://fb.com/xyz" },
+      //     twitter: { name: "Twitter", url: "https://twitter.com/xyz" },
+      // }
+    })
+      .then(() => {
+        setSocialLink("");
+        toast.success("Profile is updated");
+      })
+      .catch((err) => {
+        console.log("user update error", err);
+      });
+  };
 
-    const handleSocialLink = (platform, value) => {
-        setSocialLink(value);
-        setSocialHandels((prev) => ({
-            ...prev,
-            [platform.toLowerCase()]: {
-                name: platform,
-                url: value,
-            },
-        }));
-    };
-    // console.log(userData);
-    return (
-        <>
-            {userData ? (
-                <div className="h-full overflow-hidden">
-                    <div
-                        className="max-w-xl h-full mx-auto p-6 overflow-y-scroll 50"
-                        style={{ scrollbarWidth: "none" }}
-                    >
-                        <h1 className="text-2xl font-semibold mb-6">Edit profile</h1>
-                        <div className="flex items-center gap-4 mb-6">
-                            <img
-                                src={userData?.imgUrl}
-                                alt="Profile"
-                                className="w-16 h-16 rounded-full object-cover"
-                            />
-                            <div>
-                                <div className="flex items-center gap-x-2">
-                                    {editFullname ? (
-                                        <input
-                                            type="text"
-                                            value={fullname}
-                                            onChange={(e) => setFullname(e.target.value)}
-                                            className="border  py-1 rounded"
-                                        />
-                                    ) : (
-                                        <input
-                                            type="text"
-                                            value={fullname}
-                                            className="py-1 rounded"
-                                            disabled
-                                        />
-                                    )}
-                                    {editFullname ? (
-                                        <IoMdDoneAll
-                                            onClick={() => seteditFullname(!editFullname)}
-                                            className="text-black hover:text-blue-600 cursor-pointer"
-                                        />
-                                    ) : (
-                                        <FiEdit
-                                            onClick={() => seteditFullname(!editFullname)}
-                                            className="text-gray-500 hover:text-blue-500 cursor-pointer"
-                                        />
-                                    )}
-                                </div>
-
-                                <div className="inline-block">
-                                    <div className="">
-                                        <label
-                                            htmlFor="upload"
-                                            className="  text-blue-800 cursor-pointer"
-                                        >
-                                            Change photo
-                                        </label>
-                                        <input
-                                            type="file"
-                                            multiple
-                                            id="upload"
-                                            name="upload"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* Follower / Following Visibility Section (Select dropdown) */}
-                            <div>
-                                <label className="block font-medium mb-1">
-                                    Followers Visibility
-                                </label>
-                                <select
-                                    value={followersVisibility}
-                                    onChange={(e) => setFollowersVisibility(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-                                >
-                                    <option value="Public">Public</option>
-                                    <option value="Private">Private</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block font-medium mb-1">
-                                    Following Visibility
-                                </label>
-                                <select
-                                    value={followingVisibility}
-                                    onChange={(e) => setFollowingVisibility(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-                                >
-                                    <option value="Public">Public</option>
-                                    <option value="Private">Private</option>
-                                </select>
-                            </div>
-
-                            {/* Social Handles Section */}
-                            <div>
-                                <label className="block font-medium mb-1">Social Handles</label>
-                                <select
-                                    value={selectedPlatform}
-                                    onChange={(e) => setSelectedPlatform(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-                                >
-                                    {platforms.map((platform) => (
-                                        <option key={platform} value={platform}>
-                                            {platform}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block font-medium mb-1">
-                                    Enter {selectedPlatform} Link
-                                </label>
-                                <input
-                                    type="url"
-                                    placeholder={`https://www.${selectedPlatform.toLowerCase().split(" ")[0]
-                                        }.com/yourprofile`}
-                                    value={socialLink}
-                                    onChange={(e) =>
-                                        handleSocialLink(selectedPlatform, e.target.value)
-                                    }
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-                                />
-                            </div>
-                            {/* social handle links */}
-
-                            <div className="flex flex-col">
-                                {socialHandels &&
-                                    Object.keys(socialHandels).length > 0 &&
-                                    Object.values(socialHandels)?.map(({ name, url }) => (
-                                        <div className="flex items-center gap-x-1">
-                                            {name == "Facebook" ? (
-                                                <FaFacebookSquare className="text-blue-500" />
-                                            ) : name == "X (Twitter)" ? (
-                                                <FaXTwitter className="text-black" />
-                                            ) : name == "YouTube" ? (
-                                                <FaYoutube className="text-red-500" />
-                                            ) : name == "Instagram" ? (
-                                                <FaInstagram />
-                                            ) : name == "LinkedIn" ? (
-                                                <FaLinkedin />
-                                            ) : (
-                                                "Not Implement"
-                                            )}
-                                            <a
-                                                className="text-blue-500 cursor-pointer"
-                                                target="_blank"
-                                                href={url}
-                                            >
-                                                {" "}
-                                                {url}
-                                            </a>
-                                        </div>
-                                    ))}
-                            </div>
-
-                            {/* Bio Section */}
-                            <div>
-                                <label className="block font-medium mb-1">Bio</label>
-                                <textarea
-                                    placeholder="Bio"
-                                    maxLength={160}
-                                    onChange={(e) => setBio(e.target.value)}
-                                    value={bio}
-                                    className="w-full border border-gray-300 rounded-md p-2 h-24 focus:ring focus:ring-blue-300"
-                                ></textarea>
-                            </div>
-
-                            {/* Gender */}
-                            <div>
-                                <label className="block font-medium mb-1">Gender</label>
-                                <select
-                                    value={gender}
-                                    onChange={(e) => setGender(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-                                >
-                                    <option value={"Male"}>Male</option>
-                                    <option value={"Female"}>Female</option>
-                                    <option value={"Unselected"}>Unselected</option>
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    This won’t be part of your public profile.
-                                </p>
-                            </div>
-
-                            {/* Show Suggestions Toggle */}
-                            <div className="flex justify-between border border-gray-300 rounded-md p-2">
-                                <label className="block font-medium mb-1">
-                                    Theme. Change to {theme == "Light" ? "Light" : "Dark"}
-                                </label>
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={theme}
-                                        onChange={() =>
-                                            setTheme(theme == "Light" ? "Dark" : "Light")
-                                        }
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 rounded-full relative peer-checked:bg-blue-500">
-                                        <div
-                                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${theme == "Dark" ? "translate-x-5" : ""
-                                                }`}
-                                        ></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleUpdateUser}
-                            className="w-full mt-6 bg-blue-500 text-white rounded-md py-2 font-medium hover:bg-blue-600 cursor-pointer"
-                        >
-                            Submit
-                        </button>
-                    </div>
+  return (
+    <>
+      {currentUser ? (
+        <div className="h-full overflow-hidden">
+          <div
+            className="max-w-xl h-full mx-auto p-6 overflow-y-scroll 50"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <h1 className="text-2xl font-semibold mb-6">Edit profile</h1>
+            <div className="flex items-center gap-4 mb-6">
+              <img
+                src={profilePicUpdateUrl}
+                alt="Profile"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+              <div>
+                <div className="flex items-center gap-x-2">
+                  {editFullname ? (
+                    <input
+                      type="text"
+                      value={fullname}
+                      onChange={(e) => setFullname(e.target.value)}
+                      className="border  py-1 rounded"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={fullname}
+                      className="py-1 rounded"
+                      disabled
+                    />
+                  )}
+                  {editFullname ? (
+                    <IoMdDoneAll
+                      onClick={() => seteditFullname(!editFullname)}
+                      className="text-black hover:text-blue-600 cursor-pointer"
+                    />
+                  ) : (
+                    <FiEdit
+                      onClick={() => seteditFullname(!editFullname)}
+                      className="text-gray-500 hover:text-blue-500 cursor-pointer"
+                    />
+                  )}
                 </div>
-            ) : (
-                <SettingSkeleton />
-            )}
-        </>
-    );
+
+                <div className="inline-block">
+                  <div className="">
+                    <label
+                      htmlFor="upload"
+                      className="  text-blue-800 cursor-pointer"
+                    >
+                      Change photo
+                    </label>
+                    <input
+                      type="file"
+                      multiple
+                      id="upload"
+                      name="upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Follower / Following Visibility Section (Select dropdown) */}
+              <div>
+                <label className="block font-medium mb-1">
+                  Followers Visibility
+                </label>
+                <select
+                  value={followersVisibility}
+                  onChange={(e) => setFollowersVisibility(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
+                >
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-medium mb-1">
+                  Following Visibility
+                </label>
+                <select
+                  value={followingVisibility}
+                  onChange={(e) => setFollowingVisibility(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
+                >
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                </select>
+              </div>
+
+              {/* Social Handles Section control by button */}
+              <p className="m-0">
+                Add Social Links{" "}
+                <button
+                  onClick={() =>
+                    setSocialHandelsVisibility(!socialHandelsVisibility)
+                  }
+                  className=" bg-blue-600 mb-2 text-white px-2 cursor-pointer rounded"
+                >
+                  {socialHandelsVisibility ? "Close" : "Open"}
+                </button>
+              </p>
+
+              {socialHandelsVisibility && (
+                <AddSocialPrompt setSocialHandels={setSocialHandels} />
+              )}
+              {/* social handle links */}
+
+              <div className="flex flex-col">
+                {socialHandels &&
+                  Object.keys(socialHandels).length > 0 &&
+                  Object.values(socialHandels)?.map(({ name, url }) => (
+                    <div className="flex items-center gap-x-1">
+                      {name == "Facebook" ? (
+                        <FaFacebookSquare className="text-blue-500" />
+                      ) : name == "X (Twitter)" ? (
+                        <FaXTwitter className="text-black" />
+                      ) : name == "YouTube" ? (
+                        <FaYoutube className="text-red-500" />
+                      ) : name == "Instagram" ? (
+                        <FaInstagram />
+                      ) : name == "LinkedIn" ? (
+                        <FaLinkedin />
+                      ) : (
+                        "Not Implement"
+                      )}
+                      <a
+                        className="text-blue-500 cursor-pointer"
+                        target="_blank"
+                        href={url}
+                      >
+                        {url}
+                      </a>
+                    </div>
+                  ))}
+              </div>
+
+              {/* Bio Section */}
+              <div>
+                <label className="block font-medium mb-1">Bio</label>
+                <textarea
+                  placeholder="Bio"
+                  maxLength={160}
+                  onChange={(e) => setBio(e.target.value)}
+                  value={bio}
+                  className="w-full border border-gray-300 rounded-md p-2 h-24 focus:ring focus:ring-blue-300"
+                ></textarea>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block font-medium mb-1">Gender</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
+                >
+                  <option value={"Male"}>Male</option>
+                  <option value={"Female"}>Female</option>
+                  <option value={"Unselected"}>Unselected</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  This won’t be part of your public profile.
+                </p>
+              </div>
+
+              {/* Show Suggestions Toggle */}
+              <div className="flex justify-between border border-gray-300 rounded-md p-2">
+                <label className="block font-medium mb-1">
+                  Theme. Change to {theme == "Light" ? "Light" : "Dark"}
+                </label>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={theme}
+                    onChange={() =>
+                      setTheme(theme == "Light" ? "Dark" : "Light")
+                    }
+                  />
+                  <div className="w-11 h-6 bg-gray-200 rounded-full relative peer-checked:bg-blue-500">
+                    <div
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${
+                        theme == "Dark" ? "translate-x-5" : ""
+                      }`}
+                    ></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <button
+              onClick={handleUpdateUser}
+              className="w-full mt-6 bg-blue-500 text-white rounded-md py-2 font-medium hover:bg-blue-600 cursor-pointer"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      ) : (
+        <SettingSkeleton />
+      )}
+    </>
+  );
 };
 
 export default Settings;

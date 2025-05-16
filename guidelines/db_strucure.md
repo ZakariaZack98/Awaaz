@@ -101,7 +101,7 @@
     |-followerId2: true
     |-followerId3: true
 
--following/
+-followings/
   |-userId/ (this user is following these uids)
     |-followingId1: true
     |-followingId2: true

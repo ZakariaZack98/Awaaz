@@ -24,6 +24,7 @@ allPosts = {
     id: auth.currentUser.uid + Date.now(),
     timeStamp: Date.now(),
     posterId: auth.currentUser.uid,
+    posterUsername: currentUser.username,
     posterName: currentUser.displayName, //? denormalized name
     posterImgUrl: currentUser.photoUrl, //? denormalized photoUrl
     createdAt: GetTimeNow(), //? formatted timestamp

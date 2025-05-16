@@ -26,7 +26,7 @@ allPosts = {
     posterId: auth.currentUser.uid,
     posterUsername: currentUser.username,
     posterName: currentUser.displayName, //? denormalized name
-    posterImgUrl: currentUser.photoUrl, //? denormalized photoUrl
+    posterImgUrl: currentUser.photoURL, //? denormalized photoUrl
     createdAt: GetTimeNow(), //? formatted timestamp
     visibility: "public", //? public || private || friends
     text: "Lorem Ipsum",

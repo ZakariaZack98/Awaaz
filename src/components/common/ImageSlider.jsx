@@ -3,7 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc/82025/9b855abd4e17b3e674065fe3928972a3/hjorundfjord-norway-hgr-141715_1920-photo_fabrice_milochau.jpg?q=40&w=3840&fm=webp', 'https://cdn.britannica.com/40/59040-050-BEAE1332/fjords-North-Sea-coast-Norway.jpg', 'https://upload.wikimedia.org/wikipedia/commons/7/78/Geirangerfjord_%286-2007%29.jpg'] }) => {
+const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc/82025/9b855abd4e17b3e674065fe3928972a3/hjorundfjord-norway-hgr-141715_1920-photo_fabrice_milochau.jpg?q=40&w=3840&fm=webp', 'https://cdn.britannica.com/40/59040-050-BEAE1332/fjords-North-Sea-coast-Norway.jpg', 'https://upload.wikimedia.org/wikipedia/commons/7/78/Geirangerfjord_%286-2007%29.jpg'], inPost }) => {
   const settings = {
     dots: true,
     infinite: true,
@@ -64,10 +64,10 @@ const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc
             width: "100%",
             height: "100%",
           }}>
-          <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ maxHeight: "500px"}}>
+          <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ height : `${inPost ? 'h-[92dvh]' : 'h-125'}`}}>
             {imgUrlArray?.map((url) => (
-              <div className="w-full h-125 overflow-hidden">
-                <img src={url} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <div className={`w-full ${inPost ? 'h-[92dvh]' : 'h-125'} overflow-hidden`}>
+                <img src={url} style={{ width: "100%", height: "100%", objectFit: `contain` }} />
               </div>
             ))}
           </Slider>

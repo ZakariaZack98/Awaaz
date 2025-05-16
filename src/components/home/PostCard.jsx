@@ -1,21 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { GoDotFill } from "react-icons/go";
 import ImageSlider from "../common/ImageSlider";
-import PostCardActions from "./PostCardActions";
 import { FaBookmark, FaHeart, FaRegBookmark, FaRegHeart } from "react-icons/fa";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiPaperPlaneTilt } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import EmojiPicker from "emoji-picker-react";
 import { auth, db } from "../../../Database/Firebase.config";
-import moment from "moment";
 import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, FetchLikesCommentsCount, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
+import PostHeader from "../common/PostHeader";
+import { mockData } from "../../lib/mockData";
+import Post from "../../pages/Post/Post";
 
-const PostCard = ({ postData }) => {
-  const { id, text, posterUsername, posterId, posterName, posterImgUrl, createdAt, imgUrls, videoUrl } = postData;
+const PostCard = ({ postData = mockData.postData }) => {
+  const { id, text, posterName, imgUrls, videoUrl } = postData;
   const [openPostActions, setOpenPostActions] = useState(false);
+  const [openPost, setOpenPost] = useState(false);
   const [followed, setFollowed] = useState(true);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -102,37 +102,12 @@ const PostCard = ({ postData }) => {
   };
 
   return (
-    //================ HEADING ======================//
     <div className="p-3 bg-white rounded-md shadow-md">
-      <div className="header flex justify-between items-center pb-2">
-        <div className="flex items-center gap-x-2 cursor-pointer">
-          <img
-            src={
-              posterImgUrl ||
-              "https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper-thumbnail.png"
-            }
-            className="rounded-full w-10 h-10"
-          />
-          <div className="flex items-start gap-x-2">
-            <div className="flex flex-col">
-              <p className="text-sm font-semibold">{posterName || "Name Missing"}</p>
-              <p className="opacity-70 text-[13px]">{posterUsername ? `@${posterUsername}` : "@username"}</p>
-            </div>
-            <span>
-              <GoDotFill />
-            </span>
-            <p className="opacity-70 text-[13px]">{moment(createdAt).fromNow()}</p>
-          </div>
-        </div>
-        <span className="relative">
-          <BsThreeDotsVertical className="cursor-pointer" onClick={() => setOpenPostActions((prev) => !prev)} />
-          {openPostActions && (
-            <div className="absolute right-0 top-5 z-50">
-              <PostCardActions postData={postData} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
-            </div>
-          )}
-        </span>
-      </div>
+      {
+        openPost && <Post setOpenPost={setOpenPost} postData={postData} followed={followed} setFollowed={setFollowed} saved={saved} setSaved={setSaved}/>
+      }
+      {/* //================ HEADING ====================== */}
+      <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
       {/* ========== MEDIA PART =========== */}
       {imgUrls && imgUrls.length > 1 && (
         <div className="media">
@@ -180,7 +155,7 @@ const PostCard = ({ postData }) => {
       <p className="font-semibold text-sm">{likesCount} likes</p>
       <span className="font-semibold text-sm cursor-pointer">{posterName || "Poster Name"}</span>
       <p className="postcardCaption text-sm text-black">{text}</p>
-      {commentsCount > 0 && <p className=" text-sm mt-2 cursor-pointer">View all {commentsCount} comments...</p>}
+      {commentsCount > 0 && <p className=" text-sm mt-2 cursor-pointer" onClick={() => setOpenPost(true)}>View all {commentsCount} comments...</p>}
       {displayComment && displayComment.length > 0 && (
         <div className="flex items-center gap-x-2">
           <img src={auth.currentUser.photoURL} className="w-5 h-5 rounded-full" />

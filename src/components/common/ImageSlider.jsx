@@ -67,7 +67,7 @@ const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc
           <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ height : `${inPost ? 'h-[92dvh]' : 'h-125'}`}}>
             {imgUrlArray?.map((url) => (
               <div className={`w-full ${inPost ? 'h-[92dvh]' : 'h-125'} overflow-hidden`}>
-                <img src={url} style={{ width: "100%", height: "100%", objectFit: `${inPost ? 'cover' : 'contain'}` }} />
+                <img src={url} style={{ width: "100%", height: "100%", objectFit: `contain` }} />
               </div>
             ))}
           </Slider>

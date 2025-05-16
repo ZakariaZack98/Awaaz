@@ -1,12 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  AiFillHome,
-  AiOutlineSearch,
-  AiOutlineCompass,
-  AiOutlineHeart,
-  AiOutlinePlusSquare,
-} from "react-icons/ai";
+import { AiFillHome, AiOutlineSearch, AiOutlineCompass, AiOutlineHeart, AiOutlinePlusSquare } from "react-icons/ai";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { FiSend } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
@@ -20,13 +14,13 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
-  const {currentUser, setCurrentUser} = useContext(DataContext);
+  const { currentUser, setCurrentUser } = useContext(DataContext);
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)
-    .then(data => setCurrentUser(data))
-    .catch(console.error)
-  }, [auth.currentUser?.uid])
+      .then((data) => setCurrentUser(data))
+      .catch(console.error);
+  }, [auth.currentUser?.uid]);
 
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },
@@ -61,8 +55,7 @@ const Sidebar = () => {
                 }}
                 className={`flex items-center gap-4 px-4 py-2 rounded-lg cursor-pointer transition-all
         ${isActive ? "font-semibold bg-gray-100" : "hover:bg-gray-100"}
-        ${isLast ? "mt-8 relative" : ""}`}
-              >
+        ${isLast ? "mt-8 relative" : ""}`}>
                 <Icon size={24} />
                 <span>{label}</span>
               </div>

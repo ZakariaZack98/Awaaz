@@ -6,8 +6,9 @@ import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
 import { get, limitToFirst, query, ref } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
-import { FetchUserData } from "../../utils/fetchData.utils";
+import { FetchComments, FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
+import CommentCard from "../../components/post/CommentCard";
 
 const Post = ({
   postData = mockData.postData,
@@ -25,9 +26,10 @@ const Post = ({
   handleComment,
   onlyText
 }) => {
-  const { id, text, posterName, imgUrls, videoUrl } = postData;
+  const { id, text, posterName, posterImgUrl, imgUrls, videoUrl } = postData;
   const [openPostActions, setOpenPostActions] = useState(false);
   const [likerName, setLikerName] = useState(null);
+  const [commentsData, setCommentsData] = useState([]);
   useEffect(() => {
     const getFirstLikerName = async () => {
       const likesRef = ref(db, `postsMetaData/${id}/likes`);
@@ -35,11 +37,9 @@ const Post = ({
       try {
         const snapshot = await get(singleLikerQuery);
         if (snapshot.exists()) {
-          console.log('running')
           const likes = snapshot.val();
           const likerId = Object.keys(likes)[0];
           const userData = await FetchUserData(likerId);
-          console.log('userdata-', userData)
           setLikerName(userData?.fullName || 'Random person');
         }
       } catch (error) {
@@ -47,7 +47,12 @@ const Post = ({
         return null;
       }
     };
-    getFirstLikerName();
+    Promise.all([getFirstLikerName(), FetchComments(id)])
+    .then(data => {
+      const [_, fetchedComments] = data;
+      setCommentsData(fetchedComments);
+    })
+    .catch(console.error)
   }, [liked]);
 
   return (
@@ -83,7 +88,19 @@ const Post = ({
               setSaved={setSaved}
             />
           </div>
-          <div className="caption&comments h-[68%]"></div>
+          <div className="caption&comments h-[68%] overflow-y-scroll p-3" style={{scrollbarWidth: 'none'}}>
+            <div className="captionSec flex gap-x-3">
+              <picture>
+                <img src={posterImgUrl} className="min-w-10 w-10 h-10 rounded-full object-cover object-center" />
+              </picture>
+              <p className="text-sm"><strong className="me-4">{posterName}</strong>{text}</p>
+            </div>
+            <div className="commentSec my-4">
+              {
+                commentsData?.map(comment => <CommentCard commentData={comment} commentsDataArr={commentsData} setCommentsDataArr={setCommentsData}/>)
+              }
+            </div>
+          </div>
           <div className="likes&others h-17 border-t border-[rgba(0,0,0,0.26)] p-3">
             <div className="flex flex-col justify-center gap-y-1">
               <PostActionIcons
@@ -113,7 +130,7 @@ const Post = ({
             </div>
           </div>
           <div className="commentField h-13 border-t border-[rgba(0,0,0,0.26)] px-3">
-            <CommentField postId={id} comment={comment} setComment={setComment} handleComment={handleComment} inPost/>
+            <CommentField postId={id} comment={comment} setComment={setComment} commentsData={commentsData} setCommentsData={setCommentsData} handleComment={handleComment} inPost/>
           </div>
         </div>
       </div>

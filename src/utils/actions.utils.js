@@ -3,20 +3,6 @@ import { auth, db } from "../../Database/Firebase.config";
 import { toast } from "react-toastify";
 import { GetTimeNow } from "./date.utils";
 
-// TODO: FETCH A POST'S LIKES & COMMENTS COUNT ==========================
-export const FetchLikesCommentsCount = async postId => {
-  const likeCountRef = ref(db, `postsMetaData/${postId}/likesCount`);
-  const commentCountRef = ref(db, `postsMetaData/${postId}/commentsCount`);
-  try {
-    const snapshots = await Promise.all([get(likeCountRef), get(commentCountRef)]);
-    const counts = [];
-    snapshots.forEach(snapshot => counts.push(snapshot.val()));
-    return counts;
-  } catch (error) {
-    console.error('Error fetching like & comment count ',error)
-  }
-};
-
 // TODO: CHECK IF FOLLOWED ===============================
 export const CheckIfFollowed = async userId => {
   const followRef = ref(db, `followings/${auth.currentUser.uid}/${userId}`);
@@ -91,7 +77,7 @@ export const UnlikePost = async (postId) => {
 };
 
 //* (HELPER) CREATE A COMMENT DATA FOR DB ========================
-export const CreateCommentData = (commentId, postId, text, imgUrl) => {
+export const CreateCommentData = (commentId, postId, text) => {
   return {
     id: commentId,
     timeStamp: Date.now(),
@@ -101,7 +87,6 @@ export const CreateCommentData = (commentId, postId, text, imgUrl) => {
     commenterName: auth.currentUser.displayName,
     commenterImgUrl: auth.currentUser.photoURL,
     text,
-    imgUrl: imgUrl || null,
     likeCounts: 0,
   }
 }
@@ -141,9 +126,68 @@ export const CheckIfSaved = async postId => {
 }
 export const SavePost = async postId => {
   const savedPostRef = ref(db, `savedPosts/${auth.currentUser.uid}/${postId}`)
-  await set(savedPostRef, true);
+  try {
+    await set(savedPostRef, true);
+  } catch (error) {
+    console.error('error saving post', error)
+  }
 }
 export const RemoveSavedPost = async postId => {
   const savedPostRef = ref(db, `savedPosts/${auth.currentUser.uid}/${postId}`)
-  await remove(savedPostRef);
+  try {
+    await remove(savedPostRef);
+  } catch (error) {
+    console.error('error removing post from save', error)
+  }
+}
+
+
+// TODO: CHECK IF A COMMENT IS LIKED ========================================================
+export const CheckIfCommentLiked = async commentId => {
+  const likeRef = ref(db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}`);
+  try {
+    const snapshot = await get(likeRef);
+    return snapshot.exists()
+  } catch (error) {
+    console.error('error checking post is liked or not', error)
+  }
+}
+// TODO: LIKE A COMMENT =====================================================================
+export const LikeComment = async commentId => {
+  const commentLikesRef = ref(db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}`);
+  const commentLikesCountRef = ref(db, `commentsMetaData/${commentId}/likesCount`);
+  try {
+    await Promise.all([set(commentLikesRef, true), runTransaction(commentLikesCountRef, (currentValue) => {
+      return (currentValue || 0) + 1;
+    })]);
+  } catch (error) {
+    console.error('Error liking comment', error.message)
+  }
+}
+// TODO: UNLIKE A COMMENT ===================================================================
+export const UnlikeComment = async commentId => {
+  const commentLikesRef = ref(db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}`)
+  const commentLikesCountRef = ref(db, `commentsMetaData/${commentId}/likesCount`)
+  try {
+    await Promise.all([await remove(commentLikesRef), runTransaction(commentLikesCountRef, (currentValue) => {
+      return Math.max((currentValue || 0) - 1, 0);
+    })])
+  } catch (error) {
+    console.error('Error liking comment', error.message)
+  }
+}
+// TODO: DELETE A COMMENT ====================================================================
+export const DeleteComment = async (commentId, postId) => {
+  const postMDRef = ref(db, `postsMetaData/${postId}/comments/${commentId}`)
+  const commentRef = ref(db, `comments/${commentId}`);
+  const commentCountRef = ref(db, `postsMetaData/${postId}/commentsCount`);
+  const commentMDRef = ref(db, `commentsMetaData/${commentId}`);
+  try {
+    await Promise.all([remove(commentRef), remove(postMDRef), remove(commentMDRef), runTransaction(commentCountRef, (currentValue) => {
+      return Math.max((currentValue || 0) - 1, 0);
+    })]);
+    toast.warn('Comment deleted.')
+  } catch (error) {
+    console.error('Error deleting comment', error.message)
+  }
 }

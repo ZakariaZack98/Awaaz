@@ -1,8 +1,9 @@
 import EmojiPicker from "emoji-picker-react";
 import React, { useEffect, useRef, useState } from "react";
 import { CiFaceSmile } from "react-icons/ci";
+import { CreateCommentData } from "../../utils/actions.utils";
 
-const CommentField = ({postId, comment, setComment, handleComment, inPost }) => {
+const CommentField = ({postId, comment, setComment, commentsData, setCommentsData, handleComment, inPost }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
 
@@ -39,6 +40,8 @@ const CommentField = ({postId, comment, setComment, handleComment, inPost }) => 
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleComment(postId);
+            const newComment = CreateCommentData(Date.now(), postId, comment);
+            setCommentsData([newComment, ...commentsData]); //? Optimistic UI Update
           }
         }}
       />

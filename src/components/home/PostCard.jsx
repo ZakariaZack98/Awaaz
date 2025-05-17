@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import ImageSlider from "../common/ImageSlider";
-import { auth, db } from "../../../Database/Firebase.config";
-import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, FetchLikesCommentsCount, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
+import { auth } from "../../../Database/Firebase.config";
+import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 import PostHeader from "../common/PostHeader";
 import { mockData } from "../../lib/mockData";
 import Post from "../../pages/Post/Post";
 import PostActionIcons from "../common/PostActionIcons";
 import CommentField from "../common/CommentField";
+import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
 
 const PostCard = ({ postData = mockData.postData }) => {
   const { id, text, posterName, imgUrls, videoUrl } = postData;
@@ -16,8 +17,8 @@ const PostCard = ({ postData = mockData.postData }) => {
   const [followed, setFollowed] = useState(true);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [likesCount, setLikesCount] = useState(12);
-  const [commentsCount, setCommentsCount] = useState(28);
+  const [likesCount, setLikesCount] = useState(0);
+  const [commentsCount, setCommentsCount] = useState(0);
   const [comment, setComment] = useState("");
   const [displayComment, setDisplayComment] = useState("");
 

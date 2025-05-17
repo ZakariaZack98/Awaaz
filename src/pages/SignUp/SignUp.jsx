@@ -19,7 +19,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState("https://icons.veryicon.com/png/o/miscellaneous/standard/avatar-15.png");
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 

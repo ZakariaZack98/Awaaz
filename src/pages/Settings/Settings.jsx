@@ -31,7 +31,6 @@ const Settings = () => {
   const [followingVisibility, setFollowingVisibility] = useState("Public");
   const [bio, setBio] = useState("");
   const [gender, setGender] = useState("Unselected");
-  console.log(theme);
 
   // State for Social handle
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
@@ -48,7 +47,7 @@ const Settings = () => {
     setSocialHandels(currentUser?.socialHandles || {});
     setBio(currentUser?.bio || "");
     setGender(currentUser?.gender || "Unselected");
-    setTheme(currentUser?.defaultTheme);
+    setTheme(currentUser?.defaultTheme || "Light");
   }, [currentUser]);
 
   // Update profile picture
@@ -105,7 +104,7 @@ const Settings = () => {
         console.log("user update error", err);
       });
   };
-  console.log(auth.currentUser);
+console.log(theme);
 
   return (
     <>

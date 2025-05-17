@@ -165,13 +165,13 @@ const PostCreationLabel = () => {
           <div className="album w-full overflow-x-scroll flex gap-x-2 h-8/10 pt-2">
             {filePathsArr && filePathsArr.length > 0 ? (
               filePathsArr.map((url, idx) => (
-                <div className="relative h-full max-w-5/10 min-w-1/4 overflow-hidden">
+                <div className="relative h-full max-w-5/10 overflow-hidden">
                   <img src={url} className="h-full"></img>
                   <div className="absolute right-2 top-2">
                     <span className="text-white cursor-pointer text-xl ">
                       <IoMdCloseCircle
                         onClick={() => handleRemove("photo", idx)}
-                        className="border rounded-full shadow"
+                        className="border rounded-full text-red-500 opacity-80 hover:opacity-100"
                       />
                     </span>
                   </div>

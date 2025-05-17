@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 
-const AddSocialPrompt = ({ setSocialHandels }) => {
+const AddSocialPrompt = ({ setSocialHandels,socialLink ,setSocialLink }) => {
     const [selectedPlatform, setSelectedPlatform] = useState("Facebook");
-    const [socialLink, setSocialLink] = useState("");
+    
     const platforms = [
         "Facebook",
         "X (Twitter)",

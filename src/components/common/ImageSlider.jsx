@@ -64,10 +64,10 @@ const ImageSlider = ({ imgUrlArray = ['https://images.ctfassets.net/7mmwp5vb96tc
             width: "100%",
             height: "100%",
           }}>
-          <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ height : `${inPost ? 'h-[92dvh]' : 'h-125'}`}}>
+          <Slider {...settings} className="border border-[rgba(0,0,0,0.1)] rounded-md" style={{ height : `${inPost ? 'h-[92dvh]' : 'max-h-150'}`}}>
             {imgUrlArray?.map((url) => (
-              <div className={`w-full ${inPost ? 'h-[92dvh]' : 'h-125'} overflow-hidden`}>
-                <img src={url} style={{ width: "100%", height: "100%", objectFit: `contain` }} />
+              <div className={`w-full ${inPost ? 'h-[92dvh]' : 'max-h-150'} overflow-hidden flex justify-center items-center`}>
+                <img src={url} style={{ width: "100%", height: "100%", objectFit: `${inPost ? 'contain' : 'cover'}` }} className="object-center"/>
               </div>
             ))}
           </Slider>

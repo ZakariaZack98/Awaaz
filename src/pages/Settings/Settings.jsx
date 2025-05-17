@@ -7,6 +7,7 @@ import {
   FaFacebookSquare,
   FaInstagram,
   FaLinkedin,
+  FaLock,
   FaYoutube,
 } from "react-icons/fa";
 import { FaCircleMinus, FaCirclePlus, FaXTwitter } from "react-icons/fa6";
@@ -14,8 +15,9 @@ import { toast } from "react-toastify";
 import SettingSkeleton from "../../components/Skeleton/SettingSkeleton";
 import { DataContext } from "../../contexts/DataContexts";
 import { useContext } from "react";
-import AddSocialPrompt from "./AddSocialPrompt";
+import AddSocialPrompt from "../../components/Settings/AddSocialPrompt";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { ImUnlocked } from "react-icons/im";
 
 const Settings = () => {
   const db = getDatabase();
@@ -29,6 +31,7 @@ const Settings = () => {
   const [theme, setTheme] = useState("Light");
   const [followersVisibility, setFollowersVisibility] = useState("Public");
   const [followingVisibility, setFollowingVisibility] = useState("Public");
+  const [profileVisibility, setProfileVisibility] = useState(false);
   const [bio, setBio] = useState("");
   const [gender, setGender] = useState("Unselected");
 
@@ -48,6 +51,7 @@ const Settings = () => {
     setBio(currentUser?.bio || "");
     setGender(currentUser?.gender || "Unselected");
     setTheme(currentUser?.defaultTheme || "Light");
+    setProfileVisibility(currentUser?.isLocked || false)
   }, [currentUser]);
 
   // Update profile picture
@@ -82,6 +86,7 @@ const Settings = () => {
       gender: gender,
       bio: bio,
       defaultTheme: theme,
+      isLocked: profileVisibility,
       followersVisibility: followersVisibility,
       followingVisibility: followingVisibility,
       socialHandles: socialHandels,
@@ -104,7 +109,6 @@ const Settings = () => {
         console.log("user update error", err);
       });
   };
-console.log(theme);
 
   return (
     <>
@@ -128,13 +132,13 @@ console.log(theme);
                       type="text"
                       value={fullname}
                       onChange={(e) => setFullname(e.target.value)}
-                      className="border  py-1 rounded"
+                      className="border py-1 px-2 rounded w-[180px]"
                     />
                   ) : (
                     <input
                       type="text"
                       value={fullname}
-                      className="py-1 rounded"
+                      className="py-1 rounded w-[180px]"
                       disabled
                     />
                   )}
@@ -173,7 +177,38 @@ console.log(theme);
               </div>
             </div>
 
-            <div className="space-y-4">
+
+            {/* ProfileVisibility */}
+            <div className="space-y-3">
+              <div >
+                <label className="block font-medium mb-1">
+                  Profile Visibility
+                </label>
+                <div className="flex justify-between border border-gray-300 rounded-md p-2">
+                  <label className="block font-medium mb-1">
+                    Switch to {profileVisibility ? "Unlocked" : "Locked"}
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={profileVisibility}
+                      onChange={() =>
+                        setProfileVisibility(!profileVisibility)
+                      }
+                    />
+                    <div className="w-11 h-6 rounded-full relative bg bg-blue-400">
+                      <div
+                        className={`absolute flex justify-center items-center top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${profileVisibility ? "translate-x-5" : ""
+                          }`}
+                      >{profileVisibility ? <FaLock className="text-black p-[1px]" /> : <ImUnlocked className="text-black p-[1px]" />
+                        }</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              {/* ProfileVisibility */}
+
               {/* Follower / Following Visibility Section (Select dropdown) */}
               <div>
                 <label className="block font-medium mb-1">
@@ -296,7 +331,7 @@ console.log(theme);
                     <div
                       className={`absolute flex justify-center items-center top-0.5 left-0.5 w-5 h-5   rounded-full transition ${theme == "Dark" ? "translate-x-5 bg-black" : "bg-white"
                         }`}
-                    >{theme == "Light" ? <MdDarkMode className="text-black" /> : <MdLightMode className="text-white" />
+                    >{theme == "Light" ? <MdLightMode className="text-black" /> : <MdDarkMode className="text-white" />
                       }</div>
                   </div>
                 </label>

@@ -4,6 +4,7 @@ import { FaFacebookF, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { BiGridAlt } from "react-icons/bi";
 import { BsBookmark } from "react-icons/bs";
+import { RiFolderVideoFill } from "react-icons/ri";
 import {
   onValue,
   query,
@@ -15,6 +16,7 @@ import {
 } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
+import ProfileSkeleton from "./ProfileSkeleton";
 
 const Profile = () => {
   const { userId } = useParams();
@@ -25,58 +27,49 @@ const Profile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [savedPosts, setSavedPosts] = useState([]);
   const navigate = useNavigate();
 
-  // todo: for chacking the user is follower or not
+  // Follow check
   useEffect(() => {
     if (!currentUser?.userId || !userId) return;
-
     const followRef = ref(db, `followers/${userId}/${currentUser.userId}`);
     onValue(followRef, (snapshot) => {
       setIsFollowing(snapshot.exists());
     });
   }, [currentUser?.userId, userId]);
 
-  // todo: Profileuser followers fetch from db
+  // Follower count
   useEffect(() => {
     if (!userId) return;
-
     const followersRef = ref(db, `followers/${userId}`);
     onValue(followersRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const count = Object.keys(snapshot.val()).length; //Object.keys method gives a array using objects all key
-        setFollowersCount(count);
-      } else {
-        setFollowersCount(0);
-      }
+      setFollowersCount(
+        snapshot.exists() ? Object.keys(snapshot.val()).length : 0
+      );
     });
   }, [userId]);
-  // todo: Profileuser following fetch from db
+
+  // Following count
   useEffect(() => {
     if (!userId) return;
-
-    const followersRef = ref(db, `followings/${userId}`);
-    onValue(followersRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const count = Object.keys(snapshot.val()).length; //Object.keys method gives a array using objects all key
-        setFollowingCount(count);
-      } else {
-        setFollowingCount(0);
-      }
+    const followingRef = ref(db, `followings/${userId}`);
+    onValue(followingRef, (snapshot) => {
+      setFollowingCount(
+        snapshot.exists() ? Object.keys(snapshot.val()).length : 0
+      );
     });
   }, [userId]);
 
-  // todo: Profileuser fetch from db
+  // User data and posts
   useEffect(() => {
     if (!userId) return;
 
     const userRef = ref(db, `users/${userId}`);
     onValue(userRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setProfileUserData(snapshot.val());
-      }
+      if (snapshot.exists()) setProfileUserData(snapshot.val());
     });
-    // todo: Profileuser post fetch from db
+
     const postsQuery = query(
       ref(db, "posts"),
       orderByChild("posterId"),
@@ -84,16 +77,37 @@ const Profile = () => {
     );
 
     onValue(postsQuery, (snapshot) => {
-      if (snapshot.exists()) {
-        const postsArray = Object.values(snapshot.val());
-        setProfileUserPost(postsArray);
-      } else {
-        setProfileUserPost([]);
-      }
+      setProfileUserPost(
+        snapshot.exists() ? Object.values(snapshot.val()) : []
+      );
     });
   }, [userId]);
 
-  // todo: handleFollowToggle function for follow and unfollow
+  // Saved posts
+  useEffect(() => {
+    if (activeTab !== "saved" || !userId) return;
+
+    const savedRef = ref(db, `savedPosts/${userId}`);
+    onValue(savedRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const savedKeys = Object.keys(snapshot.val());
+
+        const allPostRef = ref(db, "posts");
+        onValue(allPostRef, (postSnap) => {
+          if (postSnap.exists()) {
+            const allPosts = postSnap.val();
+            const filtered = savedKeys
+              .map((key) => allPosts[key])
+              .filter(Boolean);
+            setSavedPosts(filtered);
+          }
+        });
+      } else {
+        setSavedPosts([]);
+      }
+    });
+  }, [activeTab, userId]);
+
   const handleFollowToggle = () => {
     if (!currentUser?.userId || !userId) return;
 
@@ -101,25 +115,28 @@ const Profile = () => {
     const followingRef = ref(db, `followings/${currentUser.userId}/${userId}`);
 
     if (isFollowing) {
-      //  Unfollow: remove both
       remove(followerRef)
         .then(() => remove(followingRef))
         .then(() => setIsFollowing(false))
-        .catch((error) => console.error("unfollow Error:", error));
+        .catch((error) => console.error("Unfollow Error:", error));
     } else {
-      //  Follow: add both
       set(followerRef, true)
         .then(() => set(followingRef, true))
         .then(() => setIsFollowing(true))
-        .catch((error) => console.error("follow Error:", error));
+        .catch((error) => console.error("Follow Error:", error));
     }
   };
+
+  // Show skeleton while loading
+  if (!profileUserData) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
       {/* Profile Header */}
       <div className="flex items-start space-x-10">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600 p-[3px]">
+        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
           <div className="w-full h-full rounded-full bg-white p-[3px]">
             <div className="w-full h-full rounded-full overflow-hidden relative">
               <img
@@ -130,7 +147,6 @@ const Profile = () => {
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-0 left-0 w-full h-full  rounded-full" />
             </div>
           </div>
         </div>
@@ -140,32 +156,30 @@ const Profile = () => {
             <h2 className="text-xl font-semibold">
               {profileUserData?.fullName || "User"}
             </h2>
-            {currentUser?.userId === userId && (
+            {currentUser?.userId === userId ? (
               <button
                 onClick={() => navigate(`/setting`)}
                 className="px-3 py-1 border cursor-pointer rounded text-sm font-medium"
               >
-                Edit profile
+                Edit Profile
               </button>
-            )}
-            {currentUser?.userId !== userId && (
-              <button
-                onClick={handleFollowToggle}
-                className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${
-                  isFollowing ? "bg-gray-200 text-black" : ""
-                }`}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-            )}
-
-            {currentUser?.userId !== userId && (
-              <button
-                onClick={() => navigate(`/message`)}
-                className="px-3 py-1 border cursor-pointer rounded text-sm font-medium"
-              >
-                Message
-              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleFollowToggle}
+                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${
+                    isFollowing ? "bg-gray-200 text-black" : ""
+                  }`}
+                >
+                  {isFollowing ? "Following" : "Follow"}
+                </button>
+                <button
+                  onClick={() => navigate(`/message`)}
+                  className="px-3 py-1 border cursor-pointer rounded text-sm font-medium"
+                >
+                  Message
+                </button>
+              </>
             )}
           </div>
           <div className="-mt-2.5">
@@ -184,45 +198,42 @@ const Profile = () => {
             </span>
           </div>
 
-          {/* Social Media Icons */}
           <div className="font-medium text-sm">
             <div className="flex gap-4 mt-2 text-xl">
-              <a
-                href="#"
-                className="text-[#1877F2] hover:scale-110 transition-transform"
-              >
-                <FaFacebookF />
-              </a>
-              <a
-                href="#"
-                className="text-[#0A66C2] hover:scale-110 transition-transform"
-              >
-                <FaLinkedinIn />
-              </a>
-              <a
-                href="#"
-                className="text-black hover:scale-110 transition-transform"
-              >
-                <FaXTwitter />
-              </a>
-              <a
-                href="#"
-                className="text-[#25D366] hover:scale-110 transition-transform"
-              >
-                <FaWhatsapp />
-              </a>
+              {profileUserData?.socialHandles?.facebook?.url && (
+                <a
+                  href={profileUserData.socialHandles.facebook.url}
+                  target="_blank"
+                >
+                  <FaFacebookF className="text-[#1877F2] hover:scale-110 transition-transform cursor-pointer" />
+                </a>
+              )}
+              {profileUserData?.socialHandles?.linkedin?.url && (
+                <a
+                  href={profileUserData.socialHandles.linkedin.url}
+                  target="_blank"
+                >
+                  <FaLinkedinIn className="text-[#0A66C2] hover:scale-110 transition-transform cursor-pointer" />
+                </a>
+              )}
+              {profileUserData?.socialHandles?.twitter?.url && (
+                <a
+                  href={profileUserData.socialHandles.twitter.url}
+                  target="_blank"
+                >
+                  <FaXTwitter className="text-black hover:scale-110 transition-transform cursor-pointer" />
+                </a>
+              )}
+              {profileUserData?.socialHandles?.whatsapp?.url && (
+                <a
+                  href={profileUserData.socialHandles.whatsapp.url}
+                  target="_blank"
+                >
+                  <FaWhatsapp className="text-[#25D366] hover:scale-110 transition-transform cursor-pointer" />
+                </a>
+              )}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Story Section */}
-      <div className="flex gap-6 mt-6">
-        <div className="flex flex-col items-center text-sm cursor-pointer">
-          <div className="w-16 h-16 border rounded-full flex items-center justify-center text-3xl text-gray-500">
-            +
-          </div>
-          <span className="mt-1">New</span>
         </div>
       </div>
 
@@ -237,8 +248,9 @@ const Profile = () => {
           }`}
         >
           <BiGridAlt />
-          <span>POSTS</span>
+          <span>Posts</span>
         </div>
+
         {currentUser?.userId === userId && (
           <div
             onClick={() => setActiveTab("saved")}
@@ -249,24 +261,37 @@ const Profile = () => {
             }`}
           >
             <BsBookmark />
-            <span>SAVED</span>
+            <span>Saved</span>
+          </div>
+        )}
+
+        {currentUser?.userId !== userId && (
+          <div
+            onClick={() => setActiveTab("video")}
+            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
+              activeTab === "video"
+                ? "text-black border-t-2 border-black font-bold"
+                : "text-gray-500"
+            }`}
+          >
+            <RiFolderVideoFill />
+            <span>Videos</span>
           </div>
         )}
       </div>
 
-      {/* Posts */}
+      {/* Posts Tab */}
       {activeTab === "posts" && (
         <div className="flex flex-wrap -m-1 mt-4">
           {profileUserPost
-            .slice()
-            .reverse() // .slice().reverse() for latest post
+            .filter((post) => post?.imgUrls && post.imgUrls.length > 0) //only show that post there hane any image
             .reverse()
             .map((post, index) => (
               <div key={index} className="w-1/3 p-1">
                 <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
                   <img
-                    src={post?.imgUrls?.[0]}
-                    alt={`Post image`}
+                    src={post.imgUrls[0]}
+                    alt="Post"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -275,20 +300,51 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Saved */}
-      {activeTab === "saved" && currentUser?.userId === userId && (
+      {/* Video Tab */}
+      {activeTab === "video" && (
         <div className="flex flex-wrap -m-1 mt-4">
-          {profileUserPost.map((post, index) => (
-            <div key={index} className="w-1/3 p-1">
-              <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
-                <img
-                  src={post?.imgUrls?.[0]}
-                  alt={`Post image`}
-                  className="w-full h-full object-cover"
-                />
+          {profileUserPost.filter((post) => post.videoUrl).length > 0 ? (
+            profileUserPost
+              .filter((post) => post.videoUrl)
+              .map((post, index) => (
+                <div key={index} className="w-1/3 p-1">
+                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md bg-black">
+                    <video
+                      src={post.videoUrl}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              ))
+          ) : (
+            <p className="text-center w-full text-gray-500 mt-4">
+              No videos found
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Saved Posts Tab */}
+      {activeTab === "saved" && (
+        <div className="flex flex-wrap -m-1 mt-4">
+          {savedPosts.length > 0 ? (
+            savedPosts.map((post, index) => (
+              <div key={index} className="w-1/3 p-1">
+                <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
+                  <img
+                    src={post?.imgUrls?.[0]}
+                    alt="Saved Post"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center w-full text-gray-500 mt-4">
+              No saved posts found
+            </p>
+          )}
         </div>
       )}
     </div>

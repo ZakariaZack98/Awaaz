@@ -3,6 +3,7 @@ import { Facebook, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { handlefacebook, handlegoogle } from '../../utils/Signupsignin.utils';
+import { toast } from 'react-toastify';
 
 
 const SignIn = () => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDatabase, ref, onValue, get, set } from "firebase/database";
-import { getAuth } from "firebase/auth";
+import { getAuth, updateProfile } from "firebase/auth";
 import { FiEdit } from "react-icons/fi";
 import { IoMdDoneAll } from "react-icons/io";
 import {
@@ -9,7 +9,7 @@ import {
   FaLinkedin,
   FaYoutube,
 } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaCircleMinus, FaCirclePlus, FaXTwitter } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import SettingSkeleton from "../../components/Skeleton/SettingSkeleton";
 import { DataContext } from "../../contexts/DataContexts";
@@ -34,6 +34,7 @@ const Settings = () => {
   // State for Social handle
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
   const [socialHandels, setSocialHandels] = useState("");
+  const [socialLink, setSocialLink] = useState("");
 
   // Update state
   useEffect(() => {
@@ -87,6 +88,12 @@ const Settings = () => {
       //     facebook: { name: "Facebook", url: "https://fb.com/xyz" },
       //     twitter: { name: "Twitter", url: "https://twitter.com/xyz" },
       // }
+    }).then(() => {
+      // Update auth
+      updateProfile(auth.currentUser, {
+        displayName: fullname,
+        photoURL: profilePicUpdateUrl,
+      })
     })
       .then(() => {
         setSocialLink("");
@@ -195,20 +202,19 @@ const Settings = () => {
               </div>
 
               {/* Social Handles Section control by button */}
-              <p className="m-0">
-                Add Social Links{" "}
-                <button
-                  onClick={() =>
-                    setSocialHandelsVisibility(!socialHandelsVisibility)
-                  }
-                  className=" bg-blue-600 mb-2 text-white px-2 cursor-pointer rounded"
-                >
-                  {socialHandelsVisibility ? "Close" : "Open"}
-                </button>
-              </p>
 
+              <button
+                onClick={() =>
+                  setSocialHandelsVisibility(!socialHandelsVisibility)
+                }
+                className="flex items-center gap-x-2 text-black mb-2 cursor-pointer rounded"
+              >
+                {socialHandelsVisibility ? <FaCircleMinus /> : <FaCirclePlus />}Social Links
+              </button>
               {socialHandelsVisibility && (
-                <AddSocialPrompt setSocialHandels={setSocialHandels} />
+                <AddSocialPrompt setSocialHandels={setSocialHandels}
+                  setSocialLink={setSocialLink}
+                  socialLink={socialLink} />
               )}
               {/* social handle links */}
 
@@ -273,7 +279,7 @@ const Settings = () => {
               {/* Show Suggestions Toggle */}
               <div className="flex justify-between border border-gray-300 rounded-md p-2">
                 <label className="block font-medium mb-1">
-                  Theme. Change to {theme == "Light" ? "Light" : "Dark"}
+                  Switch to {theme == "Light" ? "Light" : "Dark"}
                 </label>
                 <label className="inline-flex items-center cursor-pointer">
                   <input
@@ -286,9 +292,8 @@ const Settings = () => {
                   />
                   <div className="w-11 h-6 bg-gray-200 rounded-full relative peer-checked:bg-blue-500">
                     <div
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${
-                        theme == "Dark" ? "translate-x-5" : ""
-                      }`}
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${theme == "Dark" ? "translate-x-5" : ""
+                        }`}
                     ></div>
                   </div>
                 </label>

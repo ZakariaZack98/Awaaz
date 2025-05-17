@@ -6,6 +6,7 @@ import { getDatabase, ref, set } from "firebase/database";
 
 import { useNavigate } from "react-router-dom";
 import { handlefacebook, handlegoogle } from "../../utils/Signupsignin.utils";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const auth = getAuth();
@@ -99,7 +100,8 @@ const SignUp = () => {
           fullName: auth.currentUser.displayName || formData.fullName,
           activePosts: 0
         });
-        navigate("/signin")
+        toast.success("User create succesfully");
+        navigate("/")
       })
       .catch((error) => {
         console.log("Create user in DB error", error);

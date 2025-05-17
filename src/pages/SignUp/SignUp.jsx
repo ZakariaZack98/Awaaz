@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { auth } from "../../../Database/Firebase.config";
 import { Facebook, Mail, Lock } from 'lucide-react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 
 import { useNavigate } from "react-router-dom";
 import { handlefacebook, handlegoogle } from "../../utils/Signupsignin.utils";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const auth = getAuth();
@@ -18,7 +19,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState("https://icons.veryicon.com/png/o/miscellaneous/standard/avatar-15.png");
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -83,6 +84,7 @@ const SignUp = () => {
     // Create User in Database/Firebase
     createUserWithEmailAndPassword(auth, formData.email, formData.password)
       .then((userInfo) => {
+        sendEmailVerification(auth.currentUser);
         // Update User in Auth
         updateProfile(auth.currentUser, {
           displayName: formData.fullName,
@@ -99,6 +101,8 @@ const SignUp = () => {
           fullName: auth.currentUser.displayName || formData.fullName,
           activePosts: 0
         });
+        toast.success("User create succesfully");
+        navigate("/")
       })
       .catch((error) => {
         console.log("Create user in DB error", error);

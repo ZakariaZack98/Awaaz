@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import SignIn from './pages/SignIn/SignIn'
 import Index from './pages/Home'
 import CommonLayout from './pages/CommonLayout'
+import Settings from './pages/Settings/Settings'
 
 const App = () => {
   return (
@@ -11,6 +12,7 @@ const App = () => {
       <Routes>
         <Route path='' element={<CommonLayout/>}>
           <Route index element={<Index/>}/>
+          <Route path='/settings' element={<Settings/>}/>
         </Route>
         <Route path='/signin' element={<SignIn/>}/>
         <Route path='/signup' element={<SignUp/>}/>

@@ -8,7 +8,6 @@ export const FetchUserData = async (uid) => {
     const userSnapshot = await get(userRef);
     if (userSnapshot.exists()) {
       return userSnapshot.val();
-      console.log(userSnapshot.val());
     } else console.log("User data not found");
   } catch (error) {
     console.log("Error fetching user data", error.message);
@@ -64,7 +63,7 @@ export const FetchCommentLikesCount = async commentId => {
 
 // TODO: FETCH A COMMENT'S REPLY COUNT ==============================================
 export const FetchCommentReplyCount = async commentId => {
-  const replyCountRef = ref(db, `commentsMetaData/${commentId}/replyCount`)
+  const replyCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`)
   try {
     const snapshot = await get(replyCountRef);
     if(snapshot.exists()) {

@@ -96,7 +96,7 @@ export const AddComment = async (postId, comment, imgUrl) => {
   const commentId = auth.currentUser.uid + Date.now();
   const postMDRef = ref(db, `postsMetaData/${postId}/comments/${commentId}`)
   const commentRef = ref(db, `comments/${commentId}`);
-  const newComment = CreateCommentData(commentId, postId, comment, imgUrl);
+  const newComment = CreateCommentData(commentId, postId, comment);
   const commentsCountRef = ref(db, `postsMetaData/${postId}/commentsCount`);
   if(comment.length === 0) {
     toast.error(`Can't post empty comment.`);
@@ -189,5 +189,46 @@ export const DeleteComment = async (commentId, postId) => {
     toast.warn('Comment deleted.')
   } catch (error) {
     console.error('Error deleting comment', error.message)
+  }
+}
+
+//* (HELPER) CREATE A REPLY DATA FOR DB ========================
+export const CreateReplyData = (replyId, commentId, commenterName, text) => {
+  return {
+    id: replyId,
+    timeStamp: Date.now(),
+    createdAt: GetTimeNow(),
+    commentId,
+    commenterName,
+    replierId: auth.currentUser.uid,
+    replierName: auth.currentUser.displayName,
+    replierImgUrl: auth.currentUser.photoURL,
+    text,
+  }
+}
+
+// TODO: ADD A COMMENT TO A POST =================================
+export const AddReply = async (commentId, commenterName, reply) => {
+  const replyId = auth.currentUser.uid + Date.now();
+  const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`)
+  const repliesRef = ref(db, `replies/${replyId}`);
+  const replyCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
+  const newReply = CreateReplyData(replyId, commentId, commenterName, reply);
+  if(reply.length === 0) {
+    toast.error(`Can't post empty comment.`);
+    return;
+  }
+  try {
+    await Promise.all([
+      set(repliesRef, newReply), 
+      set(commentMDRef, true), 
+      runTransaction(replyCountRef, (currentValue) => {
+        return (currentValue || 0) + 1;
+      })
+    ]);
+    console.log('reply posted')
+    //! CREATE A NOTIFICATION
+  } catch (error) {
+    console.error('Error posting reply, ', error.message)
   }
 }

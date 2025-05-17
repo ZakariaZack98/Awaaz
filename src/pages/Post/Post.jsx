@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ImageSlider from "../../components/common/ImageSlider";
 import PostHeader from "../../components/common/PostHeader";
-import { mockData } from "../../lib/mockData";
 import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
 import { get, limitToFirst, query, ref } from "firebase/database";
@@ -9,9 +8,10 @@ import { db } from "../../../Database/Firebase.config";
 import { FetchComments, FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
 import CommentCard from "../../components/post/CommentCard";
+import PostSkeleton from "../../components/post/PostSekeleton";
 
 const Post = ({
-  postData = mockData.postData,
+  postData,
   setOpenPost,
   followed,
   setFollowed,
@@ -30,6 +30,8 @@ const Post = ({
   const [openPostActions, setOpenPostActions] = useState(false);
   const [likerName, setLikerName] = useState(null);
   const [commentsData, setCommentsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const getFirstLikerName = async () => {
       const likesRef = ref(db, `postsMetaData/${id}/likes`);
@@ -47,13 +49,23 @@ const Post = ({
         return null;
       }
     };
+
+    setIsLoading(true);
     Promise.all([getFirstLikerName(), FetchComments(id)])
-    .then(data => {
-      const [_, fetchedComments] = data;
-      setCommentsData(fetchedComments);
-    })
-    .catch(console.error)
-  }, [liked]);
+      .then(data => {
+        const [_, fetchedComments] = data;
+        setCommentsData(fetchedComments);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setIsLoading(false);
+      });
+  }, [liked, id]);
+
+  if (isLoading) {
+    return <PostSkeleton onlyText={onlyText} />;
+  }
 
   return (
     <div

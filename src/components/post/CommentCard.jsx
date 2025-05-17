@@ -3,16 +3,18 @@ import { mockData } from "../../lib/mockData";
 import moment from "moment";
 import { GoDotFill } from "react-icons/go";
 import { FaRegHeart } from "react-icons/fa";
-import { FaHeart, FaTrashCan } from "react-icons/fa6";
+import { FaAngleRight, FaHeart, FaTrashCan } from "react-icons/fa6";
 import { CheckIfCommentLiked, DeleteComment, LikeComment, UnlikeComment } from "../../utils/actions.utils";
 import { auth } from "../../../Database/Firebase.config";
 import { FetchCommentLikesCount, FetchCommentReplyCount } from "../../utils/fetchData.utils";
+import ReplyPrompt from "./ReplyPrompt";
 
 const CommentCard = ({ commentData = mockData.commentData, commentsDataArr, setCommentsDataArr }) => {
   const {id, text, commenterName, commenterImgUrl, createdAt, postId } = commentData;
   const [likesCount, setLikesCount] = useState(0);
   const [repliesCount, setRepliesCount] = useState(0);
   const [liked, setLiked] = useState(false);
+  const [openReplyPrompt, setOpenReplyPrompt] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
 
   // TODO: CHECK IF THE COMMENT IS LIKED & FETCH LIKES AND REPLY COUNT ===
@@ -46,7 +48,7 @@ const CommentCard = ({ commentData = mockData.commentData, commentsDataArr, setC
       <div className="right w-9/10">
         <div className="top flex gap-x-4">
           <p className="text-sm">
-            <strong className="me-4">{commenterName}</strong>
+            <strong className="me-2">{commenterName}<FaAngleRight className=" inline mb-0.5 ms-2 opacity-60"/></strong>
             {text}
           </p>
         </div>
@@ -56,7 +58,7 @@ const CommentCard = ({ commentData = mockData.commentData, commentsDataArr, setC
             <GoDotFill className="translate-y-0.5"/>
             <p className="font-medium">{likesCount} Likes</p>
             <GoDotFill className="translate-y-0.5"/>
-            <p className="font-medium">Reply</p>
+            <p className="font-medium cursor-pointer" onClick={() => setOpenReplyPrompt(prev => !prev)}>Reply</p>
           </div>
           <div className="flex gap-x-3">
             <span onClick={() => handleCommentLike()}>
@@ -73,8 +75,11 @@ const CommentCard = ({ commentData = mockData.commentData, commentsDataArr, setC
           </div>
         </div>
         {
+          openReplyPrompt && <ReplyPrompt commentData={commentData} setOpenReplyPrompt={setOpenReplyPrompt}/>
+        }
+        {
           repliesCount > 0 && (
-            <div className="flex items-center gap-x-3 pt-2">
+            <div className="flex items-center gap-x-3 pt-2 cursor-pointer" >
               <span className="h-[1px] w-4 bg-mainfontColor"></span>
               <p className="text-sm">View {repliesCount > 1 ? 'all' : ''} <strong>{repliesCount} {repliesCount > 1 ? 'replies' : 'reply'}</strong></p>
             </div>

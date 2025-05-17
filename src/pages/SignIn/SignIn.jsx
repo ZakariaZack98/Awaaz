@@ -16,9 +16,7 @@ const SignIn = () => {
     e.preventDefault();
     // Handle form submission logic here
     signInWithEmailAndPassword(auth, email, password)
-      .then((userInfo) => {
-        return sendEmailVerification(auth.currentUser);
-      }).then(() => {
+      .then(() => {
         navigate("/")
       })
       .catch((error) => {

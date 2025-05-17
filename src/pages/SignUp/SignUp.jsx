@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { auth } from "../../../Database/Firebase.config";
 import { Facebook, Mail, Lock } from 'lucide-react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 
 import { useNavigate } from "react-router-dom";
@@ -84,6 +84,7 @@ const SignUp = () => {
     // Create User in Database/Firebase
     createUserWithEmailAndPassword(auth, formData.email, formData.password)
       .then((userInfo) => {
+        sendEmailVerification(auth.currentUser);
         // Update User in Auth
         updateProfile(auth.currentUser, {
           displayName: formData.fullName,

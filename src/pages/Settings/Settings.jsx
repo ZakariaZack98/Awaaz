@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getDatabase, ref, onValue, get, set } from "firebase/database";
+import { getDatabase, ref, set } from "firebase/database";
 import { getAuth, updateProfile } from "firebase/auth";
 import { FiEdit } from "react-icons/fi";
 import { IoMdDoneAll } from "react-icons/io";
@@ -15,6 +15,7 @@ import SettingSkeleton from "../../components/Skeleton/SettingSkeleton";
 import { DataContext } from "../../contexts/DataContexts";
 import { useContext } from "react";
 import AddSocialPrompt from "./AddSocialPrompt";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 const Settings = () => {
   const db = getDatabase();
@@ -30,6 +31,7 @@ const Settings = () => {
   const [followingVisibility, setFollowingVisibility] = useState("Public");
   const [bio, setBio] = useState("");
   const [gender, setGender] = useState("Unselected");
+  console.log(theme);
 
   // State for Social handle
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
@@ -103,6 +105,7 @@ const Settings = () => {
         console.log("user update error", err);
       });
   };
+  console.log(auth.currentUser);
 
   return (
     <>
@@ -279,7 +282,7 @@ const Settings = () => {
               {/* Show Suggestions Toggle */}
               <div className="flex justify-between border border-gray-300 rounded-md p-2">
                 <label className="block font-medium mb-1">
-                  Switch to {theme == "Light" ? "Light" : "Dark"}
+                  Switch to {theme == "Light" ? "Dark" : "Light"}
                 </label>
                 <label className="inline-flex items-center cursor-pointer">
                   <input
@@ -290,11 +293,12 @@ const Settings = () => {
                       setTheme(theme == "Light" ? "Dark" : "Light")
                     }
                   />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full relative peer-checked:bg-blue-500">
+                  <div className="w-11 h-6 bg-gray-200 rounded-full relative bg peer-checked:bg-blue-400">
                     <div
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${theme == "Dark" ? "translate-x-5" : ""
+                      className={`absolute flex justify-center items-center top-0.5 left-0.5 w-5 h-5   rounded-full transition ${theme == "Dark" ? "translate-x-5 bg-black" : "bg-white"
                         }`}
-                    ></div>
+                    >{theme == "Light" ? <MdDarkMode className="text-black" /> : <MdLightMode className="text-white" />
+                      }</div>
                   </div>
                 </label>
               </div>

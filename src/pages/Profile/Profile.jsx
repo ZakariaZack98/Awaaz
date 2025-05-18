@@ -16,7 +16,7 @@ import {
 } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
-import ProfileSkeleton from "./ProfileSkeleton";
+import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
 
 const Profile = () => {
   const { userId } = useParams();
@@ -30,7 +30,6 @@ const Profile = () => {
   const [savedPosts, setSavedPosts] = useState([]);
   const navigate = useNavigate();
 
-  // Follow check
   useEffect(() => {
     if (!currentUser?.userId || !userId) return;
     const followRef = ref(db, `followers/${userId}/${currentUser.userId}`);
@@ -39,7 +38,6 @@ const Profile = () => {
     });
   }, [currentUser?.userId, userId]);
 
-  // Follower count
   useEffect(() => {
     if (!userId) return;
     const followersRef = ref(db, `followers/${userId}`);
@@ -50,7 +48,6 @@ const Profile = () => {
     });
   }, [userId]);
 
-  // Following count
   useEffect(() => {
     if (!userId) return;
     const followingRef = ref(db, `followings/${userId}`);
@@ -61,7 +58,6 @@ const Profile = () => {
     });
   }, [userId]);
 
-  // User data and posts
   useEffect(() => {
     if (!userId) return;
 
@@ -75,7 +71,6 @@ const Profile = () => {
       orderByChild("posterId"),
       equalTo(userId)
     );
-
     onValue(postsQuery, (snapshot) => {
       setProfileUserPost(
         snapshot.exists() ? Object.values(snapshot.val()) : []
@@ -83,7 +78,6 @@ const Profile = () => {
     });
   }, [userId]);
 
-  // Saved posts
   useEffect(() => {
     if (activeTab !== "saved" || !userId) return;
 
@@ -91,7 +85,6 @@ const Profile = () => {
     onValue(savedRef, (snapshot) => {
       if (snapshot.exists()) {
         const savedKeys = Object.keys(snapshot.val());
-
         const allPostRef = ref(db, "posts");
         onValue(allPostRef, (postSnap) => {
           if (postSnap.exists()) {
@@ -127,7 +120,6 @@ const Profile = () => {
     }
   };
 
-  // Show skeleton while loading
   if (!profileUserData) {
     return <ProfileSkeleton />;
   }
@@ -251,6 +243,18 @@ const Profile = () => {
           <span>Posts</span>
         </div>
 
+        <div
+          onClick={() => setActiveTab("video")}
+          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
+            activeTab === "video"
+              ? "text-black border-t-2 border-black font-bold"
+              : "text-gray-500"
+          }`}
+        >
+          <RiFolderVideoFill />
+          <span>Videos</span>
+        </div>
+
         {currentUser?.userId === userId && (
           <div
             onClick={() => setActiveTab("saved")}
@@ -264,89 +268,75 @@ const Profile = () => {
             <span>Saved</span>
           </div>
         )}
-
-        {currentUser?.userId !== userId && (
-          <div
-            onClick={() => setActiveTab("video")}
-            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
-              activeTab === "video"
-                ? "text-black border-t-2 border-black font-bold"
-                : "text-gray-500"
-            }`}
-          >
-            <RiFolderVideoFill />
-            <span>Videos</span>
-          </div>
-        )}
       </div>
 
-      {/* Posts Tab */}
-      {activeTab === "posts" && (
-        <div className="flex flex-wrap -m-1 mt-4">
-          {profileUserPost
-            .filter((post) => post?.imgUrls && post.imgUrls.length > 0) //only show that post there hane any image
-            .reverse()
-            .map((post, index) => (
-              <div key={index} className="w-1/3 p-1">
-                <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
-                  <img
-                    src={post.imgUrls[0]}
-                    alt="Post"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {/* Video Tab */}
-      {activeTab === "video" && (
-        <div className="flex flex-wrap -m-1 mt-4">
-          {profileUserPost.filter((post) => post.videoUrl).length > 0 ? (
-            profileUserPost
-              .filter((post) => post.videoUrl)
+      {/* Scrollable Tab Content */}
+      <div className="relative h-[70vh] overflow-y-scroll mt-4">
+        {activeTab === "posts" && (
+          <div className="flex flex-wrap -m-1">
+            {profileUserPost
+              .filter((post) => post?.imgUrls && post.imgUrls.length > 0)
+              .reverse()
               .map((post, index) => (
                 <div key={index} className="w-1/3 p-1">
-                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md bg-black">
-                    <video
-                      src={post.videoUrl}
-                      controls
+                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
+                    <img
+                      src={post.imgUrls[0]}
+                      alt="Post"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {activeTab === "video" && (
+          <div className="flex flex-wrap -m-1">
+            {profileUserPost.filter((post) => post.videoUrl).length > 0 ? (
+              profileUserPost
+                .filter((post) => post.videoUrl)
+                .map((post, index) => (
+                  <div key={index} className="w-1/3 p-1">
+                    <div className="w-full aspect-[3/4] overflow-hidden rounded-md bg-black">
+                      <video
+                        src={post.videoUrl}
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <p className="text-center w-full text-gray-500 mt-4">
+                No videos found
+              </p>
+            )}
+          </div>
+        )}
+
+        {activeTab === "saved" && (
+          <div className="flex flex-wrap -m-1">
+            {savedPosts.length > 0 ? (
+              savedPosts.map((post, index) => (
+                <div key={index} className="w-1/3 p-1">
+                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
+                    <img
+                      src={post?.imgUrls?.[0]}
+                      alt="Saved Post"
                       className="w-full h-full object-cover"
                     />
                   </div>
                 </div>
               ))
-          ) : (
-            <p className="text-center w-full text-gray-500 mt-4">
-              No videos found
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Saved Posts Tab */}
-      {activeTab === "saved" && (
-        <div className="flex flex-wrap -m-1 mt-4">
-          {savedPosts.length > 0 ? (
-            savedPosts.map((post, index) => (
-              <div key={index} className="w-1/3 p-1">
-                <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
-                  <img
-                    src={post?.imgUrls?.[0]}
-                    alt="Saved Post"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center w-full text-gray-500 mt-4">
-              No saved posts found
-            </p>
-          )}
-        </div>
-      )}
+            ) : (
+              <p className="text-center w-full text-gray-500 mt-4">
+                No saved posts found
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

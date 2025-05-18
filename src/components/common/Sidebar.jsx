@@ -1,12 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  AiFillHome,
-  AiOutlineSearch,
-  AiOutlineCompass,
-  AiOutlineHeart,
-  AiOutlinePlusSquare,
-} from "react-icons/ai";
+import { AiFillHome, AiOutlineSearch, AiOutlineCompass, AiOutlineHeart, AiOutlinePlusSquare } from "react-icons/ai";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { FiSend } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
@@ -68,6 +62,7 @@ const Sidebar = () => {
                 }}
                 className={`flex items-center gap-4 px-4 py-2 rounded-lg cursor-pointer transition-all
         ${isActive ? "font-semibold bg-gray-100" : "hover:bg-gray-100"}
+<<<<<<< HEAD
         ${isLast ? "mt-8 relative" : ""}`}
               >
                 {label === "Profile" && img ? (
@@ -79,6 +74,10 @@ const Sidebar = () => {
                 ) : (
                   <Icon size={24} />
                 )}
+=======
+        ${isLast ? "mt-8 relative" : ""}`}>
+                <Icon size={24} />
+>>>>>>> d1e889dce92f782d66ca8de5922cb827806e69ef
                 <span>{label}</span>
               </div>
             );

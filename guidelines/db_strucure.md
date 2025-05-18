@@ -36,9 +36,13 @@
       |-1: "recipe"
     |-likeCounts
 
--postMetaData/
+-postsMetaData/
   |-postId/
     |-likesCount
+    |-commentsCount
+    |-likes/
+      |-userId1: true
+      |-userId2: true
     |-comments/
       |-commentId1: true
       |-commentId2: true

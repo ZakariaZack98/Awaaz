@@ -60,6 +60,7 @@ const PostCreationLabel = () => {
     }
     const postId = auth.currentUser.uid + Date.now();
     const postRef = ref(db, `/posts/${postId}`);
+    const activePostRef = ref(db, `users/${auth.currentUser.uid}/activePosts`);
     const newPost = {
       id: postId,
       timeStamp: Date.now(),
@@ -72,11 +73,10 @@ const PostCreationLabel = () => {
       text: caption,
       imgUrls,
       videoUrl,
-      likeCounts: 0,
       hashtags: caption.split(" ").filter((word) => word.startsWith("#")),
     };
     try {
-      await set(postRef, newPost);
+      await Promise.all([set(postRef, newPost), set(activePostRef, currentUser.activePosts + 1 || 1)]);
       toast.success("Posting successfull");
       setOpenUploadPrompt(false);
     } catch (error) {
@@ -165,13 +165,13 @@ const PostCreationLabel = () => {
           <div className="album w-full overflow-x-scroll flex gap-x-2 h-8/10 pt-2">
             {filePathsArr && filePathsArr.length > 0 ? (
               filePathsArr.map((url, idx) => (
-                <div className="relative h-full max-w-5/10 min-w-1/4 overflow-hidden">
+                <div className="relative h-full max-w-5/10 overflow-hidden">
                   <img src={url} className="h-full"></img>
                   <div className="absolute right-2 top-2">
                     <span className="text-white cursor-pointer text-xl ">
                       <IoMdCloseCircle
                         onClick={() => handleRemove("photo", idx)}
-                        className="border rounded-full shadow"
+                        className="border rounded-full text-red-500 opacity-80 hover:opacity-100"
                       />
                     </span>
                   </div>

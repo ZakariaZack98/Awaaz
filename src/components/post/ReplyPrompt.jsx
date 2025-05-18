@@ -5,7 +5,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { AddReply } from '../../utils/actions.utils';
 import { toast } from 'react-toastify';
 
-const ReplyPrompt = ({ commentData, setOpenReplyPrompt }) => {
+const ReplyPrompt = ({ commentData, replierName, setOpenReplyPrompt, repliesCount, setRepliesCount }) => {
   const {id, commenterName } = commentData;
   const [reply, setReply] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -32,7 +32,8 @@ const ReplyPrompt = ({ commentData, setOpenReplyPrompt }) => {
       return;
     }
     try {
-      await AddReply(id, commenterName, reply);
+      await AddReply(id, replierName ? replierName : commenterName, reply);
+      setRepliesCount(repliesCount + 1);
     } catch (error) {
       consle.error('Error posting reply', error.message)
     } finally {
@@ -43,7 +44,7 @@ const ReplyPrompt = ({ commentData, setOpenReplyPrompt }) => {
 
   return (
     <div className='rounded-md p-2 border border-[rgba(0,0,0,0.19)] my-2 text-sm relative'>
-      <p className="font-medium text-red-700">@{commenterName}</p>
+      <p className="font-medium text-red-700">@{replierName ? replierName : commenterName}</p>
       <div className="flex justify-between items-center">
         <input
           type="text"

@@ -61,7 +61,7 @@ const Post = ({
         console.error(error);
         setIsLoading(false);
       });
-  }, [liked, id]);
+  }, [id]);
 
   if (isLoading) {
     return <PostSkeleton onlyText={onlyText} />;

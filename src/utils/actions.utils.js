@@ -173,7 +173,7 @@ export const UnlikeComment = async commentId => {
       return Math.max((currentValue || 0) - 1, 0);
     })])
   } catch (error) {
-    console.error('Error liking comment', error.message)
+    console.error('Error unliking comment', error.message)
   }
 }
 // TODO: DELETE A COMMENT ====================================================================
@@ -206,8 +206,7 @@ export const CreateReplyData = (replyId, commentId, commenterName, text) => {
     text,
   }
 }
-
-// TODO: ADD A COMMENT TO A POST =================================
+// TODO: ADD A REPLY TO A COMMENT =================================
 export const AddReply = async (commentId, commenterName, reply) => {
   const replyId = auth.currentUser.uid + Date.now();
   const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`)
@@ -230,5 +229,54 @@ export const AddReply = async (commentId, commenterName, reply) => {
     //! CREATE A NOTIFICATION
   } catch (error) {
     console.error('Error posting reply, ', error.message)
+  }
+}
+// TODO: CHECK IF A REPLY IS LIKED ========================================================
+export const CheckIfReplyLiked = async replyId => {
+  const replyRef = ref(db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`);
+  try {
+    const snapshot = await get(replyRef);
+    return snapshot.exists()
+  } catch (error) {
+    console.error('error checking reply is liked or not', error)
+  }
+}
+// TODO: LIKE A COMMENT =====================================================================
+export const LikeReply = async replyId => {
+  const replyLikeRef = ref(db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`);
+  const replyLikesCountRef = ref(db, `repliesMetaData/${replyId}/likesCount`);
+  try {
+    await Promise.all([set(replyLikeRef, true), runTransaction(replyLikesCountRef, (currentValue) => {
+      return (currentValue || 0) + 1;
+    })]);
+  } catch (error) {
+    console.error('Error liking reply', error.message)
+  }
+}
+// TODO: UNLIKE A COMMENT ===================================================================
+export const UnlikeReply = async replyId => {
+  const replyLikeRef = ref(db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`);
+  const replyLikesCountRef = ref(db, `repliesMetaData/${replyId}/likesCount`);
+  try {
+    await Promise.all([await remove(replyLikeRef), runTransaction(replyLikesCountRef, (currentValue) => {
+      return Math.max((currentValue || 0) - 1, 0);
+    })])
+  } catch (error) {
+    console.error('Error unliking reply', error.message)
+  }
+}
+// TODO: DELETE A REPLY ====================================================================
+export const DeleteReply = async (replyId, commentId) => {
+  const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`)
+  const replyRef = ref(db, `replies/${replyId}`);
+  const repliesCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
+  const repliesMDRef = ref(db, `repliesMetaData/${replyId}`);
+  try {
+    await Promise.all([remove(replyRef), remove(commentMDRef), remove(repliesMDRef), runTransaction(repliesCountRef, (currentValue) => {
+      return Math.max((currentValue || 0) - 1, 0);
+    })]);
+    toast.warn('Reply deleted.')
+  } catch (error) {
+    console.error('Error deleting reply', error.message)
   }
 }

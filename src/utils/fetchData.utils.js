@@ -1,7 +1,7 @@
 import { equalTo, get, orderByChild, query, ref } from "firebase/database";
 import { db } from "../../Database/Firebase.config";
 
-// TODO: FETCH A USER'S DATA WITH USER ID ================================
+// TODO: FETCH A USER'S DATA WITH USER ID ========================================
 export const FetchUserData = async (uid) => {
   const userRef = ref(db, `users/${uid}`);
   try {
@@ -14,7 +14,7 @@ export const FetchUserData = async (uid) => {
   }
 };
 
-// TODO: FETCH A POST'S COMMENTS WITH POST ID ============================
+// TODO: FETCH A POST'S COMMENTS WITH POST ID ====================================
 export const FetchComments = async (postId) => {
   const commentsRef = ref(db, `comments`);
   const postCommentQuery = query(commentsRef, orderByChild("postId"), equalTo(postId));
@@ -33,6 +33,7 @@ export const FetchComments = async (postId) => {
     return [];
   }
 };
+
 
 // TODO: FETCH A POST'S LIKES & COMMENTS COUNT (FOR POST) ==========================
 export const FetchLikesCommentsCount = async postId => {
@@ -68,6 +69,19 @@ export const FetchCommentReplyCount = async commentId => {
     const snapshot = await get(replyCountRef);
     if(snapshot.exists()) {
       return snapshot.val();
+    } else return 0;
+  } catch (error) {
+    console.error('Error fetching comments likes count', error.message)
+  }
+}
+
+// TODO: FETCH A RIPLY'S LIKES COUNT ==============================================
+export const FetchReplyLikesCount = async replyId => {
+  const likesCountRef = ref(db, `repliesMetaData/${replyId}/likesCount`)
+  try {
+    const snapshot = await get(likesCountRef);
+    if (snapshot.exists()) {
+      return snapshot.val()
     } else return 0;
   } catch (error) {
     console.error('Error fetching comments likes count', error.message)

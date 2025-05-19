@@ -6,117 +6,99 @@ import { BiGridAlt } from "react-icons/bi";
 import { BsBookmark } from "react-icons/bs";
 import { RiFolderVideoFill } from "react-icons/ri";
 import {
-  onValue,
-  query,
+  get,
   ref,
+  query,
   orderByChild,
-  equalTo,
-  set,
-  remove,
+  equalTo
 } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
+import { Follow, Unfollow } from "../../utils/actions.utils";
 
 const Profile = () => {
   const { userId } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useContext(DataContext);
+
   const [profileUserData, setProfileUserData] = useState(null);
   const [profileUserPost, setProfileUserPost] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
-  const { currentUser } = useContext(DataContext);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!currentUser?.userId || !userId) return;
-    const followRef = ref(db, `followers/${userId}/${currentUser.userId}`);
-    onValue(followRef, (snapshot) => {
-      setIsFollowing(snapshot.exists());
-    });
-  }, [currentUser?.userId, userId]);
 
   useEffect(() => {
     if (!userId) return;
-    const followersRef = ref(db, `followers/${userId}`);
-    onValue(followersRef, (snapshot) => {
-      setFollowersCount(
-        snapshot.exists() ? Object.keys(snapshot.val()).length : 0
-      );
-    });
-  }, [userId]);
+    const fetchProfileData = async () => {
+      try {
+        const [
+          userSnap,
+          postsSnap,
+          followersSnap,
+          followingSnap,
+          followStatusSnap
+        ] = await Promise.all([
+          get(ref(db, `users/${userId}`)),
+          get(query(ref(db, "posts"), orderByChild("posterId"), equalTo(userId))),
+          get(ref(db, `followers/${userId}`)),
+          get(ref(db, `followings/${userId}`)),
+          currentUser?.userId
+            ? get(ref(db, `followers/${userId}/${currentUser.userId}`))
+            : Promise.resolve(null)
+        ]);
 
-  useEffect(() => {
-    if (!userId) return;
-    const followingRef = ref(db, `followings/${userId}`);
-    onValue(followingRef, (snapshot) => {
-      setFollowingCount(
-        snapshot.exists() ? Object.keys(snapshot.val()).length : 0
-      );
-    });
-  }, [userId]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const userRef = ref(db, `users/${userId}`);
-    onValue(userRef, (snapshot) => {
-      if (snapshot.exists()) setProfileUserData(snapshot.val());
-    });
-
-    const postsQuery = query(
-      ref(db, "posts"),
-      orderByChild("posterId"),
-      equalTo(userId)
-    );
-    onValue(postsQuery, (snapshot) => {
-      setProfileUserPost(
-        snapshot.exists() ? Object.values(snapshot.val()) : []
-      );
-    });
-  }, [userId]);
+        setProfileUserData(userSnap.exists() ? userSnap.val() : null);
+        setProfileUserPost(postsSnap.exists() ? Object.values(postsSnap.val()) : []);
+        setFollowersCount(followersSnap.exists() ? Object.keys(followersSnap.val()).length : 0);
+        setFollowingCount(followingSnap.exists() ? Object.keys(followingSnap.val()).length : 0);
+        setIsFollowing(followStatusSnap && followStatusSnap.exists());
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+    fetchProfileData();
+  }, [userId, currentUser?.userId]);
 
   useEffect(() => {
     if (activeTab !== "saved" || !userId) return;
-
-    const savedRef = ref(db, `savedPosts/${userId}`);
-    onValue(savedRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const savedKeys = Object.keys(snapshot.val());
-        const allPostRef = ref(db, "posts");
-        onValue(allPostRef, (postSnap) => {
-          if (postSnap.exists()) {
-            const allPosts = postSnap.val();
-            const filtered = savedKeys
-              .map((key) => allPosts[key])
-              .filter(Boolean);
+    const fetchSavedPosts = async () => {
+      try {
+        const savedSnap = await get(ref(db, `savedPosts/${userId}`));
+        if (savedSnap.exists()) {
+          const savedKeys = Object.keys(savedSnap.val());
+          const allPostsSnap = await get(ref(db, "posts"));
+          if (allPostsSnap.exists()) {
+            const allPosts = allPostsSnap.val();
+            const filtered = savedKeys.map((key) => allPosts[key]).filter(Boolean);
             setSavedPosts(filtered);
           }
-        });
-      } else {
-        setSavedPosts([]);
+        } else {
+          setSavedPosts([]);
+        }
+      } catch (error) {
+        console.error("Error fetching saved posts:", error);
       }
-    });
+    };
+    fetchSavedPosts();
   }, [activeTab, userId]);
 
-  const handleFollowToggle = () => {
+  const handleFollowToggle = async () => {
     if (!currentUser?.userId || !userId) return;
-
-    const followerRef = ref(db, `followers/${userId}/${currentUser.userId}`);
-    const followingRef = ref(db, `followings/${currentUser.userId}/${userId}`);
-
-    if (isFollowing) {
-      remove(followerRef)
-        .then(() => remove(followingRef))
-        .then(() => setIsFollowing(false))
-        .catch((error) => console.error("Unfollow Error:", error));
-    } else {
-      set(followerRef, true)
-        .then(() => set(followingRef, true))
-        .then(() => setIsFollowing(true))
-        .catch((error) => console.error("Follow Error:", error));
+    try {
+      if (isFollowing) {
+        await Unfollow(userId);
+        setFollowersCount(followersCount - 1 || 0)
+        setIsFollowing(false);
+      } else {
+        await Follow(userId);
+        setFollowersCount(followersCount + 1)
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Follow/Unfollow Error:", error);
     }
   };
 
@@ -125,7 +107,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 h-screen overflow-hidden" style={{ scrollbarWidth: "none" }}>
       {/* Profile Header */}
       <div className="flex items-start space-x-10">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
@@ -142,7 +124,6 @@ const Profile = () => {
             </div>
           </div>
         </div>
-
         <div className="flex flex-col">
           <div className="flex items-center gap-4 mb-2">
             <h2 className="text-xl font-semibold">
@@ -159,9 +140,8 @@ const Profile = () => {
               <>
                 <button
                   onClick={handleFollowToggle}
-                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${
-                    isFollowing ? "bg-gray-200 text-black" : ""
-                  }`}
+                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${isFollowing ? "bg-gray-200 text-black" : ""
+                    }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>
@@ -196,6 +176,7 @@ const Profile = () => {
                 <a
                   href={profileUserData.socialHandles.facebook.url}
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <FaFacebookF className="text-[#1877F2] hover:scale-110 transition-transform cursor-pointer" />
                 </a>
@@ -204,6 +185,7 @@ const Profile = () => {
                 <a
                   href={profileUserData.socialHandles.linkedin.url}
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <FaLinkedinIn className="text-[#0A66C2] hover:scale-110 transition-transform cursor-pointer" />
                 </a>
@@ -212,6 +194,7 @@ const Profile = () => {
                 <a
                   href={profileUserData.socialHandles.twitter.url}
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <FaXTwitter className="text-black hover:scale-110 transition-transform cursor-pointer" />
                 </a>
@@ -220,6 +203,7 @@ const Profile = () => {
                 <a
                   href={profileUserData.socialHandles.whatsapp.url}
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <FaWhatsapp className="text-[#25D366] hover:scale-110 transition-transform cursor-pointer" />
                 </a>
@@ -233,11 +217,10 @@ const Profile = () => {
       <div className="flex justify-center border-t pt-4 mt-6 text-sm font-medium">
         <div
           onClick={() => setActiveTab("posts")}
-          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${
-            activeTab === "posts"
+          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${activeTab === "posts"
               ? "text-black border-t-2 border-black font-bold"
               : "text-gray-500"
-          }`}
+            }`}
         >
           <BiGridAlt />
           <span>Posts</span>
@@ -245,11 +228,10 @@ const Profile = () => {
 
         <div
           onClick={() => setActiveTab("video")}
-          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
-            activeTab === "video"
+          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "video"
               ? "text-black border-t-2 border-black font-bold"
               : "text-gray-500"
-          }`}
+            }`}
         >
           <RiFolderVideoFill />
           <span>Videos</span>
@@ -258,11 +240,10 @@ const Profile = () => {
         {currentUser?.userId === userId && (
           <div
             onClick={() => setActiveTab("saved")}
-            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
-              activeTab === "saved"
+            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "saved"
                 ? "text-black border-t-2 border-black font-bold"
                 : "text-gray-500"
-            }`}
+              }`}
           >
             <BsBookmark />
             <span>Saved</span>
@@ -270,8 +251,10 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Scrollable Tab Content */}
-      <div className="relative h-[70vh] overflow-y-scroll mt-4">
+      <div
+        className="relative h-[70vh] overflow-y-scroll mt-4"
+        style={{ scrollbarWidth: "none" }}
+      >
         {activeTab === "posts" && (
           <div className="flex flex-wrap -m-1">
             {profileUserPost
@@ -308,13 +291,10 @@ const Profile = () => {
                   </div>
                 ))
             ) : (
-              <p className="text-center w-full text-gray-500 mt-4">
-                No videos found
-              </p>
+              <p className="text-center w-full text-gray-500 mt-4">No videos found</p>
             )}
           </div>
         )}
-
         {activeTab === "saved" && (
           <div className="flex flex-wrap -m-1">
             {savedPosts.length > 0 ? (
@@ -330,9 +310,7 @@ const Profile = () => {
                 </div>
               ))
             ) : (
-              <p className="text-center w-full text-gray-500 mt-4">
-                No saved posts found
-              </p>
+              <p className="text-center w-full text-gray-500 mt-4">No saved posts found</p>
             )}
           </div>
         )}

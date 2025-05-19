@@ -25,7 +25,7 @@ const Settings = () => {
   const { currentUser } = useContext(DataContext);
 
   // State for handle edited profile. also updaet & hold fetch data
-  const [fullname, setFullname] = useState(currentUser?.fullName|| "Name missing");
+  const [fullname, setFullname] = useState(currentUser?.fullName || "Name missing");
   const [editFullname, seteditFullname] = useState(false);
   const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState(currentUser?.imgUrl);
   const [theme, setTheme] = useState(currentUser?.defaultTheme || "Light");

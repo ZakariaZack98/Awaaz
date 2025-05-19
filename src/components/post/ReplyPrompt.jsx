@@ -5,7 +5,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { AddReply } from '../../utils/actions.utils';
 import { toast } from 'react-toastify';
 
-const ReplyPrompt = ({ commentData, replierName, replierId, setOpenReplyPrompt, repliesCount, setRepliesCount }) => {
+const ReplyPrompt = ({ commentData, replierName, replierId, setOpenReplyPrompt, repliesCount, setRepliesCount, setShowReplies }) => {
   const {id, commenterName, commenterId, postId } = commentData;
   const [reply, setReply] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -34,6 +34,7 @@ const ReplyPrompt = ({ commentData, replierName, replierId, setOpenReplyPrompt, 
     try {
       await AddReply(id, replierId ? replierId : commenterId, replierName ? replierName : commenterName, postId, reply);
       setRepliesCount(repliesCount + 1);
+      setShowReplies(true);
     } catch (error) {
       console.error('Error posting reply-', error.message)
     } finally {

@@ -108,6 +108,17 @@ export const UnlikePost = async (postId) => {
   }
 };
 
+// TODO: DELETE A POST =======================================
+export const DeletePost = async postId => {
+  const postsRef = ref(db, `posts/${postId}`);
+  try {
+    await remove(postsRef);
+    toast.warn('Post deleted');
+  } catch (error) {
+    console.error('Error removing post- ', error.message)
+  }
+}
+
 //* (HELPER) CREATE A COMMENT DATA FOR DB ========================
 export const CreateCommentData = (commentId, postId, text) => {
   return {
@@ -321,10 +332,7 @@ export const UnlikeReply = async (replyId) => {
 };
 // TODO: DELETE A REPLY ====================================================================
 export const DeleteReply = async (replyId, commentId) => {
-  const commentMDRef = ref(
-    db,
-    `commentsMetaData/${commentId}/replies/${replyId}`
-  );
+  const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`);
   const replyRef = ref(db, `replies/${replyId}`);
   const repliesCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
   const repliesMDRef = ref(db, `repliesMetaData/${replyId}`);
@@ -365,3 +373,17 @@ export const RemoveSavedPost = async (postId) => {
     console.error("error removing post from save", error);
   }
 };
+
+// TODO: CHANGE POST VISIBILITY ==========================================================
+export const TogglePostVisibility = async (visibility, setVisibility, postId) => {
+  const visibilityRef = ref(db, `posts/${postId}/visibility`)
+  if(visibility === 'public') {
+    await set(visibilityRef, 'private');
+    toast.warn('Post is no longer visible to public');
+    setVisibility('private');
+  } else if (visibility === 'private') {
+    await set(visibilityRef, 'public');
+    toast.success('Post is now visible to public')
+    setVisibility('public');
+  }
+}

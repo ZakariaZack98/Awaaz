@@ -30,7 +30,7 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
   const handleReplyLike = async () => {
       liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
       setLiked(prev => !prev);
-      liked ? await UnlikeReply(id) : await LikeReply(id);
+      liked ? await UnlikeReply(id) : await LikeReply(replyData);
     }
 
   return (
@@ -74,7 +74,7 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
             </span>
           </div>
         </div>
-        {openReplyPrompt && <ReplyPrompt commentData={commentData} replierName={replierName} setOpenReplyPrompt={setOpenReplyPrompt} repliesCount={repliesCount} setRepliesCount={setRepliesCount}/>}
+        {openReplyPrompt && <ReplyPrompt commentData={commentData} replierName={replierName} replierId={replierId} setOpenReplyPrompt={setOpenReplyPrompt} repliesCount={repliesCount} setRepliesCount={setRepliesCount}/>}
       </div>
     </div>
   );

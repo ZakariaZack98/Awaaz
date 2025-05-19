@@ -26,7 +26,6 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
     const unsubscribe = onValue(replyQuery, snapshot => {
       if(snapshot.exists()) {
         const repliesDataArr = Object.values(snapshot.val()).sort((a, b) => b.timeStamp - a.timeStamp);
-        console.log('replies- ', repliesDataArr.map(reply => reply.timeStamp));
         setRepliesData(repliesDataArr);
       }
     })
@@ -80,7 +79,6 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
             {
               commentData.commenterId === auth.currentUser.uid || commentData.postId.includes(auth.currentUser.uid) ? <FaTrashCan className="text-red-500 cursor-pointer" onClick={() => {
                 DeleteComment(id, postId).then(() => {
-                  console.log(commentsDataArr)
                   setCommentsDataArr(commentsDataArr.filter(comment => comment.id !== id))
                 })
               }}/> : null

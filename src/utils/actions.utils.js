@@ -143,7 +143,7 @@ export const AddComment = async (postId, posterId, comment) => {
         return (currentValue || 0) + 1;
       }),
     ];
-    if (checkIfSelfTriggered(posterId)) {
+    if (!checkIfSelfTriggered(posterId)) {
       const commentNotification = CreateNotificationData("comment", postId, posterId, comment);
       operations.push(push(notificationRef, commentNotification));
     }
@@ -184,12 +184,7 @@ export const LikeComment = async (commentData) => {
       console.log(auth.currentUser.displayName)
       operations.push(push(notificationRef, likeNotification));
     }
-    await Promise.all([
-      set(commentLikesRef, true),
-      runTransaction(commentLikesCountRef, (currentValue) => {
-        return (currentValue || 0) + 1;
-      }),
-    ]);
+    await Promise.all(operations);
   } catch (error) {
     console.error("Error liking comment", error.message);
   }
@@ -231,9 +226,10 @@ export const DeleteComment = async (commentId, postId) => {
 };
 
 //* (HELPER) CREATE A REPLY DATA FOR DB ========================
-export const CreateReplyData = (replyId, commentId, commenterName, text) => {
+export const CreateReplyData = (replyId, commentId, postId, commenterName, text) => {
   return {
     id: replyId,
+    postId,
     timeStamp: Date.now(),
     createdAt: GetTimeNow(),
     commentId,
@@ -245,31 +241,32 @@ export const CreateReplyData = (replyId, commentId, commenterName, text) => {
   };
 };
 // TODO: ADD A REPLY TO A COMMENT =================================
-export const AddReply = async (commentId, commenterName, reply) => {
+export const AddReply = async (commentId, commenterId, commenterName, postId, reply) => {
   const replyId = auth.currentUser.uid + Date.now();
-  const commentMDRef = ref(
-    db,
-    `commentsMetaData/${commentId}/replies/${replyId}`
-  );
+  const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`);
   const repliesRef = ref(db, `replies/${replyId}`);
   const replyCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
-  const newReply = CreateReplyData(replyId, commentId, commenterName, reply);
+  const newReply = CreateReplyData(replyId, commentId, postId, commenterName, reply);
+  const notificationRef = ref(db, `notifications/${commenterId}`)
   if (reply.length === 0) {
-    toast.error(`Can't post empty comment.`);
+    toast.error(`Can't post empty reply.`);
     return;
   }
   try {
-    await Promise.all([
+    const operations = [
       set(repliesRef, newReply),
       set(commentMDRef, true),
       runTransaction(replyCountRef, (currentValue) => {
         return (currentValue || 0) + 1;
       }),
-    ]);
-    console.log("reply posted");
-    //! CREATE A NOTIFICATION
+    ];
+    if(!checkIfSelfTriggered(commenterId)) {
+      const replyNotification = CreateNotificationData('reply', postId, commenterId, reply);
+      operations.push(push(notificationRef, replyNotification))
+    }
+    await Promise.all(operations);
   } catch (error) {
-    console.error("Error posting reply, ", error.message);
+    console.error("Error posting reply- ", error.message);
   }
 };
 // TODO: CHECK IF A REPLY IS LIKED ========================================================
@@ -282,25 +279,29 @@ export const CheckIfReplyLiked = async (replyId) => {
     console.error("error checking reply is liked or not", error);
   }
 };
-// TODO: LIKE A COMMENT =====================================================================
-export const LikeReply = async (replyId) => {
-  const replyLikeRef = ref(
-    db,
-    `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`
-  );
-  const replyLikesCountRef = ref(db, `repliesMetaData/${replyId}/likesCount`);
+// TODO: LIKE A REPLY =====================================================================
+export const LikeReply = async (replyData) => {
+  const { id, text, replierId, postId } = replyData;
+  const replyLikeRef = ref(db, `repliesMetaData/${id}/likes/${auth.currentUser.uid}`);
+  const replyLikesCountRef = ref(db, `repliesMetaData/${id}/likesCount`);
+  const notificationRef = ref(db, `notifications/${replierId}`);
   try {
-    await Promise.all([
+    const operations = [
       set(replyLikeRef, true),
       runTransaction(replyLikesCountRef, (currentValue) => {
         return (currentValue || 0) + 1;
       }),
-    ]);
+    ];
+    if(!checkIfSelfTriggered(replierId)) {
+      const likeNotification = CreateNotificationData('likeOnReply', postId, replierId, text);
+      operations.push(push(notificationRef, likeNotification));
+    }
+    await Promise.all(operations);
   } catch (error) {
-    console.error("Error liking reply", error.message);
+    console.error("Error liking reply- ", error.message);
   }
 };
-// TODO: UNLIKE A COMMENT ===================================================================
+// TODO: UNLIKE A REPLY ===================================================================
 export const UnlikeReply = async (replyId) => {
   const replyLikeRef = ref(
     db,

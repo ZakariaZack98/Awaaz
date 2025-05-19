@@ -59,6 +59,12 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
             <p className="font-medium cursor-pointer" onClick={() => setOpenReplyPrompt((prev) => !prev)}>Reply</p>
           </div>
           <div className="flex gap-x-3">
+            {replierId === auth.currentUser.uid || commentId.includes(auth.currentUser.uid) ? (
+              <FaTrashCan
+                className="text-red-500 cursor-pointer"
+                onClick={() => DeleteReply(id, commentData.id)}
+              />
+            ) : null}
             <span onClick={() => handleReplyLike()}>
               {liked ? (
                 <FaHeart className="text-red-500 text-md cursor-pointer" />
@@ -66,12 +72,6 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
                 <FaRegHeart className=" text-md cursor-pointer" />
               )}
             </span>
-            {replierId === auth.currentUser.uid || commentId.includes(auth.currentUser.uid) ? (
-              <FaTrashCan
-                className="text-red-500 cursor-pointer"
-                onClick={() => DeleteReply(id, commentData.id)}
-              />
-            ) : null}
           </div>
         </div>
         {openReplyPrompt && <ReplyPrompt commentData={commentData} replierName={replierName} setOpenReplyPrompt={setOpenReplyPrompt} repliesCount={repliesCount} setRepliesCount={setRepliesCount}/>}

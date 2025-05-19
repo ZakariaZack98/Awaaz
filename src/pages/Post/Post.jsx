@@ -4,7 +4,7 @@ import PostHeader from "../../components/common/PostHeader";
 import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
 import { get, limitToFirst, query, ref } from "firebase/database";
-import { db } from "../../../Database/Firebase.config";
+import { auth, db } from "../../../Database/Firebase.config";
 import { FetchComments, FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
 import CommentCard from "../../components/post/CommentCard";
@@ -31,7 +31,7 @@ const Post = ({
   const [likerName, setLikerName] = useState(null);
   const [commentsData, setCommentsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
     const getFirstLikerName = async () => {
       const likesRef = ref(db, `postsMetaData/${id}/likes`);

@@ -4,14 +4,13 @@ import { auth } from "../../../Database/Firebase.config";
 import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 import PostHeader from "../common/PostHeader";
-import { mockData } from "../../lib/mockData";
 import Post from "../../pages/Post/Post";
 import PostActionIcons from "../common/PostActionIcons";
 import CommentField from "../common/CommentField";
 import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
 
-const PostCard = ({ postData = mockData.postData }) => {
-  const { id, text, posterName, imgUrls, videoUrl } = postData;
+const PostCard = ({ postData }) => {
+  const { id, text, posterId, posterName, imgUrls, videoUrl } = postData;
   const [openPostActions, setOpenPostActions] = useState(false);
   const [openPost, setOpenPost] = useState(false);
   const [followed, setFollowed] = useState(true);
@@ -52,7 +51,7 @@ const PostCard = ({ postData = mockData.postData }) => {
         return;
     }
     try {
-      await AddComment(postId, comment);
+      await AddComment(postId, posterId, comment);
       setDisplayComment(comment);
       setCommentsCount(commentsCount + 1);
     } catch (error) {
@@ -66,7 +65,7 @@ const PostCard = ({ postData = mockData.postData }) => {
   const handleLike = async () => {
     liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
     setLiked(liked ? false : true);
-    liked ? await UnlikePost(id) : await LikePost(id)
+    liked ? await UnlikePost(id) : await LikePost(id, posterId)
   };
   
   // TODO: HANDLE POST SAVE ====================================

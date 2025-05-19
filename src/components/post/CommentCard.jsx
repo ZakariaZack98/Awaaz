@@ -52,7 +52,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   const handleCommentLike = async () => {
     liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
     setLiked(prev => !prev);
-    liked ? await UnlikeComment(id) : await LikeComment(id);
+    liked ? await UnlikeComment(id) : await LikeComment(commentData);
   }
   return (
     <div className="flex gap-x-2 py-3 w-full">
@@ -77,9 +77,6 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
             <p className="font-medium cursor-pointer" onClick={() => setOpenReplyPrompt(prev => !prev)}>Reply</p>
           </div>
           <div className="flex gap-x-3">
-            <span onClick={() => handleCommentLike()}>
-              {liked ? <FaHeart className="text-red-500 text-md cursor-pointer"/> : <FaRegHeart className=" text-md cursor-pointer"/>}
-            </span>
             {
               commentData.commenterId === auth.currentUser.uid || commentData.postId.includes(auth.currentUser.uid) ? <FaTrashCan className="text-red-500 cursor-pointer" onClick={() => {
                 DeleteComment(id, postId).then(() => {
@@ -88,6 +85,9 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
                 })
               }}/> : null
             }
+            <span onClick={() => handleCommentLike()}>
+              {liked ? <FaHeart className="text-red-500 text-md cursor-pointer"/> : <FaRegHeart className=" text-md cursor-pointer"/>}
+            </span>
           </div>
         </div>
         {

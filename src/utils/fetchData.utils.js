@@ -22,7 +22,6 @@ export const FetchComments = async (postId) => {
     const snapshot = await get(postCommentQuery);
     if (snapshot.exists()) {
       const comments = snapshot.val();
-      console.log("Selected Post's comments:", Object.values(comments));
       return Object.values(comments).sort((a, b) => b.timeStamp - a.timeStamp);
     } else {
       console.log("No comments found for this post");

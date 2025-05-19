@@ -21,7 +21,6 @@ const Profile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
-
   const [profileUserData, setProfileUserData] = useState(null);
   const [profileUserPost, setProfileUserPost] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
@@ -30,6 +29,7 @@ const Profile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
 
+  // TODO: FETCH ALL NECESSARY DATA TO RENDER PROFILE
   useEffect(() => {
     if (!userId) return;
     const fetchProfileData = async () => {
@@ -62,6 +62,7 @@ const Profile = () => {
     fetchProfileData();
   }, [userId, currentUser?.userId]);
 
+  // TODO: FETCH DATA FOR SAVED TAB IF SAVED TAB IS ACTIVE
   useEffect(() => {
     if (activeTab !== "saved" || !userId) return;
     const fetchSavedPosts = async () => {
@@ -85,6 +86,7 @@ const Profile = () => {
     fetchSavedPosts();
   }, [activeTab, userId]);
 
+  // TODO: HANDLE FOLLOW/UNFOLLOW PROFILE
   const handleFollowToggle = async () => {
     if (!currentUser?.userId || !userId) return;
     try {

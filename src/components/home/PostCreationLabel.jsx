@@ -4,7 +4,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { GetTimeNow } from "../../utils/date.utils";
 import { uploadFiles } from "../../utils/fileuploads.utils"; // Import the uploadPhotos function
 import { toast } from "react-toastify";
-import { ref, set } from "firebase/database";
+import { push, ref, set } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 
@@ -61,6 +61,7 @@ const PostCreationLabel = () => {
     const postId = auth.currentUser.uid + Date.now();
     const postRef = ref(db, `/posts/${postId}`);
     const activePostRef = ref(db, `users/${auth.currentUser.uid}/activePosts`);
+    const hashTagsArr = caption.split(" ").filter((word) => word.startsWith("#")).map(hashtag => hashtag.slice(1));
     const newPost = {
       id: postId,
       timeStamp: Date.now(),
@@ -73,10 +74,16 @@ const PostCreationLabel = () => {
       text: caption,
       imgUrls,
       videoUrl,
-      hashtags: caption.split(" ").filter((word) => word.startsWith("#")),
+      hashtags: hashTagsArr,
     };
     try {
-      await Promise.all([set(postRef, newPost), set(activePostRef, currentUser.activePosts + 1 || 1)]);
+      const operations = [set(postRef, newPost), set(activePostRef, currentUser.activePosts + 1 || 1)]
+      if(hashTagsArr.length > 0) {
+        hashTagsArr.forEach(hashTag => {
+          operations.push(set(ref(db, `hashTags/${hashTag}/${postId}`), true))
+        });
+      }
+      await Promise.all(operations);
       toast.success("Posting successfull");
       setOpenUploadPrompt(false);
     } catch (error) {

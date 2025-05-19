@@ -129,13 +129,13 @@ const Post = ({
               )}
               {likesCount === 1 && (
                 <p className="text-sm">
-                  Liked by <strong>{likerName}</strong>
+                  Liked by <strong> {likerName} </strong>
                 </p>
               )}
               {likesCount > 1 && (
                 <p className="text-sm">
                   Liked by
-                  <strong>{likerName}</strong> &<strong className="cursor-pointer">{likesCount - 1}</strong>
+                  <strong> {likerName} </strong> & <strong className="cursor-pointer"> {likesCount - 1} </strong>
                   others
                 </p>
               )}

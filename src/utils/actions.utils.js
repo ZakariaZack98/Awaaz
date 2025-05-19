@@ -1,4 +1,4 @@
-import { get, push, ref, remove, runTransaction, set } from "firebase/database";
+import { equalTo, get, orderByChild, push, query, ref, remove, runTransaction, set } from "firebase/database";
 import { auth, db } from "../../Database/Firebase.config";
 import { toast } from "react-toastify";
 import { GetTimeNow } from "./date.utils";
@@ -108,9 +108,15 @@ export const UnlikePost = async (postId) => {
   }
 };
 
-// TODO: DELETE A POST =======================================
+// TODO: DELETE A POST WITH ALL ASSOCIATED LIKES & COMMENTS ===
 export const DeletePost = async postId => {
   const postsRef = ref(db, `posts/${postId}`);
+  const postMDRef = ref(db, `postsMetaData/${postId}`);
+  const commentsQuery = query(ref(db, `comments/`), orderByChild('postId'), equalTo(postId));
+  const commentsMDQuery = query(ref(db, `commentsMetaData/`), orderByChild('postId'), equalTo(postId));
+  const repliesQuery = query(ref(db, `replies/`), orderByChild('postId'), equalTo(postId)); // !Add rules
+  const repliesMDQuery = query(ref(db, `replies/`), orderByChild('postId'), equalTo(postId)); // !Add rules
+  
   try {
     await remove(postsRef);
     toast.warn('Post deleted');

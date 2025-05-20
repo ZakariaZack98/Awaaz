@@ -53,7 +53,7 @@ const PeopleSuggestion = () => {
   return (
     <>
       {!userData ? (<PeopleSuggestionSkeleton />) :
-        (<div className=" w-[70%] p-4 h-screen bg-white shadow rounded-xl space-y-4">
+        (<div className="max-w-100 p-4 h-[90dvh] rounded-xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img

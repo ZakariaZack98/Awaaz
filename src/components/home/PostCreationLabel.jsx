@@ -16,7 +16,8 @@ const PostCreationLabel = () => {
   const [photoFiles, setPhotoFiles] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPath, setVideoPath] = useState("");
-  const {currentUser} = useContext(DataContext);
+  const [isUploading, setIsUploading] = useState(false);
+  const { currentUser } = useContext(DataContext);
 
   // TODO: SHOW THE PREVIEW OF THE UPLOADED PHOTOS UNDER THE UPLOAD PROPMPT
   const handlePreview = (e, filetype) => {
@@ -50,51 +51,71 @@ const PostCreationLabel = () => {
 
   //TODO: HANDLE POST UPLOAD ========================================
   const handlePostUpload = async () => {
-    let imgUrls = [];
-    let videoUrl = "";
-    if (photoFiles && photoFiles.length > 0) {
-      imgUrls = await uploadFiles(photoFiles);
-    } else if (videoFile) {
-      const uploaded = await uploadFiles([videoFile]);
-      videoUrl = uploaded[0] || "";
+    if (isUploading) return; // Prevent multiple uploads
+    if (caption.length === 0) {
+      toast.error(`You have to write something`);
+      return;
     }
-    const postId = auth.currentUser.uid + Date.now();
-    const postRef = ref(db, `/posts/${postId}`);
-    const activePostRef = ref(db, `users/${auth.currentUser.uid}/activePosts`);
-    const hashTagsArr = caption.split(" ").filter((word) => word.startsWith("#")).map(hashtag => hashtag.slice(1));
-    const newPost = {
-      id: postId,
-      timeStamp: Date.now(),
-      posterUsername: currentUser.username,
-      posterId: auth.currentUser.uid,
-      posterName: auth.currentUser.displayName,
-      posterImgUrl: auth.currentUser.photoURL,
-      createdAt: GetTimeNow(),
-      visibility: "public", // default
-      text: caption,
-      imgUrls,
-      videoUrl,
-      hashtags: hashTagsArr,
-    };
+
+    setIsUploading(true); // Start loading
+
     try {
-      const operations = [set(postRef, newPost), set(activePostRef, currentUser.activePosts + 1 || 1)]
-      if(hashTagsArr.length > 0) {
+      let imgUrls = [];
+      let videoUrl = "";
+      if (photoFiles && photoFiles.length > 0) {
+        imgUrls = await uploadFiles(photoFiles);
+      } else if (videoFile) {
+        const uploaded = await uploadFiles([videoFile]);
+        videoUrl = uploaded[0] || "";
+      }
+
+      const postId = auth.currentUser.uid + Date.now();
+      const postRef = ref(db, `/posts/${postId}`);
+      const activePostRef = ref(db, `users/${auth.currentUser.uid}/activePosts`);
+      const hashTagsArr = caption.split(" ")
+        .filter((word) => word.startsWith("#"))
+        .map(hashtag => hashtag.slice(1));
+
+      const newPost = {
+        id: postId,
+        timeStamp: Date.now(),
+        posterUsername: currentUser.username,
+        posterId: auth.currentUser.uid,
+        posterName: auth.currentUser.displayName,
+        posterImgUrl: auth.currentUser.photoURL,
+        createdAt: GetTimeNow(),
+        visibility: "public",
+        text: caption,
+        imgUrls,
+        videoUrl,
+        hashtags: hashTagsArr,
+      };
+
+      const operations = [
+        set(postRef, newPost),
+        set(activePostRef, currentUser.activePosts + 1 || 1)
+      ];
+
+      if (hashTagsArr.length > 0) {
         hashTagsArr.forEach(hashTag => {
           operations.push(set(ref(db, `hashTags/${hashTag}/${postId}`), true))
         });
       }
+
       await Promise.all(operations);
-      toast.success("Posting successfull");
+      toast.success("Posting successful");
       setOpenUploadPrompt(false);
+
     } catch (error) {
       toast.error(`Post upload failed: ${error.message}`);
       console.log(error);
     } finally {
+      setIsUploading(false); // End loading
       setCaption("");
       setPhotoFiles(null);
       setVideoFile(null);
       setFilePathsArr([]);
-      setVideoPath(null)
+      setVideoPath(null);
     }
   };
 
@@ -114,11 +135,13 @@ const PostCreationLabel = () => {
           <input
             type="text"
             value={caption}
-            placeholder={`What's on your mind?`}
+            placeholder={isUploading ? 'Uploading...' : `What's on your mind?`}
             onChange={(e) => setCaption(e.target.value)}
-            className="px-5 py-2 rounded-3xl focus:outline-0 bg-gray-100 w-9/10"
+            className={`px-5 py-2 rounded-3xl focus:outline-0 bg-gray-100 w-9/10 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            disabled={isUploading}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !isUploading) {
                 handlePostUpload();
               }
             }}

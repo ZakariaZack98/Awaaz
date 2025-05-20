@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { CheckIfFollowed, Follow, Unfollow } from "../../utils/actions.utils";
 import avatar from "../../assets/avatar.jpg";
+import { useNavigate } from "react-router-dom";
 const UserCard = ({ singleUserData }) => {
   const { userId, username, fullName, imgUrl, isLocked } = singleUserData;
   const [isFollowed, setisFollowed] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     CheckIfFollowed(userId)
@@ -21,7 +23,7 @@ const UserCard = ({ singleUserData }) => {
             className="w-10 h-10 rounded-full object-cover"
           />
         </picture>
-        <div>
+        <div className="cursor-pointer" onClick={() => navigate(`/profile/${userId}`)}>
           <p className="text-sm font-semibold">{fullName}</p>
           <p className="text-xs text-gray-500">@{username}</p>
         </div>

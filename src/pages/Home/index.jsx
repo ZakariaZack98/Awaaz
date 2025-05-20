@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PostCreationLabel from '../../components/home/PostCreationLabel'
 import PostCard from '../../components/home/PostCard'
-import { get, ref } from 'firebase/database';
+import { get, onValue, ref } from 'firebase/database';
 import { db } from '../../../Database/Firebase.config';
 import PeopleSuggestion from '../../components/home/PeopleSuggestion';
 
@@ -10,20 +10,20 @@ const Index = () => {
 
   useEffect(() => {
     const postsRef = ref(db, `posts/`);
-    get(postsRef)
-      .then(snapshot => {
-        if (snapshot.exists()) {
+    const unsub = onValue(postsRef, snapshot => {
+      if (snapshot.exists()) {
           const postArr = [];
           snapshot.forEach(postSnapshot => {
             postArr.push(postSnapshot.val());
           })
-          setFeedPostData(postArr);
+          setFeedPostData(postArr.sort((a, b) => b.timeStamp - a.timeStamp))
         }
-      })
+    })
+    return () => unsub();
   }, [])
 
   return (
-    <div className="w-full h-full overflow-y-scroll">
+    <div className="w-full h-full overflow-y-scroll ">
       <div className='flex w-9/10 h-full  mx-auto '>
         <div className="feed w-2/3 px-10 mt-5">
           <PostCreationLabel />
@@ -43,7 +43,7 @@ const Index = () => {
             }
           </div>
         </div>
-        <div className="people w-1/3 fixed top-4 -right-[7dvw]">
+        <div className="people min-w-100 fixed top-4 right-27 max-h-[90dvh]">
           <PeopleSuggestion />
         </div>
       </div>

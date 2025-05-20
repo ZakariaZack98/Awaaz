@@ -109,12 +109,12 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 h-screen overflow-hidden" style={{ scrollbarWidth: "none" }}>
+    <div className="max-w-4xl mx-auto p-4 h-screen overflow-y-scroll" style={{ scrollbarWidth: "none" }}>
       {/* Profile Header */}
-      <div className="flex items-start pt-10">
+      <div className="flex items-start pt-5">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
           <div className="w-full h-full rounded-full bg-white p-[3px]">
-            <div className="w-full h-full rounded-full overflow-hidden relative">
+            <div className="w-full h-full rounded-full overflow-y-scroll relative">
               <img
                 src={
                   profileUserData?.imgUrl ||
@@ -254,7 +254,7 @@ const Profile = () => {
       </div>
 
       <div
-        className="relative h-[75vh] overflow-y-scroll mt-4"
+        className="relative mt-4"
         style={{ scrollbarWidth: "none" }}
       >
         {activeTab === "posts" && (
@@ -264,7 +264,7 @@ const Profile = () => {
               .reverse()
               .map((post, index) => (
                 <div key={index} className="w-1/3 p-1">
-                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
+                  <div className="w-full aspect-[3/4] rounded-md">
                     <img
                       src={post.imgUrls[0]}
                       alt="Post"

@@ -9,8 +9,7 @@ const PostHeader = ({ postData, openPostActions, setOpenPostActions, followed, s
   const { posterImgUrl, posterName, posterId, posterUsername, createdAt } = postData;
   const navigate = useNavigate();
   return (
-    <div>
-      <div className="header flex justify-between items-center pb-2">
+      <div className="header flex justify-between items-center pb-3">
         <div className="flex items-center gap-x-2 cursor-pointer">
           <img
             src={
@@ -46,7 +45,6 @@ const PostHeader = ({ postData, openPostActions, setOpenPostActions, followed, s
           )}
         </span>
       </div>
-    </div>
   );
 };
 

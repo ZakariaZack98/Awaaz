@@ -12,8 +12,8 @@ const PeopleSuggestion = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
   const [userData, setUserData] = useState();
-  const [maxUser, setMaxUser] = useState(15)
-  const [expendedData, setExpendedData] = useState(true)
+  const [maxUser, setMaxUser] = useState(5)
+  const [expendedData, setExpendedData] = useState(false)
 
   const handleLogOut = () => {
     signOut(auth)
@@ -40,20 +40,19 @@ const PeopleSuggestion = () => {
   }, []);
 
   const handleSeeMore = () => {
-    if (expendedData) {
-      setMaxUser(15)
-    }
-    else {
+    setExpendedData(!expendedData)
+    if (!expendedData) {
       setMaxUser(userData.length)
     }
-    setExpendedData(!expendedData)
+    else {
+      setMaxUser(5)
+    }
   }
-  // console.log(expendedData);
 
   return (
     <>
       {!userData ? (<PeopleSuggestionSkeleton />) :
-        (<div className="max-w-100 p-4 h-[90dvh] rounded-xl space-y-4">
+        (<div className="max-w-120 h-[95dvh] p-4 rounded-xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -81,7 +80,9 @@ const PeopleSuggestion = () => {
             <button onClick={() => handleSeeMore()} className="text-xs text-blue-500 font-semibold cursor-pointer">{expendedData ? "See Less" : "See More"}</button>
           </div>
           {/* UserCard Component */}
-          <UserList userListData={userData} maxUser={maxUser} />
+          <div className="max-h-9/10  overflow-y-scroll" style={{scrollbarWidth: 'none'}}>
+            <UserList userListData={userData} maxUser={maxUser} />
+          </div>
           {/* UserCard Component */}
 
           <footer className=" text-[10px] text-gray-400">

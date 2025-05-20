@@ -14,6 +14,19 @@ export const FetchUserData = async (uid) => {
   }
 };
 
+// TODO: FETCH A TASK DATA WITH USER ID ==========================================
+export const FetchPostData = async postId => {
+  const taskRef = ref(db, `posts/${postId}`);
+  try {
+    const taskSnapshot = await get(taskRef);
+    if(taskSnapshot.exists()) {
+      return taskSnapshot.val();
+    } else console.log('task data not found');
+  } catch (error) {
+    console.error('Error fetching task data- ', error.message)
+  }
+}
+
 // TODO: FETCH A POST'S COMMENTS WITH POST ID ====================================
 export const FetchComments = (postId) => {
   const commentsRef = ref(db, `comments`);

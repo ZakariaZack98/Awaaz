@@ -3,9 +3,11 @@ import PostCardActions from "../home/PostCardActions";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { GoDotFill } from "react-icons/go";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 const PostHeader = ({ postData, openPostActions, setOpenPostActions, followed, setFollowed, saved, setSaved }) => {
-  const { posterImgUrl, posterName, posterUsername, createdAt } = postData;
+  const { posterImgUrl, posterName, posterId, posterUsername, createdAt } = postData;
+  const navigate = useNavigate();
   return (
     <div>
       <div className="header flex justify-between items-center pb-2">
@@ -18,7 +20,7 @@ const PostHeader = ({ postData, openPostActions, setOpenPostActions, followed, s
             className="rounded-full w-10 h-10"
           />
           <div className="flex items-baseline gap-x-2">
-            <div className="flex flex-col">
+            <div className="flex flex-col" onClick={() => navigate(`/profile/${posterId}`)}>
               <p className="text-sm font-semibold leading-3">{posterName || "Name Missing"}</p>
               <p className="opacity-70 text-[13px]">{posterUsername ? `@${posterUsername}` : "@username"}</p>
             </div>

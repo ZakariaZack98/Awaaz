@@ -1,4 +1,4 @@
-import { equalTo, get, orderByChild, query, ref } from "firebase/database";
+import { equalTo, get, onValue, orderByChild, query, ref } from "firebase/database";
 import { db } from "../../Database/Firebase.config";
 
 // TODO: FETCH A USER'S DATA WITH USER ID ========================================
@@ -15,18 +15,19 @@ export const FetchUserData = async (uid) => {
 };
 
 // TODO: FETCH A POST'S COMMENTS WITH POST ID ====================================
-export const FetchComments = async (postId) => {
+export const FetchComments = (postId) => {
   const commentsRef = ref(db, `comments`);
   const postCommentQuery = query(commentsRef, orderByChild("postId"), equalTo(postId));
   try {
-    const snapshot = await get(postCommentQuery);
-    if (snapshot.exists()) {
+    onValue(postCommentQuery, snapshot => {
+      if (snapshot.exists()) {
       const comments = snapshot.val();
       return Object.values(comments).sort((a, b) => b.timeStamp - a.timeStamp);
     } else {
       console.log("No comments found for this post");
       return [];
     }
+    });
   } catch (error) {
     console.error("Error fetching comments:", error);
     return [];

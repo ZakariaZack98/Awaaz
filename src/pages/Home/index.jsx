@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PostCreationLabel from '../../components/home/PostCreationLabel'
 import PostCard from '../../components/home/PostCard'
-import { get, onValue, ref } from 'firebase/database';
+import { onValue, ref } from 'firebase/database';
 import { db } from '../../../Database/Firebase.config';
 import PeopleSuggestion from '../../components/home/PeopleSuggestion';
 

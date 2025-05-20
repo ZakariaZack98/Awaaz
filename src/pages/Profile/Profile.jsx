@@ -111,7 +111,7 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 h-screen overflow-hidden" style={{ scrollbarWidth: "none" }}>
       {/* Profile Header */}
-      <div className="flex items-start space-x-10">
+      <div className="flex items-start pt-10">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
           <div className="w-full h-full rounded-full bg-white p-[3px]">
             <div className="w-full h-full rounded-full overflow-hidden relative">
@@ -126,7 +126,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col ms-5">
           <div className="flex items-center gap-4 mb-2">
             <h2 className="text-xl font-semibold">
               {profileUserData?.fullName || "User"}
@@ -216,7 +216,7 @@ const Profile = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex justify-center border-t pt-4 mt-6 text-sm font-medium">
+      <div className="flex justify-center border-t mt-6 text-sm font-medium">
         <div
           onClick={() => setActiveTab("posts")}
           className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${activeTab === "posts"
@@ -254,7 +254,7 @@ const Profile = () => {
       </div>
 
       <div
-        className="relative h-[70vh] overflow-y-scroll mt-4"
+        className="relative h-[75vh] overflow-y-scroll mt-4"
         style={{ scrollbarWidth: "none" }}
       >
         {activeTab === "posts" && (

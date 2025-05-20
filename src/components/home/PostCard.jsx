@@ -115,7 +115,7 @@ const PostCard = ({ postData }) => {
           <p className="text-sm py-1">{displayComment}</p>
         </div>
       )}
-      <CommentField postId={id} comment={comment} setComment={setComment} handleComment={handleComment}/>
+      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount}/>
     </div>
   );
 };

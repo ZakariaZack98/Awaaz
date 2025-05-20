@@ -3,35 +3,28 @@ import ImageSlider from "../../components/common/ImageSlider";
 import PostHeader from "../../components/common/PostHeader";
 import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
-import { get, limitToFirst, query, ref } from "firebase/database";
-import { auth, db } from "../../../Database/Firebase.config";
-import { FetchComments, FetchUserData } from "../../utils/fetchData.utils";
+import { equalTo, get, limitToFirst, onValue, orderByChild, query, ref } from "firebase/database";
+import { db } from "../../../Database/Firebase.config";
+import { FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
 import CommentCard from "../../components/post/CommentCard";
 import PostSkeleton from "../../components/post/PostSekeleton";
+import { CheckIfFollowed, CheckIfLiked, CheckIfSaved } from "../../utils/actions.utils";
+import { toast } from "react-toastify";
 
-const Post = ({
-  postData,
-  setOpenPost,
-  followed,
-  setFollowed,
-  liked,
-  likesCount,
-  handleLike,
-  handleSave,
-  saved,
-  setSaved,
-  comment,
-  setComment,
-  handleComment,
-  onlyText
-}) => {
-  const { id, text, posterName, posterImgUrl, imgUrls, videoUrl } = postData;
+const Post = ({ postData, setOpenPost }) => {
+  const { id, text, posterId, posterName, posterImgUrl, imgUrls, videoUrl } = postData;
+  const onlyText = !imgUrls && videoUrl.length === 0;
+  const [followed, setFollowed] = useState(true);
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [saved, setSaved] = useState(false);
   const [openPostActions, setOpenPostActions] = useState(false);
   const [likerName, setLikerName] = useState(null);
   const [commentsData, setCommentsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+  // TODO: FETCH ALL THE NECESSARY DATA TO RENDER POST POPUP ===
   useEffect(() => {
     const getFirstLikerName = async () => {
       const likesRef = ref(db, `postsMetaData/${id}/likes`);
@@ -49,12 +42,18 @@ const Post = ({
         return null;
       }
     };
-
     setIsLoading(true);
-    Promise.all([getFirstLikerName(), FetchComments(id)])
+    Promise.all([
+      getFirstLikerName(),
+      CheckIfLiked(id),
+      CheckIfSaved(id),
+      CheckIfFollowed(id),
+    ])
       .then(data => {
-        const [_, fetchedComments] = data;
-        setCommentsData(fetchedComments);
+        const [_, liked, saved, followed] = data;
+        setLiked(liked);
+        setSaved(saved);
+        setFollowed(followed);
         setIsLoading(false);
       })
       .catch(error => {
@@ -62,6 +61,36 @@ const Post = ({
         setIsLoading(false);
       });
   }, [id]);
+
+  // TODO: LISTEN TO COMMENTS OF THIS POST ==========================================
+  useEffect(() => {
+    const commentsRef = ref(db, `comments/`);
+    const postCommentQuery = query(commentsRef, orderByChild("postId"), equalTo(id));
+    const unsub = onValue(postCommentQuery, snapshot => {
+      if (snapshot.exists()) {
+        const comments = snapshot.val();
+        setCommentsData(Object.values(comments).sort((a, b) => b.timeStamp - a.timeStamp));
+      } else {
+        console.log("No comments found for this post");
+        return [];
+      }
+    })
+    return () => unsub();
+  }, [])
+
+  // TODO: HANDLE POST LIKE ====================================
+  const handleLike = async () => {
+    liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
+    setLiked(liked ? false : true);
+    liked ? await UnlikePost(id) : await LikePost(id, posterId)
+    toast.success('Post saved.')
+  };
+
+  // TODO: HANDLE POST SAVE ====================================
+  const handleSave = async () => {
+    setSaved(saved ? false : true);
+    saved ? await RemoveSavedPost(id) : await SavePost(id)
+  };
 
   if (isLoading) {
     return <PostSkeleton onlyText={onlyText} />;
@@ -100,7 +129,7 @@ const Post = ({
               setSaved={setSaved}
             />
           </div>
-          <div className="caption&comments h-[68%] overflow-y-scroll p-3" style={{scrollbarWidth: 'none'}}>
+          <div className="caption&comments h-[68%] overflow-y-scroll p-3" style={{ scrollbarWidth: 'none' }}>
             <div className="captionSec flex gap-x-3">
               <picture>
                 <img src={posterImgUrl} className="min-w-10 w-10 h-10 rounded-full object-cover object-center" />
@@ -109,7 +138,7 @@ const Post = ({
             </div>
             <div className="commentSec my-4">
               {
-                commentsData?.map(comment => <CommentCard commentData={comment} commentsDataArr={commentsData} setCommentsDataArr={setCommentsData}/>)
+                commentsData?.map(comment => <CommentCard commentData={comment} commentsDataArr={commentsData} setCommentsDataArr={setCommentsData} />)
               }
             </div>
           </div>
@@ -142,7 +171,7 @@ const Post = ({
             </div>
           </div>
           <div className="commentField h-13 border-t border-[rgba(0,0,0,0.26)] px-3">
-            <CommentField postId={id} comment={comment} setComment={setComment} commentsData={commentsData} setCommentsData={setCommentsData} handleComment={handleComment} inPost/>
+            <CommentField postId={id} posterId={posterId} inPost />
           </div>
         </div>
       </div>

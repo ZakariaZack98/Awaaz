@@ -110,7 +110,7 @@ const PostCreationLabel = () => {
       toast.error(`Post upload failed: ${error.message}`);
       console.log(error);
     } finally {
-      setIsUploading(false); // End loading
+      setIsUploading(false);
       setCaption("");
       setPhotoFiles(null);
       setVideoFile(null);

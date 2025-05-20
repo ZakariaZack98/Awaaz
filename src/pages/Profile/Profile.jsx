@@ -133,7 +133,7 @@ const Profile = () => {
             </h2>
             {currentUser?.userId === userId ? (
               <button
-                onClick={() => navigate(`/setting`)}
+                onClick={() => navigate(`/settings`)}
                 className="px-3 py-1 border cursor-pointer rounded text-sm font-medium"
               >
                 Edit Profile
@@ -220,8 +220,8 @@ const Profile = () => {
         <div
           onClick={() => setActiveTab("posts")}
           className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${activeTab === "posts"
-              ? "text-black border-t-2 border-black font-bold"
-              : "text-gray-500"
+            ? "text-black border-t-2 border-black font-bold"
+            : "text-gray-500"
             }`}
         >
           <BiGridAlt />
@@ -231,8 +231,8 @@ const Profile = () => {
         <div
           onClick={() => setActiveTab("video")}
           className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "video"
-              ? "text-black border-t-2 border-black font-bold"
-              : "text-gray-500"
+            ? "text-black border-t-2 border-black font-bold"
+            : "text-gray-500"
             }`}
         >
           <RiFolderVideoFill />
@@ -243,8 +243,8 @@ const Profile = () => {
           <div
             onClick={() => setActiveTab("saved")}
             className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "saved"
-                ? "text-black border-t-2 border-black font-bold"
-                : "text-gray-500"
+              ? "text-black border-t-2 border-black font-bold"
+              : "text-gray-500"
               }`}
           >
             <BsBookmark />

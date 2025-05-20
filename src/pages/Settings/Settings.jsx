@@ -25,34 +25,20 @@ const Settings = () => {
   const { currentUser } = useContext(DataContext);
 
   // State for handle edited profile. also updaet & hold fetch data
-  const [fullname, setFullname] = useState("");
+  const [fullname, setFullname] = useState(currentUser?.fullName || "Name missing");
   const [editFullname, seteditFullname] = useState(false);
-  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState("");
-  const [theme, setTheme] = useState("Light");
-  const [followersVisibility, setFollowersVisibility] = useState("Public");
-  const [followingVisibility, setFollowingVisibility] = useState("Public");
-  const [profileVisibility, setProfileVisibility] = useState(false);
-  const [bio, setBio] = useState("");
-  const [gender, setGender] = useState("Unselected");
+  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState(currentUser?.imgUrl);
+  const [theme, setTheme] = useState(currentUser?.defaultTheme || "Light");
+  const [followersVisibility, setFollowersVisibility] = useState(currentUser?.followersVisibility || "Public");
+  const [followingVisibility, setFollowingVisibility] = useState(currentUser?.followingVisibility || "Public");
+  const [profileVisibility, setProfileVisibility] = useState(currentUser?.isLocked || false);
+  const [bio, setBio] = useState(currentUser?.bio || "");
+  const [gender, setGender] = useState(currentUser?.gender || "Unselected");
 
   // State for Social handle
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
-  const [socialHandels, setSocialHandels] = useState("");
+  const [socialHandels, setSocialHandels] = useState(currentUser?.socialHandles || {});
   const [socialLink, setSocialLink] = useState("");
-
-  // Update state
-  useEffect(() => {
-    // eatch state update from database data
-    setProfilePicUpdateUrl(currentUser?.imgUrl);
-    setFullname(currentUser?.fullName);
-    setFollowersVisibility(currentUser?.followersVisibility || "Public");
-    setFollowingVisibility(currentUser?.followingVisibility || "Public");
-    setSocialHandels(currentUser?.socialHandles || {});
-    setBio(currentUser?.bio || "");
-    setGender(currentUser?.gender || "Unselected");
-    setTheme(currentUser?.defaultTheme || "Light");
-    setProfileVisibility(currentUser?.isLocked || false)
-  }, [currentUser]);
 
   // Update profile picture
   const handleFileChange = async (e) => {

@@ -18,6 +18,7 @@ const CreateNotificationData = (type, postId, receiverId, data = null) => {
     triggererImgUrl: auth.currentUser.photoURL,
     receiverId,
     timestamp: Date.now(),
+    createdAt: GetTimeNow(),
     read: false,
     data,
   };

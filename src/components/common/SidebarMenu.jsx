@@ -50,9 +50,9 @@ const SidebarMenu = () => {
           key={index}
           onClick={() => {
             if (item.label === "Log out") {
-              handleLogOut(); // ✅ এখানে সঠিকভাবে ফাংশন কল করা হয়েছে
+              handleLogOut();
             } else {
-              navigate(item.path); // ✅ path ব্যবহার করা হয়েছে ঠিকভাবে
+              navigate(item.path);
             }
           }}
           className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-all"

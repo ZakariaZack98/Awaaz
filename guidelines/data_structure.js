@@ -111,12 +111,12 @@ notifications = {
     id: this.toUserId + Date.now(), //? receiver's id + timestamp
     type: "like", //? or "comment", "follow", etc.
     postId: "postId",
-    fromUserId: "userId",
+    triggererId,
     triggererName: currentUser.displayName,
-    triggererImgUrl: currentUser.photoUrl,
-    toUserId: "userId",
+    triggererImgUrl: currentUser.photoURL,
+    receiverId,
     timestamp: Date.now(),
     read: false,
-    data: { text: "optional comment text", likeCount: 1 },
+    data: 'string data',
   }
 };

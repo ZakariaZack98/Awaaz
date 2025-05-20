@@ -2,7 +2,7 @@ import { FaBookmark, FaHeart, FaRegBookmark, FaRegHeart } from "react-icons/fa";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiPaperPlaneTilt } from "react-icons/pi";
 
-const PostActionIcons = ({ postId, liked, saved, handleLike, handleSave }) => {
+const PostActionIcons = ({ liked, saved, handleLike, handleSave }) => {
   return (
     <div className="icons flex justify-between text-2xl">
       <div className="flex items-center gap-x-4">

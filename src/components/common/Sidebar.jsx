@@ -1,6 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AiFillHome, AiOutlineSearch, AiOutlineCompass, AiOutlineHeart, AiOutlinePlusSquare } from "react-icons/ai";
+import {
+  AiFillHome,
+  AiOutlineSearch,
+  AiOutlineCompass,
+  AiOutlineHeart,
+  AiOutlinePlusSquare,
+} from "react-icons/ai";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { FiSend } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
@@ -30,16 +36,24 @@ const Sidebar = () => {
     { label: "Messages", icon: FiSend, path: "/messages" },
     { label: "Notifications", icon: AiOutlineHeart, path: "/notifications" },
     { label: "Create", icon: AiOutlinePlusSquare, path: "/create" },
-    { label: "Profile", icon: CgProfile, path: "/profile" },
+    {
+      label: "Profile",
+      icon: "profile",
+      path: `/profile/${currentUser?.userId}`,
+      img:
+        currentUser?.imgUrl ||
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8mEIWZjRFdiO4YIkq790lTaNzTtCH6DcwrQ&s",
+    },
     { label: "More", icon: BiMenu, path: "/more" },
   ];
+
   return (
     <div className="w-1/5 h-screen overflow-hidden p-5 border-gray-300 text-mainfontColor">
       <div className="w-64 h-full py-4 flex flex-col">
-        <h1 className="text-2xl font-bold mb-10  font-sans">Awaaz</h1>
+        <h1 className="text-2xl font-bold mb-10 font-sans">Awaaz</h1>
 
         <nav className="flex flex-col gap-2">
-          {navItems.map(({ label, icon: Icon, path }, index) => {
+          {navItems.map(({ label, icon: Icon, path, img }, index) => {
             const isActive = location.pathname === path;
             const isLast = index === navItems.length - 1;
 
@@ -54,13 +68,23 @@ const Sidebar = () => {
                   }
                 }}
                 className={`flex items-center gap-4 px-4 py-2 rounded-lg cursor-pointer transition-all
-        ${isActive ? "font-semibold bg-gray-100" : "hover:bg-gray-100"}
-        ${isLast ? "mt-8 relative" : ""}`}>
-                <Icon size={24} />
+                ${isActive ? "font-semibold bg-gray-100" : "hover:bg-gray-100"}
+                ${isLast ? "mt-8 relative" : ""}`}
+              >
+                {label === "Profile" && img ? (
+                  <img
+                    src={img}
+                    alt="Profile"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <Icon size={24} />
+                )}
                 <span>{label}</span>
               </div>
             );
           })}
+
           {showSidebarMenu && (
             <div className="absolute z-1000">
               <SidebarMenu />

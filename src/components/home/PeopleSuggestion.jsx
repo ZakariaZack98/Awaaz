@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { DataContext } from "../../contexts/DataContexts";
 import UserList from "../../components/common/UserList";
-import { onValue, ref } from "firebase/database";
+import { get, ref } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -12,6 +12,8 @@ const PeopleSuggestion = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
   const [userData, setUserData] = useState();
+  const [maxUser, setMaxUser] = useState(15)
+  const [expendedData, setExpendedData] = useState(true)
 
   const handleLogOut = () => {
     signOut(auth)
@@ -26,7 +28,7 @@ const PeopleSuggestion = () => {
 
   useEffect(() => {
     const usersRef = ref(db, "users/");
-    onValue(usersRef, (snapshot) => {
+    get(usersRef).then((snapshot) => {
       const userArr = [];
       snapshot.forEach((userSnapshot) => {
         if (userSnapshot.key !== auth.currentUser.uid) {
@@ -34,8 +36,19 @@ const PeopleSuggestion = () => {
         }
       });
       setUserData(userArr);
-    });
+    }).catch(console.error);
   }, []);
+
+  const handleSeeMore = () => {
+    if (expendedData) {
+      setMaxUser(15)
+    }
+    else {
+      setMaxUser(userData.length)
+    }
+    setExpendedData(!expendedData)
+  }
+  // console.log(expendedData);
 
   return (
     <>
@@ -65,10 +78,10 @@ const PeopleSuggestion = () => {
 
           <div className="flex justify-between items-center">
             <p className="text-sm font-semibold text-gray-500">Suggested for you</p>
-            <button className="text-xs text-blue-500 font-semibold">See All</button>
+            <button onClick={() => handleSeeMore()} className="text-xs text-blue-500 font-semibold cursor-pointer">{expendedData ? "See Less" : "See More"}</button>
           </div>
           {/* UserCard Component */}
-          <UserList userListData={userData} />
+          <UserList userListData={userData} maxUser={maxUser} />
           {/* UserCard Component */}
 
           <footer className=" text-[10px] text-gray-400">

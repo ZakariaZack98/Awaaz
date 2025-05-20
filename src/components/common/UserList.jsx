@@ -2,7 +2,6 @@ import React from "react";
 import UserCard from "./UserCard";
 
 const UserList = ({ userListData }) => {
-  console.log(userListData);
 
   return (
     <div className=" h-[75%] rounded-xl">

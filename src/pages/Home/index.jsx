@@ -3,7 +3,7 @@ import PostCreationLabel from '../../components/home/PostCreationLabel'
 import PostCard from '../../components/home/PostCard'
 import { get, ref } from 'firebase/database';
 import { db } from '../../../Database/Firebase.config';
-import PeopleSuggestion from './PeopleSuggestion';
+import PeopleSuggestion from '../../components/home/PeopleSuggestion';
 
 const Index = () => {
   const [feedPostData, setFeedPostData] = useState([]);

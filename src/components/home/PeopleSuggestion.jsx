@@ -52,7 +52,7 @@ const PeopleSuggestion = () => {
   return (
     <>
       {!userData ? (<PeopleSuggestionSkeleton />) :
-        (<div className="max-w-120 h-[95dvh] p-4 rounded-xl space-y-4">
+        (<div className="max-w-120 h-[95dvh] p-4 rounded-xl space-y-4 bg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -64,7 +64,7 @@ const PeopleSuggestion = () => {
                 <p className="text-sm font-bold text-gray- 800">
                   {currentUser?.fullName}
                 </p>
-                <p className="text-xs text-gray-500">{currentUser?.fullName}</p>
+                <p className="text-xs text-gray-500">{currentUser?.username}</p>
               </div>
             </div>
             <button
@@ -80,7 +80,7 @@ const PeopleSuggestion = () => {
             <button onClick={() => handleSeeMore()} className="text-xs text-blue-500 font-semibold cursor-pointer">{expendedData ? "See Less" : "See More"}</button>
           </div>
           {/* UserCard Component */}
-          <div className="max-h-9/10  overflow-y-scroll" style={{scrollbarWidth: 'none'}}>
+          <div className="max-h-9/10  overflow-y-scroll " style={{scrollbarWidth: 'none'}}>
             <UserList userListData={userData} maxUser={maxUser} />
           </div>
           {/* UserCard Component */}

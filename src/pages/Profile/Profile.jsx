@@ -16,6 +16,7 @@ import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
 import { Follow, Unfollow } from "../../utils/actions.utils";
+import FSUserList from "../../components/common/FSUserList";
 
 const Profile = ({defaultTab = 'posts'}) => {
   const { userId } = useParams();
@@ -28,6 +29,8 @@ const Profile = ({defaultTab = 'posts'}) => {
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
+  const [showFollowersList, setShowFollowersList] = useState(false);
+  const [showFollowingsList, setShowFollowingsList] = useState(false);
 
   // TODO: FETCH ALL NECESSARY DATA TO RENDER PROFILE
   useEffect(() => {
@@ -114,6 +117,8 @@ const Profile = ({defaultTab = 'posts'}) => {
 
   return (
     <div className="max-w-4xl mx-auto p-4 h-screen overflow-y-scroll" style={{ scrollbarWidth: "none" }}>
+      {showFollowersList && <FSUserList initialHeading="followers" userId={profileUserData.userId} setShowUserList={setShowFollowersList}/>}
+      {showFollowingsList && <FSUserList initialHeading="followings" userId={profileUserData.userId} setShowUserList={setShowFollowingsList}/>}
       {/* Profile Header */}
       <div className="flex items-start pt-5">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
@@ -168,10 +173,10 @@ const Profile = ({defaultTab = 'posts'}) => {
               <span className="font-bold">{profileUserPost?.length || 0}</span>{" "}
               posts
             </span>
-            <span>
+            <span className="cursor-pointer" onClick={() => setShowFollowersList(true)}>
               <span className="font-bold">{followersCount}</span> followers
             </span>
-            <span>
+            <span className="cursor-pointer" onClick={() => setShowFollowingsList(true)}>
               <span className="font-bold">{followingCount}</span> following
             </span>
           </div>

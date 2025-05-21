@@ -9,6 +9,7 @@ import { FetchCommentLikesCount, FetchCommentReplyCount } from "../../utils/fetc
 import ReplyPrompt from "./ReplyPrompt";
 import { equalTo, onValue, orderByChild, query, ref } from "firebase/database";
 import ReplyCard from "./ReplyCard";
+import FSUserList from "../common/FSUserList";
 
 const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   const {id, text, commenterName, commenterImgUrl, createdAt, postId } = commentData;
@@ -18,6 +19,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   const [openReplyPrompt, setOpenReplyPrompt] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [repliesData, setRepliesData] = useState([]);
+  const [showLikersList, setShowLikersList] = useState(false);
 
   // TODO: FETCH COMMENT'S REPLIES =================================
   useEffect(() => {
@@ -57,6 +59,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   }
   return (
     <div className="flex gap-x-2 py-3 w-full">
+      {showLikersList && <FSUserList commentId={id} setShowUserList={setShowLikersList}/>}
       <div className="left">
         <picture>
           <img src={commenterImgUrl} className="min-w-9 w-9 h-9 rounded-full object-cover object-center" />
@@ -73,7 +76,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
           <div className="flex gap-x-2">
             <p>{moment(createdAt).fromNow()}</p>
             <GoDotFill className="translate-y-0.5"/>
-            <p className="font-medium">{likesCount} Likes</p>
+            <p className="font-medium cursor-pointer" onClick={likesCount > 0 ? () => setShowLikersList(true) : null}>{likesCount} Likes</p>
             <GoDotFill className="translate-y-0.5"/>
             <p className="font-medium cursor-pointer" onClick={() => setOpenReplyPrompt(prev => !prev)}>Reply</p>
           </div>

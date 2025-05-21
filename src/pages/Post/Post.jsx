@@ -5,13 +5,14 @@ import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
 import { equalTo, get, limitToFirst, onValue, orderByChild, query, ref } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
-import { FetchPostData, FetchUserData } from "../../utils/fetchData.utils";
+import { FetchLikesCommentsCount, FetchPostData, FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
 import CommentCard from "../../components/post/CommentCard";
 import PostSkeleton from "../../components/post/PostSekeleton";
 import { CheckIfFollowed, CheckIfLiked, CheckIfSaved } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 import { mockData } from "../../lib/mockData"
+import FSUserList from "../../components/common/FSUserList";
 
 const Post = ({ postId, setOpenPost }) => {
   const [postData, setPostData] = useState(mockData.postData);
@@ -25,6 +26,7 @@ const Post = ({ postId, setOpenPost }) => {
   const [likerName, setLikerName] = useState(null);
   const [commentsData, setCommentsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLikersList, setShowLikersList] = useState(false);
 
   // TODO: FETCH ALL THE NECESSARY DATA TO RENDER POST POPUP ===
   useEffect(() => {
@@ -46,13 +48,16 @@ const Post = ({ postId, setOpenPost }) => {
     };
     setIsLoading(true);
     Promise.all([
+      FetchLikesCommentsCount(postId),
       FetchPostData(postId),
       CheckIfLiked(postId),
       CheckIfSaved(postId),
       getFirstLikerName()
     ])
       .then(data => {
-        const [fetchedPostData, liked, saved] = data;
+        const [engagementCounts, fetchedPostData, liked, saved] = data;
+        const [likes] = engagementCounts;
+        setLikesCount(likes);
         setPostData(fetchedPostData);
         setLiked(liked);
         setSaved(saved);
@@ -106,6 +111,9 @@ const Post = ({ postId, setOpenPost }) => {
     <div
       className="w-screen h-screen absolute top-0 left-0 flex justify-center items-center bg-[rgba(0,0,0,0.7)]"
       style={{ zIndex: 500 }}>
+      {
+        showLikersList && <FSUserList postId={postId} setShowUserList={setShowLikersList}/>
+      }
       <div className="absolute top-5 right-5 cursor-pointer text-white">
         <span className="text-3xl">
           <MdClose onClick={() => setOpenPost(false)} />
@@ -175,7 +183,7 @@ const Post = ({ postId, setOpenPost }) => {
                 </p>
               )}
               {likesCount > 1 && (
-                <p className="text-sm">
+                <p className="text-sm cursor-pointer" onClick={() => setShowLikersList(true)}>
                   Liked by
                   <strong> {likerName} </strong> & <strong className="cursor-pointer"> {likesCount - 1} </strong>
                   others

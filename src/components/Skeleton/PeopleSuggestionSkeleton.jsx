@@ -3,7 +3,7 @@ import React from 'react'
 const PeopleSuggestionSkeleton = () => {
   return (
     <>
-    <div className="w-[70%] p-4 h-screen bg-white shadow rounded-xl space-y-4 animate-pulse">
+    <div className="p-4 h-screen rounded-xl space-y-4 animate-pulse">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ const PeopleSuggestionSkeleton = () => {
 
       {/* User List Skeleton */}
       <div className="h-[75%] rounded-xl overflow-y-scroll space-y-4">
-        {Array.from({ length: 6 }).map((_, idx) => (
+        {Array.from({ length: 5 }).map((_, idx) => (
           <div key={idx} className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-200 rounded-full"></div>

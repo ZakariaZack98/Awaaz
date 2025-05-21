@@ -94,14 +94,10 @@ allStories = {
     posterImgUrl: currentUser.photoUrl,
     createdAt: GetTimeNow(),
     visibility: "public",
-    text: "Lorem Ipsum",
-    imgUrl: "https://dummyimage.com/dummy.png",
-    videoUrl: "https://cloudinarystorage.com/fakelink.mp4",
-    likeCounts: 12,
-    comments: {
-      commentId1: true,
-      commentId2: true,
-    },
+    text: caption,
+    imgUrl: imgUrl || null,
+    videoUrl: videoUrl || null,
+    likeCounts: 0
   }
 };
 

@@ -69,7 +69,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
             {text}
           </p>
         </div>
-        <div className="bottom w-full flex justify-between gap-x-2 text-sm opacity-70">
+        <div className="bottom w-full flex justify-between gap-x-2 text-xs opacity-70">
           <div className="flex gap-x-2">
             <p>{moment(createdAt).fromNow()}</p>
             <GoDotFill className="translate-y-0.5"/>

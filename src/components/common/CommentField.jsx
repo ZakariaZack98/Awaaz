@@ -1,11 +1,33 @@
 import EmojiPicker from "emoji-picker-react";
 import React, { useEffect, useRef, useState } from "react";
 import { CiFaceSmile } from "react-icons/ci";
-import { CreateCommentData } from "../../utils/actions.utils";
+import { AddComment } from "../../utils/actions.utils";
 
-const CommentField = ({postId, comment, setComment, commentsData, setCommentsData, handleComment, inPost }) => {
+const CommentField = ({postId, posterId, inPost, setDisplayComment, commentsCount, setCommentsCount }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [comment, setComment] = useState('')
   const emojiPickerRef = useRef(null);
+
+  // TODO: DISPLAY COMMENT ON POSTCARD & POST COMMENT TO POST DB
+  const handleComment = async (postId, posterId) => {
+    if (comment.length === 0) {
+      toast.error(`Can't post empty comment.`);
+      return;
+    }
+    try {
+      await AddComment(postId, posterId, comment);
+      if(setDisplayComment) {
+        setDisplayComment(comment);
+      }
+      if(commentsCount && setCommentsCount) {
+        setCommentsCount(commentsCount + 1);
+      }
+    } catch (error) {
+      console.error('Error posting comment', error.message)
+    } finally {
+      setComment("");
+    }
+  };
 
   // TODO: CLOSE EMOJI PICKER WHEN CLICKED OUTSIDE ==============
   useEffect(() => {
@@ -39,9 +61,7 @@ const CommentField = ({postId, comment, setComment, commentsData, setCommentsDat
         className="w-9/10 text-sm focus:outline-0 font-medium"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            handleComment(postId);
-            const newComment = CreateCommentData(Date.now(), postId, comment);
-            setCommentsData([newComment, ...commentsData]); //? Optimistic UI Update
+            handleComment(postId, posterId, comment);
           }
         }}
       />

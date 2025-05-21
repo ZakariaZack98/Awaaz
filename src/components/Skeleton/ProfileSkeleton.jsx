@@ -31,7 +31,7 @@ const ProfileSkeleton = () => {
       <div className="flex flex-wrap -m-1 mt-4">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="w-1/3 p-1">
-            <div className="w-full aspect-[3/4] bg-gray-300 rounded-md"></div>
+            <div className="w-full aspect-[4/4] bg-gray-300 rounded-md"></div>
           </div>
         ))}
       </div>

@@ -27,3 +27,11 @@
   z-index: 100;
   filter: drop-shadow(0 0 5px black);
 }
+.custom-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}

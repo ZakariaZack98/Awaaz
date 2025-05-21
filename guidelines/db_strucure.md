@@ -86,18 +86,17 @@
       |-commentId2: true
 
 -notifications/
-  |-notificationId/
-    |-timestamp
-    |-type
-    |-postId
-    |-fromUserId
-    |-triggererName
-    |-triggererImgUrl
-    |-toUserId
-    |-read
-    |-data/
-      |-text
-      |-likeCount
+  |-userId
+    |-notificationId/
+      |-timestamp
+      |-type
+      |-postId
+      |-fromUserId
+      |-triggererName
+      |-triggererImgUrl
+      |-toUserId
+      |-read
+      |-data
 
 -followers/
   |-userId/ (this user is being followed by these uids)

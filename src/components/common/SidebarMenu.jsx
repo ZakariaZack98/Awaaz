@@ -1,49 +1,52 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiSettings,
-  FiActivity,
   FiBookmark,
   FiSun,
   FiAlertCircle,
   FiLogOut,
-  FiRepeat,
-  FiUser,
 } from "react-icons/fi";
-import { FaThreads } from "react-icons/fa6";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../Database/Firebase.config";
 
-const SidebarMenu = () => {
-  // todo handleLogOut function apply
+const SidebarMenu = ({ setShowSidebarMenu }) => {
+  const navigate = useNavigate();
+  const menuRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowSidebarMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setShowSidebarMenu]);
+
   const handleLogOut = () => {
     signOut(auth)
       .then(() => {
-        // Sign-out successful.
         navigate("signin");
         console.log("User signed out.");
       })
       .catch((error) => {
-        // An error happened.
         console.error("Sign-out error:", error);
       });
   };
+
   const menuItems = [
     { label: "Settings", icon: <FiSettings />, path: "/settings" },
-    { label: "Your activity", icon: <FiActivity />, path: "/activity" },
-    { label: "Saved", icon: <FiBookmark />, path: "/saved" },
+    { label: "Saved", icon: <FiBookmark />, path: `/profile/${auth.currentUser.uid}/saved` },
     { label: "Switch appearance", icon: <FiSun />, path: "/appearance" },
     { label: "Report a problem", icon: <FiAlertCircle />, path: "/report" },
-    { label: "Threads", icon: <FaThreads />, path: "/threads" },
-    { label: "Switch accounts", icon: <FiUser />, path: "/switch-accounts" },
     { label: "Log out", icon: <FiLogOut />, path: "logout" },
   ];
-  const navigate = useNavigate();
 
   return (
     <div
+      ref={menuRef}
       style={{ boxShadow: "0 0 5px 5px rgba(0,0,0,0.1)" }}
-      className="w-56 bg-white  rounded-xl p-2 space-y-1"
+      className="w-56 bg-white rounded-xl p-2 space-y-1"
     >
       {menuItems.map((item, index) => (
         <div
@@ -54,6 +57,7 @@ const SidebarMenu = () => {
             } else {
               navigate(item.path);
             }
+            setShowSidebarMenu(false);
           }}
           className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-all"
         >

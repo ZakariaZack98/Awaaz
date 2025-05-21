@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ImageSlider from "../common/ImageSlider";
 import { auth } from "../../../Database/Firebase.config";
-import { AddComment, CheckIfFollowed, CheckIfLiked, CheckIfSaved, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
+import { CheckIfFollowed, CheckIfLiked, CheckIfSaved, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 import PostHeader from "../common/PostHeader";
 import Post from "../../pages/Post/Post";
@@ -11,6 +11,7 @@ import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
 
 const PostCard = ({ postData }) => {
   const { id, text, posterId, posterName, imgUrls, videoUrl } = postData;
+  const [onlyText, setOnlyText] = useState(!postData.imgUrls && postData.videoUrl.length === 0);
   const [openPostActions, setOpenPostActions] = useState(false);
   const [openPost, setOpenPost] = useState(false);
   const [followed, setFollowed] = useState(true);
@@ -18,7 +19,6 @@ const PostCard = ({ postData }) => {
   const [saved, setSaved] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
-  const [comment, setComment] = useState("");
   const [displayComment, setDisplayComment] = useState("");
 
   // TODO: FETCH POST METADATA ==================================
@@ -44,23 +44,6 @@ const PostCard = ({ postData }) => {
   .catch(err => console.error(err))
 }, [])
 
-  // TODO: DISPLAY COMMENT ON POSTCARD & POST COMMENT TO POST DB
-  const handleComment = async (postId) => {
-    if(comment.length === 0) {
-        toast.error(`Can't post empty comment.`);
-        return;
-    }
-    try {
-      await AddComment(postId, posterId, comment);
-      setDisplayComment(comment);
-      setCommentsCount(commentsCount + 1);
-    } catch (error) {
-      console.error('Error posting comment', error.message)
-    } finally {
-      setComment("");
-    }
-  };
-
   // TODO: HANDLE POST LIKE ====================================
   const handleLike = async () => {
     liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
@@ -71,42 +54,38 @@ const PostCard = ({ postData }) => {
   // TODO: HANDLE POST SAVE ====================================
   const handleSave = async () => {
     setSaved(saved ? false : true);
-    saved ? await RemoveSavedPost(id) : await SavePost(id)
+    saved ? await RemoveSavedPost(id) : await SavePost(id).then(() => toast.success('Post saved'));
   };
 
   return (
-    <div className="p-3 bg-white rounded-md shadow-md">
+    <div className="py-3 px-4 bg-white rounded-md shadow-md">
       {
-        openPost && <Post setOpenPost={setOpenPost} postData={postData} followed={followed} setFollowed={setFollowed} liked={liked} likesCount={likesCount} saved={saved} setSaved={setSaved} handleLike={handleLike} handleSave={handleSave} comment={comment} setComment={setComment} handleComment={handleComment} onlyText={!imgUrls && videoUrl.length === 0}/>
+        openPost && <Post setOpenPost={setOpenPost} postId={postData.id}/>
       }
       {/* //================ HEADING ====================== */}
       <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
+      {/* ==================ONLY TEXT POST'S TEXT CONTENT ======================= */}
+      {
+        onlyText && <p className="postcardCaption text-2xl text-black cursor-pointer" onClick={() => setOpenPost(true)}>{text}</p>
+      }
       {/* ========== MEDIA PART =========== */}
-      {imgUrls && imgUrls.length > 1 && (
-        <div className="media">
-          <ImageSlider imgUrlArray={imgUrls}/>
-        </div>
-      )}
-      {
-        imgUrls && imgUrls.length === 1 && (
-          <picture className="w-full">
-            <img src={imgUrls[0]} alt="" className="w-full object-cover object-center"/>
-          </picture>
-        )
-      }
-      {
-        videoUrl && videoUrl.length > 0 && (
-          <video src={videoUrl} controls className="w-full"></video>
-        )
-      }
+      {imgUrls && imgUrls.length > 1 && <ImageSlider imgUrlArray={imgUrls}/>}
+      {imgUrls && imgUrls.length === 1 && <img src={imgUrls[0]} alt="" className="w-full object-cover object-center"/>}
+      {videoUrl && videoUrl.length > 0 && <video src={videoUrl} controls className="w-full"></video>}
       {/* ========== ICONS ================== */}
       <div className="py-2">
         <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave}/>
       </div>
       {/* ============= LIKES & COMMENTS ============== */}
       <p className="font-semibold text-sm">{likesCount} likes</p>
-      <span className="font-semibold text-sm cursor-pointer">{posterName || "Poster Name"}</span>
-      <p className="postcardCaption text-sm text-black">{text}</p>
+      {
+        !onlyText && (
+          <>
+            <span className="font-semibold text-sm cursor-pointer">{posterName || "Poster Name"}</span>
+            <p className="postcardCaption text-sm text-black cursor-pointer" onClick={() => setOpenPost(true)}>{text}</p>
+          </>
+        )
+      }
       {commentsCount > 0 && <p className=" text-sm mt-2 cursor-pointer" onClick={() => setOpenPost(true)}>View all {commentsCount} comments...</p>}
       {displayComment && displayComment.length > 0 && (
         <div className="flex items-center gap-x-2">
@@ -115,7 +94,7 @@ const PostCard = ({ postData }) => {
           <p className="text-sm py-1">{displayComment}</p>
         </div>
       )}
-      <CommentField postId={id} comment={comment} setComment={setComment} handleComment={handleComment}/>
+      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount}/>
     </div>
   );
 };

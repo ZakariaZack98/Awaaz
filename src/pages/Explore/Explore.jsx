@@ -3,10 +3,15 @@ import { get, ref } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import PostThumbnail from "../../components/common/PostThumbnail";
 import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
+import Spinners from "../../components/common/Spinners";
+import Post from "../../pages/Post/Post";
 
 const Explore = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [isPostOpen, setIsPostOpen] = useState(false);
 
   useEffect(() => {
     const fetchExplorePosts = async () => {
@@ -49,15 +54,18 @@ const Explore = () => {
     fetchExplorePosts();
   }, []);
 
+  // todo: handlePostClick for post page open
+  const handlePostClick = (postId) => {
+    setSelectedPostId(postId);
+    setIsPostOpen(true);
+  };
   return (
     <div className="relative h-screen flex flex-col">
-      {/* Sticky White Header */}
       <div className="bg-white w-full h-[40px] sticky top-0 z-50 -mx-5"></div>
 
-      {/* Scrollable Post Section */}
       <div className="flex-1 overflow-y-auto flex flex-wrap gap-2 justify-center p-2">
         {loading ? (
-          <p>Loading...</p>
+          <Spinners />
         ) : (
           posts.map((post) => {
             const user = {
@@ -79,6 +87,7 @@ const Explore = () => {
                   {...commonProps}
                   type="image"
                   src={post.imgUrls[0]}
+                  onClick={() => handlePostClick(post.id)}
                   caption={post.text}
                   hasMultipleImages={post.imgUrls.length > 1}
                 />
@@ -88,13 +97,19 @@ const Explore = () => {
                 <PostThumbnail
                   {...commonProps}
                   type="video"
+                  onClick={() => handlePostClick(post.id)}
                   src={post.videoUrl}
                   caption={post.text}
                 />
               );
             } else if (post.text) {
               return (
-                <PostThumbnail {...commonProps} type="text" text={post.text} />
+                <PostThumbnail
+                  {...commonProps}
+                  onClick={() => handlePostClick(post.id)}
+                  type="text"
+                  text={post.text}
+                />
               );
             }
 
@@ -102,6 +117,11 @@ const Explore = () => {
           })
         )}
       </div>
+      {isPostOpen && (
+        <div className="fixed inset-0 bg-black/60 z-1000 flex items-center justify-center">
+          <Post postId={selectedPostId} setOpenPost={setIsPostOpen} />
+        </div>
+      )}
     </div>
   );
 };

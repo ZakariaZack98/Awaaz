@@ -1,10 +1,11 @@
-import { get, push, ref, remove, runTransaction, set } from "firebase/database";
+import { equalTo, get, orderByChild, push, query, ref, remove, runTransaction, set, update } from "firebase/database";
 import { auth, db } from "../../Database/Firebase.config";
 import { toast } from "react-toastify";
 import { GetTimeNow } from "./date.utils";
 
 //* (HELPER) CHECK IF CURRENT USER IS THE NOTIFICATION TRIGGERER
-const checkIfSelfTriggered = receiverId => receiverId === auth.currentUser.uid; 
+const checkIfSelfTriggered = (receiverId) =>
+  receiverId === auth.currentUser.uid;
 
 //* (HELPER) CREATE DATA FOR NOTIFICATION ================
 const CreateNotificationData = (type, postId, receiverId, data = null) => {
@@ -17,6 +18,7 @@ const CreateNotificationData = (type, postId, receiverId, data = null) => {
     triggererImgUrl: auth.currentUser.photoURL,
     receiverId,
     timestamp: Date.now(),
+    createdAt: GetTimeNow(),
     read: false,
     data,
   };
@@ -62,7 +64,7 @@ export const Follow = async (userId) => {
 
 // TODO: CHECK IF A POST IS LIKED BY USER OR NOT =========
 export const CheckIfLiked = async (postId) => {
-  const likeRef = ref(db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}`);
+  const likeRef = ref( db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}`);
   try {
     const snapshot = await get(likeRef);
     return snapshot.exists();
@@ -73,10 +75,7 @@ export const CheckIfLiked = async (postId) => {
 
 // TODO: LIKE A POST ======================================
 export const LikePost = async (postId, posterId) => {
-  const postMDLikeRef = ref(
-    db,
-    `postsMetaData/${postId}/likes/${auth.currentUser.uid}`
-  );
+  const postMDLikeRef = ref( db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}` );
   const likesCountRef = ref(db, `postsMetaData/${postId}/likesCount`);
   const notificationRef = ref(db, `notifications/${posterId}`);
   try {
@@ -96,7 +95,7 @@ export const LikePost = async (postId, posterId) => {
 
 // TODO: UNLIKE A POST ======================================
 export const UnlikePost = async (postId) => {
-  const postMDLikeRef = ref(db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}`);
+  const postMDLikeRef = ref( db, `postsMetaData/${postId}/likes/${auth.currentUser.uid}` );
   const likesCountRef = ref(db, `postsMetaData/${postId}/likesCount`);
   try {
     await remove(postMDLikeRef);
@@ -105,6 +104,58 @@ export const UnlikePost = async (postId) => {
     });
   } catch (error) {
     console.error(error);
+  }
+};
+
+// TODO: DELETE A POST WITH ALL ASSOCIATED LIKES & COMMENTS ===
+export const DeletePost = async (postId) => {
+  const postsRef = ref(db, `posts/${postId}`);
+  const postMDRef = ref(db, `postsMetaData/${postId}`);
+  const commentsQuery = query( ref(db, `comments/`), orderByChild("postId"), equalTo(postId));
+  const repliesQuery = query( ref(db, `replies/`), orderByChild("postId"), equalTo(postId));
+  try {
+    const postSnap = await get(postsRef);
+    let hashtagUpdates = {};
+    if (postSnap.exists() && postSnap.val().hashtags) {
+      const hashtags = postSnap.val().hashtags;
+      hashtags.forEach((hashTag) => {
+        hashtagUpdates[`hashTags/${hashTag}/${postId}`] = null;
+      });
+    }
+    await Promise.all([remove(postsRef), remove(postMDRef)]);
+    const updates = { ...hashtagUpdates };
+    const commentsSnap = await get(commentsQuery);
+    if (commentsSnap.exists()) {
+      Object.keys(commentsSnap.val()).forEach((commentKey) => {
+        updates[`comments/${commentKey}`] = null;
+      });
+    }
+    const commentsMDSnap = await get(
+      query( ref(db, `commentsMetaData`), orderByChild("postId"), equalTo(postId))
+    );
+    if (commentsMDSnap.exists()) {
+      Object.keys(commentsMDSnap.val()).forEach((commentMDKey) => {
+        updates[`commentsMetaData/${commentMDKey}`] = null;
+      });
+    }
+    const repliesSnap = await get(repliesQuery);
+    if (repliesSnap.exists()) {
+      Object.keys(repliesSnap.val()).forEach((replyKey) => {
+        updates[`replies/${replyKey}`] = null;
+      });
+    }
+    const repliesMDSnap = await get(
+      query(ref(db, `repliesMetaData`), orderByChild("postId"), equalTo(postId))
+    );
+    if (repliesMDSnap.exists()) {
+      Object.keys(repliesMDSnap.val()).forEach((replyMDKey) => {
+        updates[`repliesMetaData/${replyMDKey}`] = null;
+      });
+    }
+    await update(ref(db), updates);
+    toast.warn("Post deleted.");
+  } catch (error) {
+    console.error("Error removing post- ", error.message);
   }
 };
 
@@ -144,7 +195,7 @@ export const AddComment = async (postId, posterId, comment) => {
       }),
     ];
     if (!checkIfSelfTriggered(posterId)) {
-      const commentNotification = CreateNotificationData("comment", postId, posterId, comment);
+      const commentNotification = CreateNotificationData( "comment", postId, posterId, comment );
       operations.push(push(notificationRef, commentNotification));
     }
     await Promise.all(operations);
@@ -155,10 +206,7 @@ export const AddComment = async (postId, posterId, comment) => {
 
 // TODO: CHECK IF A COMMENT IS LIKED ========================================================
 export const CheckIfCommentLiked = async (commentId) => {
-  const likeRef = ref(
-    db,
-    `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}`
-  );
+  const likeRef = ref(db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}` );
   try {
     const snapshot = await get(likeRef);
     return snapshot.exists();
@@ -168,20 +216,18 @@ export const CheckIfCommentLiked = async (commentId) => {
 };
 // TODO: LIKE A COMMENT =====================================================================
 export const LikeComment = async (commentData) => {
-  const {id, text, commenterId, postId } = commentData;
-  const commentLikesRef = ref(db, `commentsMetaData/${id}/likes/${auth.currentUser.uid}`);
+  const { id, text, commenterId, postId } = commentData;
+  const commentLikesRef = ref( db, `commentsMetaData/${id}/likes/${auth.currentUser.uid}`);
   const commentLikesCountRef = ref(db, `commentsMetaData/${id}/likesCount`);
-  const notificationRef = ref(db, `notifications/${commenterId}`)
+  const notificationRef = ref(db, `notifications/${commenterId}`);
   try {
-    const operations = [
-      set(commentLikesRef, true),
-      runTransaction(commentLikesCountRef, (currentValue) => {
+    const operations = [set(commentLikesRef, true), runTransaction(commentLikesCountRef, (currentValue) => {
         return (currentValue || 0) + 1;
       }),
-    ]
-    if(!checkIfSelfTriggered(commenterId)) {
-      const likeNotification = CreateNotificationData('likeOnComment', postId, commenterId, text);
-      console.log(auth.currentUser.displayName)
+    ];
+    if (!checkIfSelfTriggered(commenterId)) {
+      const likeNotification = CreateNotificationData( "likeOnComment", postId, commenterId, text );
+      console.log(auth.currentUser.displayName);
       operations.push(push(notificationRef, likeNotification));
     }
     await Promise.all(operations);
@@ -191,12 +237,10 @@ export const LikeComment = async (commentData) => {
 };
 // TODO: UNLIKE A COMMENT ===================================================================
 export const UnlikeComment = async (commentId) => {
-  const commentLikesRef = ref(db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}`);
-  const commentLikesCountRef = ref(db,`commentsMetaData/${commentId}/likesCount`);
+  const commentLikesRef = ref( db, `commentsMetaData/${commentId}/likes/${auth.currentUser.uid}` );
+  const commentLikesCountRef = ref( db, `commentsMetaData/${commentId}/likesCount` );
   try {
-    await Promise.all([
-      await remove(commentLikesRef),
-      runTransaction(commentLikesCountRef, (currentValue) => {
+    await Promise.all([remove(commentLikesRef), runTransaction(commentLikesCountRef, (currentValue) => {
         return Math.max((currentValue || 0) - 1, 0);
       }),
     ]);
@@ -206,27 +250,36 @@ export const UnlikeComment = async (commentId) => {
 };
 // TODO: DELETE A COMMENT ====================================================================
 export const DeleteComment = async (commentId, postId) => {
-  const postMDRef = ref(db, `postsMetaData/${postId}/comments/${commentId}`);
-  const commentRef = ref(db, `comments/${commentId}`);
   const commentCountRef = ref(db, `postsMetaData/${postId}/commentsCount`);
-  const commentMDRef = ref(db, `commentsMetaData/${commentId}`);
   try {
-    await Promise.all([
-      remove(commentRef),
-      remove(postMDRef),
-      remove(commentMDRef),
-      runTransaction(commentCountRef, (currentValue) => {
-        return Math.max((currentValue || 0) - 1, 0);
-      }),
-    ]);
-    toast.warn("Comment deleted.");
+    const updates = {};
+    updates[`comments/${commentId}`] = null;
+    updates[`postsMetaData/${postId}/comments/${commentId}`] = null;
+    updates[`commentsMetaData/${commentId}`] = null;
+    const repliesQuery = query(ref(db, "replies"), orderByChild("commentId"), equalTo(commentId));
+    const repliesSnap = await get(repliesQuery);
+    if (repliesSnap.exists()) {
+      Object.keys(repliesSnap.val()).forEach((replyKey) => {
+        updates[`replies/${replyKey}`] = null;
+      });
+    }
+    const repliesMDSnap = await get(query(ref(db, "repliesMetaData"), orderByChild("commentId"), equalTo(commentId)));
+    if (repliesMDSnap.exists()) {
+      Object.keys(repliesMDSnap.val()).forEach((replyMDKey) => {
+        updates[`repliesMetaData/${replyMDKey}`] = null;
+      });
+    }
+    await Promise.all([update(ref(db), updates), runTransaction(commentCountRef, (currentValue) =>
+      Math.max((currentValue || 0) - 1, 0)
+    )])
+    toast.warn("Comment and all its replies deleted.");
   } catch (error) {
     console.error("Error deleting comment", error.message);
   }
 };
 
 //* (HELPER) CREATE A REPLY DATA FOR DB ========================
-export const CreateReplyData = (replyId, commentId, postId, commenterName, text) => {
+export const CreateReplyData = ( replyId, commentId, postId, commenterName, text ) => {
   return {
     id: replyId,
     postId,
@@ -241,13 +294,13 @@ export const CreateReplyData = (replyId, commentId, postId, commenterName, text)
   };
 };
 // TODO: ADD A REPLY TO A COMMENT =================================
-export const AddReply = async (commentId, commenterId, commenterName, postId, reply) => {
+export const AddReply = async ( commentId, commenterId, commenterName, postId, reply ) => {
   const replyId = auth.currentUser.uid + Date.now();
   const commentMDRef = ref(db, `commentsMetaData/${commentId}/replies/${replyId}`);
   const repliesRef = ref(db, `replies/${replyId}`);
   const replyCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
-  const newReply = CreateReplyData(replyId, commentId, postId, commenterName, reply);
-  const notificationRef = ref(db, `notifications/${commenterId}`)
+  const newReply = CreateReplyData( replyId, commentId, postId, commenterName, reply );
+  const notificationRef = ref(db, `notifications/${commenterId}`);
   if (reply.length === 0) {
     toast.error(`Can't post empty reply.`);
     return;
@@ -260,9 +313,9 @@ export const AddReply = async (commentId, commenterId, commenterName, postId, re
         return (currentValue || 0) + 1;
       }),
     ];
-    if(!checkIfSelfTriggered(commenterId)) {
-      const replyNotification = CreateNotificationData('reply', postId, commenterId, reply);
-      operations.push(push(notificationRef, replyNotification))
+    if (!checkIfSelfTriggered(commenterId)) {
+      const replyNotification = CreateNotificationData( "reply", postId, commenterId, reply );
+      operations.push(push(notificationRef, replyNotification));
     }
     await Promise.all(operations);
   } catch (error) {
@@ -271,7 +324,7 @@ export const AddReply = async (commentId, commenterId, commenterName, postId, re
 };
 // TODO: CHECK IF A REPLY IS LIKED ========================================================
 export const CheckIfReplyLiked = async (replyId) => {
-  const replyRef = ref(db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`);
+  const replyRef = ref( db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}` );
   try {
     const snapshot = await get(replyRef);
     return snapshot.exists();
@@ -282,7 +335,7 @@ export const CheckIfReplyLiked = async (replyId) => {
 // TODO: LIKE A REPLY =====================================================================
 export const LikeReply = async (replyData) => {
   const { id, text, replierId, postId } = replyData;
-  const replyLikeRef = ref(db, `repliesMetaData/${id}/likes/${auth.currentUser.uid}`);
+  const replyLikeRef = ref( db, `repliesMetaData/${id}/likes/${auth.currentUser.uid}` );
   const replyLikesCountRef = ref(db, `repliesMetaData/${id}/likesCount`);
   const notificationRef = ref(db, `notifications/${replierId}`);
   try {
@@ -292,8 +345,8 @@ export const LikeReply = async (replyData) => {
         return (currentValue || 0) + 1;
       }),
     ];
-    if(!checkIfSelfTriggered(replierId)) {
-      const likeNotification = CreateNotificationData('likeOnReply', postId, replierId, text);
+    if (!checkIfSelfTriggered(replierId)) {
+      const likeNotification = CreateNotificationData( "likeOnReply", postId, replierId, text );
       operations.push(push(notificationRef, likeNotification));
     }
     await Promise.all(operations);
@@ -303,10 +356,7 @@ export const LikeReply = async (replyData) => {
 };
 // TODO: UNLIKE A REPLY ===================================================================
 export const UnlikeReply = async (replyId) => {
-  const replyLikeRef = ref(
-    db,
-    `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}`
-  );
+  const replyLikeRef = ref( db, `repliesMetaData/${replyId}/likes/${auth.currentUser.uid}` );
   const replyLikesCountRef = ref(db, `repliesMetaData/${replyId}/likesCount`);
   try {
     await Promise.all([
@@ -321,10 +371,7 @@ export const UnlikeReply = async (replyId) => {
 };
 // TODO: DELETE A REPLY ====================================================================
 export const DeleteReply = async (replyId, commentId) => {
-  const commentMDRef = ref(
-    db,
-    `commentsMetaData/${commentId}/replies/${replyId}`
-  );
+  const commentMDRef = ref( db, `commentsMetaData/${commentId}/replies/${replyId}` );
   const replyRef = ref(db, `replies/${replyId}`);
   const repliesCountRef = ref(db, `commentsMetaData/${commentId}/repliesCount`);
   const repliesMDRef = ref(db, `repliesMetaData/${replyId}`);
@@ -363,5 +410,19 @@ export const RemoveSavedPost = async (postId) => {
     await remove(savedPostRef);
   } catch (error) {
     console.error("error removing post from save", error);
+  }
+};
+
+// TODO: CHANGE POST VISIBILITY ==========================================================
+export const TogglePostVisibility = async ( visibility, setVisibility, postId ) => {
+  const visibilityRef = ref(db, `posts/${postId}/visibility`);
+  if (visibility === "public") {
+    await set(visibilityRef, "private");
+    toast.warn("Post is no longer visible to public");
+    setVisibility("private");
+  } else if (visibility === "private") {
+    await set(visibilityRef, "public");
+    toast.success("Post is now visible to public");
+    setVisibility("public");
   }
 };

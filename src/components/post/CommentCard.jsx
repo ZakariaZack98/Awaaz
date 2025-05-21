@@ -22,15 +22,17 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   // TODO: FETCH COMMENT'S REPLIES =================================
   useEffect(() => {
     const repliesRef = ref(db, `replies/`);
-    const replyQuery = query(repliesRef, orderByChild('commentId'), equalTo(id));
+    const replyQuery = query(repliesRef, orderByChild("commentId"), equalTo(id));
     const unsubscribe = onValue(replyQuery, snapshot => {
       if(snapshot.exists()) {
         const repliesDataArr = Object.values(snapshot.val()).sort((a, b) => b.timeStamp - a.timeStamp);
         setRepliesData(repliesDataArr);
+      } else {
+        setRepliesData([]);
       }
-    })
-    return () => unsubscribe()
-  }, [])
+    });
+    return () => unsubscribe();
+}, [id]);
 
   // TODO: CHECK IF THE COMMENT IS LIKED & FETCH LIKES AND REPLY COUNT ===
   useEffect(() => {
@@ -46,7 +48,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
       setRepliesCount(replies);
     })
     .catch(console.error)
-  }, [commentsDataArr])
+  }, [commentsDataArr, repliesData])
 
   const handleCommentLike = async () => {
     liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
@@ -67,7 +69,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
             {text}
           </p>
         </div>
-        <div className="bottom w-full flex justify-between gap-x-2 text-sm opacity-70">
+        <div className="bottom w-full flex justify-between gap-x-2 text-xs opacity-70">
           <div className="flex gap-x-2">
             <p>{moment(createdAt).fromNow()}</p>
             <GoDotFill className="translate-y-0.5"/>
@@ -89,7 +91,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
           </div>
         </div>
         {
-          openReplyPrompt && <ReplyPrompt commentData={commentData} setOpenReplyPrompt={setOpenReplyPrompt} repliesCount={repliesCount} setRepliesCount={setRepliesCount}/>
+          openReplyPrompt && <ReplyPrompt commentData={commentData} setOpenReplyPrompt={setOpenReplyPrompt} repliesCount={repliesCount} setRepliesCount={setRepliesCount} setShowReplies={setShowReplies}/>
         }
         {
           repliesCount > 0 && (

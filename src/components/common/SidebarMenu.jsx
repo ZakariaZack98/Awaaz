@@ -31,7 +31,7 @@ const SidebarMenu = () => {
   const menuItems = [
     { label: "Settings", icon: <FiSettings />, path: "/settings" },
     { label: "Your activity", icon: <FiActivity />, path: "/activity" },
-    { label: "Saved", icon: <FiBookmark />, path: "/saved" },
+    { label: "Saved", icon: <FiBookmark />, path: `/profile/${auth.currentUser.uid}/saved` },
     { label: "Switch appearance", icon: <FiSun />, path: "/appearance" },
     { label: "Report a problem", icon: <FiAlertCircle />, path: "/report" },
     { label: "Threads", icon: <FaThreads />, path: "/threads" },

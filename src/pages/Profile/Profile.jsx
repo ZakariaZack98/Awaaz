@@ -12,18 +12,18 @@ import {
   orderByChild,
   equalTo
 } from "firebase/database";
-import { db } from "../../../Database/Firebase.config";
+import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
 import { Follow, Unfollow } from "../../utils/actions.utils";
 
-const Profile = () => {
+const Profile = ({defaultTab = 'posts'}) => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
   const [profileUserData, setProfileUserData] = useState(null);
   const [profileUserPost, setProfileUserPost] = useState([]);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -64,7 +64,11 @@ const Profile = () => {
 
   // TODO: FETCH DATA FOR SAVED TAB IF SAVED TAB IS ACTIVE
   useEffect(() => {
-    if (activeTab !== "saved" || !userId) return;
+    if (activeTab !== "saved" || !userId ) return;
+    if(userId !== auth.currentUser.uid) {
+      navigate('/accessdenied');
+      return;
+    }
     const fetchSavedPosts = async () => {
       try {
         const savedSnap = await get(ref(db, `savedPosts/${userId}`));

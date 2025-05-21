@@ -9,7 +9,6 @@ import {
 } from "react-icons/ai";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { FiSend } from "react-icons/fi";
-import { CgProfile } from "react-icons/cg";
 import { BiMenu } from "react-icons/bi";
 import SidebarMenu from "./SidebarMenu";
 import { DataContext } from "../../contexts/DataContexts";

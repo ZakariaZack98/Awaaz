@@ -7,6 +7,8 @@ import Profile from "./pages/Profile/Profile";
 import AllUsers from "./pages/Profile/AllUsers";
 import Settings from "./pages/Settings/Settings";
 import SignIn from "./pages/SignIn/SignIn";
+import { auth } from "../Database/Firebase.config";
+import AccessDenied from "./pages/Error/AccessDenied";
 
 const App = () => {
   return (
@@ -15,11 +17,13 @@ const App = () => {
         <Route path="" element={<CommonLayout />}>
           <Route index element={<Index />} />
           <Route path="/profile/:userId" element={<Profile />} />
+          <Route path={`/profile/:userId/saved`} element={<Profile defaultTab="saved"/>} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/accessdenied" element={<AccessDenied />} />
       </Routes>
     </BrowserRouter>
   );

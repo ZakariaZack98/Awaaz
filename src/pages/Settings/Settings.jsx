@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { getDatabase, ref, set } from "firebase/database";
 import { getAuth, updateProfile } from "firebase/auth";
 import { FiEdit } from "react-icons/fi";

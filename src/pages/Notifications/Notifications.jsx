@@ -1,30 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import NotificationsList from "../../components/notifications/NotificationsList";
-import { onValue, ref } from "firebase/database";
-import { db, auth } from "../../../Database/Firebase.config";
+
+import { DataContext } from "../../contexts/DataContexts";
 
 const Notifications = () => {
-  const [notificationData, setNotificationData] = useState([]);
-
-  // Fetch all notificationData from DB
-  useEffect(() => {
-    const notificationRef = ref(db, `notifications/${auth.currentUser.uid}`);
-    onValue(notificationRef, (snapshot) => {
-      const notificationArr = [];
-      snapshot.forEach((notificationSnapshot) => {
-        notificationArr.push({
-          ...notificationSnapshot.val(),
-          Key: notificationSnapshot.key,
-        });
-      });
-      setNotificationData(notificationArr);
-    });
-  }, []);
+  const { notificationsData } = useContext(DataContext);
 
   return (
-    <div className="py-10 px-20">
+    <div className="py-10 px-20 h-[90dvh] ">
       <h1 className="text-4xl font-bold mb-5">Notifications</h1>
-      <NotificationsList NotificationDataArr={notificationData} />
+      <div className="h-[80dvh] overflow-y-scroll">
+        <NotificationsList NotificationDataArr={notificationsData} />
+      </div>
     </div>
   );
 };

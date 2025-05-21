@@ -7,6 +7,7 @@ import { IoIosPersonAdd } from "react-icons/io";
 import { TbFileLike } from "react-icons/tb";
 import { handleRead } from "../../utils/notifications.utils";
 import { useNavigate } from "react-router-dom";
+import Post from "../../pages/Post/Post";
 
 const NotificationsCard = ({ SingleNotificationData }) => {
   const {
@@ -22,9 +23,8 @@ const NotificationsCard = ({ SingleNotificationData }) => {
     Key,
   } = SingleNotificationData;
   const [readDone, setReadDone] = useState(read);
-  const navigate = useNavigate()
-  console.log(Key);
-  console.log(receiverId);
+  const [showPost, setShowPost] = useState(false);
+  const navigate = useNavigate();
 
   let message = "";
   let navigateTo = "";
@@ -33,7 +33,6 @@ const NotificationsCard = ({ SingleNotificationData }) => {
   switch (type) {
     case "like":
       message = `${triggererName} has liked your post.`;
-      navigateTo = `/post/${postId}`;
       icon = (
         <AiFillLike className="bg-blue-600 text-white rounded-full p-[3px] text-lg" />
       );
@@ -41,15 +40,13 @@ const NotificationsCard = ({ SingleNotificationData }) => {
 
     case "comment":
       message = `${triggererName} has commented on your post - "${data}"`;
-      navigateTo = `/post/${postId}`;
       icon = (
-        <FaComment className="bg-green-600 text-white rounded-full p-[3px] text-lg" />
+        <FaComment className="bg-purple-800 text-white rounded-full p-[3px] text-lg" />
       );
       break;
 
     case "likeOnComment":
       message = `${triggererName} likes your comment - "${data}"`;
-      navigateTo = `/post/${postId}`;
       icon = (
         <BiSolidCommentCheck className="bg-blue-600 text-white rounded-full p-[3px] text-lg" />
       );
@@ -57,17 +54,15 @@ const NotificationsCard = ({ SingleNotificationData }) => {
 
     case "reply":
       message = `${triggererName} replied to your comment - "${data}"`;
-      navigateTo = `/post/${postId}`;
       icon = (
-        <BiSolidCommentDetail className="bg-green-600 text-white rounded-full p-[3px] text-lg" />
+        <BiSolidCommentDetail className="bg-purple-800 text-white rounded-full p-[3px] text-lg" />
       );
       break;
 
     case "likeOnReply":
       message = `${triggererName} likes your reply - "${data}"`;
-      navigateTo = `/post/${postId}`;
       icon = (
-        <TbFileLike className="bg-red-600 text-white rounded-full p-[3px] text-lg" />
+        <TbFileLike className="bg-blue-500 text-white rounded-full p-[3px] text-lg" />
       );
       break;
 
@@ -75,7 +70,7 @@ const NotificationsCard = ({ SingleNotificationData }) => {
       message = `${triggererName} has started following you.`;
       navigateTo = `/profile/${triggererId}`;
       icon = (
-        <IoIosPersonAdd className="bg-red-600 text-white rounded-full p-[3px] text-lg" />
+        <IoIosPersonAdd className="bg-green-600 text-white rounded-full p-[3px] text-lg" />
       );
       break;
     default:
@@ -83,15 +78,19 @@ const NotificationsCard = ({ SingleNotificationData }) => {
       navigateTo = "/";
   }
 
- 
+  // console.log(openPost);
+
   return (
     <div
-      onClick={() => handleRead(receiverId,Key,setReadDone,navigate,navigateTo)}
-      className={`cursor-pointer flex items-center w-[80%] p-2 justify-between mb-2 border-1 border-gray-200 rounded shadow-2xs ${
-        readDone ? "bg-gray-100" : "bg-gray-200 font-bold"
+      onClick={() =>
+        setShowPost(true)
+      }
+      className={`cursor-pointer flex items-center  p-2 justify-between mb-2 rounded ${
+        readDone ? "" : "font-bold"
       }`}
       key=""
     >
+      {showPost && <Post setOpenPost={setShowPost} postId={postId} />}
       <div className="flex items-center gap-3 w-full pr-2">
         <picture className="relative">
           <img

@@ -14,13 +14,17 @@ import { BiMenu } from "react-icons/bi";
 import SidebarMenu from "./SidebarMenu";
 import { DataContext } from "../../contexts/DataContexts";
 import { FetchUserData } from "../../utils/fetchData.utils";
-import { auth } from "../../../Database/Firebase.config";
+import { auth, db } from "../../../Database/Firebase.config";
+import { onValue, ref } from "firebase/database";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
   const { currentUser, setCurrentUser } = useContext(DataContext);
+  const { notificationsData, setNotificationsData } = useContext(DataContext);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] =
+    useState(null);
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)
@@ -28,6 +32,29 @@ const Sidebar = () => {
       .catch(console.error);
   }, [auth.currentUser?.uid]);
 
+  // Fetch all notificationData from DB
+  useEffect(() => {
+    const notificationRef = ref(db, `notifications/${auth?.currentUser.uid}`);
+    onValue(notificationRef, (snapshot) => {
+      const notificationArr = [];
+      snapshot.forEach((notificationSnapshot) => {
+        notificationArr.push({
+          ...notificationSnapshot.val(),
+          Key: notificationSnapshot.key,
+        });
+      });
+      setNotificationsData(notificationArr);
+    });
+  }, []);
+
+  // Set Unread massage
+  useEffect(() => {
+    if (notificationsData && notificationsData.length > 0) {
+      setUnreadNotificationsCount(
+        notificationsData.filter((item) => item.read === false).length
+      );
+    }
+  }, [notificationsData]);
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },
     { label: "Search", icon: AiOutlineSearch, path: "/search" },
@@ -81,10 +108,14 @@ const Sidebar = () => {
                   <Icon size={24} />
                 )}
                 <span>{label}</span>
+                {label === "Notifications" && unreadNotificationsCount > 0 && (
+                  <p className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center font-bold justify-center text-xs ml-1">
+                    {unreadNotificationsCount}
+                  </p>
+                )}
               </div>
             );
           })}
-
           {showSidebarMenu && (
             <div className="absolute z-1000">
               <SidebarMenu />

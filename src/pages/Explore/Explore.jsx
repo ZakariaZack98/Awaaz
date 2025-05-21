@@ -9,7 +9,6 @@ import Post from "../../pages/Post/Post";
 const Explore = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [isPostOpen, setIsPostOpen] = useState(false);
 
@@ -43,7 +42,7 @@ const Explore = () => {
           (a, b) => b.likeCounts - a.likeCounts
         );
 
-        setPosts(sortedPosts);
+        setPosts(sortedPosts.filter(post => post.visibility !== 'private'));
         setLoading(false);
       } catch (error) {
         console.error("Error fetching explore posts:", error);
@@ -61,9 +60,7 @@ const Explore = () => {
   };
   return (
     <div className="relative h-screen flex flex-col">
-      <div className="bg-white w-full h-[40px] sticky top-0 z-50 -mx-5"></div>
-
-      <div className="flex-1 overflow-y-auto flex flex-wrap gap-2 justify-center p-2">
+      <div className="flex-1 overflow-y-auto max-w-5xl mx-auto mt-5 flex flex-wrap gap-2 justify-center p-2">
         {loading ? (
           <Spinners />
         ) : (

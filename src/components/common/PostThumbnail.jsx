@@ -78,7 +78,7 @@ const PostThumbnail = ({
             </div>
           )}
           {hasMultipleImages && (
-            <div className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-20 ">
+            <div className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center z-20 ">
               <FaClone className="text-white text-2xl" />
             </div>
           )}
@@ -130,7 +130,7 @@ const PostThumbnail = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-4 mt-3 text-base text-gray-200 z-20">
+          <div className="flex justify-end items-center gap-4 mt-3 text-base text-gray-200 z-20">
             <div className="flex items-center gap-1">
               <FaHeart /> {likes}
             </div>
@@ -141,7 +141,7 @@ const PostThumbnail = ({
         </div>
       )}
       {(type === "image" || type === "video") && (
-        <div className="absolute bottom-2 left-2 flex items-center gap-4 text-base text-white z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-3 left-3 flex gap-4 text-base text-white z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="flex items-center gap-1">
             <FaHeart /> {likes}
           </div>

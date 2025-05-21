@@ -7,6 +7,7 @@ import Profile from "./pages/Profile/Profile";
 import AllUsers from "./pages/Profile/AllUsers";
 import Settings from "./pages/Settings/Settings";
 import SignIn from "./pages/SignIn/SignIn";
+import Explore from "./pages/Explore/Explore";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/explore" element={<Explore />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />

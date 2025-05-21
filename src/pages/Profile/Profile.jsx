@@ -5,20 +5,17 @@ import { FaXTwitter } from "react-icons/fa6";
 import { BiGridAlt } from "react-icons/bi";
 import { BsBookmark } from "react-icons/bs";
 import { RiFolderVideoFill } from "react-icons/ri";
-import {
-  get,
-  ref,
-  query,
-  orderByChild,
-  equalTo
-} from "firebase/database";
+import { get, ref, query, orderByChild, equalTo } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
 import { Follow, Unfollow } from "../../utils/actions.utils";
+import PostThumbnail from "../../components/common/PostThumbnail";
+import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
+import Post from "../../pages/Post/Post";
 import FSUserList from "../../components/common/FSUserList";
 
-const Profile = ({defaultTab = 'posts'}) => {
+const Profile = ({ defaultTab = "posts" }) => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
@@ -32,9 +29,12 @@ const Profile = ({defaultTab = 'posts'}) => {
   const [showFollowersList, setShowFollowersList] = useState(false);
   const [showFollowingsList, setShowFollowingsList] = useState(false);
 
-  // TODO: FETCH ALL NECESSARY DATA TO RENDER PROFILE
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [isPostOpen, setIsPostOpen] = useState(false);
+
   useEffect(() => {
     if (!userId) return;
+
     const fetchProfileData = async () => {
       try {
         const [
@@ -42,34 +42,63 @@ const Profile = ({defaultTab = 'posts'}) => {
           postsSnap,
           followersSnap,
           followingSnap,
-          followStatusSnap
+          followStatusSnap,
         ] = await Promise.all([
           get(ref(db, `users/${userId}`)),
-          get(query(ref(db, "posts"), orderByChild("posterId"), equalTo(userId))),
+          get(
+            query(ref(db, "posts"), orderByChild("posterId"), equalTo(userId))
+          ),
           get(ref(db, `followers/${userId}`)),
           get(ref(db, `followings/${userId}`)),
           currentUser?.userId
             ? get(ref(db, `followers/${userId}/${currentUser.userId}`))
-            : Promise.resolve(null)
+            : Promise.resolve(null),
         ]);
 
         setProfileUserData(userSnap.exists() ? userSnap.val() : null);
-        setProfileUserPost(postsSnap.exists() ? Object.values(postsSnap.val()) : []);
-        setFollowersCount(followersSnap.exists() ? Object.keys(followersSnap.val()).length : 0);
-        setFollowingCount(followingSnap.exists() ? Object.keys(followingSnap.val()).length : 0);
+
+        if (postsSnap.exists()) {
+          const postsData = postsSnap.val();
+
+          // For each post, fetch likes and comments count
+          const postsWithCounts = await Promise.all(
+            Object.entries(postsData).map(async ([postId, post]) => {
+              const [likesCount, commentsCount] = await FetchLikesCommentsCount(
+                postId
+              );
+              return {
+                ...post,
+                id: postId,
+                likesCount: likesCount,
+                commentsCount: commentsCount,
+              };
+            })
+          );
+
+          setProfileUserPost(postsWithCounts);
+        } else {
+          setProfileUserPost([]);
+        }
+
+        setFollowersCount(
+          followersSnap.exists() ? Object.keys(followersSnap.val()).length : 0
+        );
+        setFollowingCount(
+          followingSnap.exists() ? Object.keys(followingSnap.val()).length : 0
+        );
         setIsFollowing(followStatusSnap && followStatusSnap.exists());
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
     };
+
     fetchProfileData();
   }, [userId, currentUser?.userId]);
 
-  // TODO: FETCH DATA FOR SAVED TAB IF SAVED TAB IS ACTIVE
   useEffect(() => {
-    if (activeTab !== "saved" || !userId ) return;
-    if(userId !== auth.currentUser.uid) {
-      navigate('/accessdenied');
+    if (activeTab !== "saved" || !userId) return;
+    if (userId !== auth.currentUser.uid) {
+      navigate("/accessdenied");
       return;
     }
     const fetchSavedPosts = async () => {
@@ -80,7 +109,9 @@ const Profile = ({defaultTab = 'posts'}) => {
           const allPostsSnap = await get(ref(db, "posts"));
           if (allPostsSnap.exists()) {
             const allPosts = allPostsSnap.val();
-            const filtered = savedKeys.map((key) => allPosts[key]).filter(Boolean);
+            const filtered = savedKeys
+              .map((key) => allPosts[key])
+              .filter(Boolean);
             setSavedPosts(filtered);
           }
         } else {
@@ -91,19 +122,18 @@ const Profile = ({defaultTab = 'posts'}) => {
       }
     };
     fetchSavedPosts();
-  }, [activeTab, userId]);
+  }, [activeTab, userId, navigate]);
 
-  // TODO: HANDLE FOLLOW/UNFOLLOW PROFILE
   const handleFollowToggle = async () => {
     if (!currentUser?.userId || !userId) return;
     try {
       if (isFollowing) {
         await Unfollow(userId);
-        setFollowersCount(followersCount - 1 || 0)
+        setFollowersCount((count) => (count > 0 ? count - 1 : 0));
         setIsFollowing(false);
       } else {
         await Follow(userId);
-        setFollowersCount(followersCount + 1)
+        setFollowersCount((count) => count + 1);
         setIsFollowing(true);
       }
     } catch (error) {
@@ -114,16 +144,20 @@ const Profile = ({defaultTab = 'posts'}) => {
   if (!profileUserData) {
     return <ProfileSkeleton />;
   }
-
+  // todo: handlePostClick for post page open
+  const handlePostClick = (postId) => {
+    setSelectedPostId(postId);
+    setIsPostOpen(true);
+  };
   return (
-    <div className="max-w-4xl mx-auto p-4 h-screen overflow-y-scroll" style={{ scrollbarWidth: "none" }}>
+    <div className="max-w-4xl mx-auto p-4 h-screen overflow-y-auto custom-scrollbar">
       {showFollowersList && <FSUserList initialHeading="followers" userId={profileUserData.userId} setShowUserList={setShowFollowersList}/>}
       {showFollowingsList && <FSUserList initialHeading="followings" userId={profileUserData.userId} setShowUserList={setShowFollowingsList}/>}
       {/* Profile Header */}
       <div className="flex items-start pt-5">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
           <div className="w-full h-full rounded-full bg-white p-[3px]">
-            <div className="w-full h-full rounded-full overflow-y-scroll relative">
+            <div className="w-full h-full rounded-full overflow-hidden relative">
               <img
                 src={
                   profileUserData?.imgUrl ||
@@ -151,8 +185,9 @@ const Profile = ({defaultTab = 'posts'}) => {
               <>
                 <button
                   onClick={handleFollowToggle}
-                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${isFollowing ? "bg-gray-200 text-black" : ""
-                    }`}
+                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${
+                    isFollowing ? "bg-gray-200 text-black" : ""
+                  }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>
@@ -228,10 +263,11 @@ const Profile = ({defaultTab = 'posts'}) => {
       <div className="flex justify-center border-t mt-6 text-sm font-medium">
         <div
           onClick={() => setActiveTab("posts")}
-          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${activeTab === "posts"
-            ? "text-black border-t-2 border-black font-bold"
-            : "text-gray-500"
-            }`}
+          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${
+            activeTab === "posts"
+              ? "text-black border-t-2 border-black font-bold"
+              : "text-gray-500"
+          }`}
         >
           <BiGridAlt />
           <span>Posts</span>
@@ -239,10 +275,11 @@ const Profile = ({defaultTab = 'posts'}) => {
 
         <div
           onClick={() => setActiveTab("video")}
-          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "video"
-            ? "text-black border-t-2 border-black font-bold"
-            : "text-gray-500"
-            }`}
+          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
+            activeTab === "video"
+              ? "text-black border-t-2 border-black font-bold"
+              : "text-gray-500"
+          }`}
         >
           <RiFolderVideoFill />
           <span>Videos</span>
@@ -251,10 +288,11 @@ const Profile = ({defaultTab = 'posts'}) => {
         {currentUser?.userId === userId && (
           <div
             onClick={() => setActiveTab("saved")}
-            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "saved"
-              ? "text-black border-t-2 border-black font-bold"
-              : "text-gray-500"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
+              activeTab === "saved"
+                ? "text-black border-t-2 border-black font-bold"
+                : "text-gray-500"
+            }`}
           >
             <BsBookmark />
             <span>Saved</span>
@@ -262,25 +300,28 @@ const Profile = ({defaultTab = 'posts'}) => {
         )}
       </div>
 
-      <div
-        className="relative mt-4"
-        style={{ scrollbarWidth: "none" }}
-      >
+      <div className="relative mt-4">
         {activeTab === "posts" && (
           <div className="flex flex-wrap -m-1">
             {profileUserPost
               .filter((post) => post?.imgUrls && post.imgUrls.length > 0)
               .reverse()
               .map((post, index) => (
-                <div key={index} className="w-1/3 p-1">
-                  <div className="w-full aspect-[3/4] rounded-md">
-                    <img
-                      src={post.imgUrls[0]}
-                      alt="Post"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+                <PostThumbnail
+                  key={post.id || index}
+                  onClick={() => handlePostClick(post.id)}
+                  type="image"
+                  src={post.imgUrls[0]}
+                  likes={post.likesCount || 0}
+                  comments={post.commentsCount || 0}
+                  caption={post.caption || ""}
+                  hasMultipleImages={post.imgUrls.length > 1}
+                  user={{
+                    name: profileUserData?.fullName,
+                    username: profileUserData?.username,
+                    profileImage: profileUserData?.imgUrl,
+                  }}
+                />
               ))}
           </div>
         )}
@@ -291,41 +332,62 @@ const Profile = ({defaultTab = 'posts'}) => {
               profileUserPost
                 .filter((post) => post.videoUrl)
                 .map((post, index) => (
-                  <div key={index} className="w-1/3 p-1">
-                    <div className="w-full aspect-[3/4] overflow-hidden rounded-md bg-black">
-                      <video
-                        src={post.videoUrl}
-                        controls
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
+                  <PostThumbnail
+                    onClick={() => handlePostClick(post.id)}
+                    key={post.id || index}
+                    type="video"
+                    src={post.videoUrl}
+                    likes={post.likesCount || 0}
+                    comments={post.commentsCount || 0}
+                    caption={post.caption || ""}
+                    user={{
+                      name: profileUserData?.fullName,
+                      username: profileUserData?.username,
+                      profileImage: profileUserData?.imgUrl,
+                    }}
+                  />
                 ))
             ) : (
-              <p className="text-center w-full text-gray-500 mt-4">No videos found</p>
+              <p className="text-center w-full text-gray-500 mt-4">
+                No videos found
+              </p>
             )}
           </div>
         )}
+
         {activeTab === "saved" && (
           <div className="flex flex-wrap -m-1">
             {savedPosts.length > 0 ? (
               savedPosts.map((post, index) => (
-                <div key={index} className="w-1/3 p-1">
-                  <div className="w-full aspect-[3/4] overflow-hidden rounded-md">
-                    <img
-                      src={post?.imgUrls?.[0]}
-                      alt="Saved Post"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+                <PostThumbnail
+                  onClick={() => handlePostClick(post.id)}
+                  key={post.id || index}
+                  type={post.videoUrl ? "video" : "image"}
+                  src={post.videoUrl || post?.imgUrls?.[0]}
+                  likes={post.likesCount || 0}
+                  comments={post.commentsCount || 0}
+                  caption={post.caption || ""}
+                  hasMultipleImages={post.imgUrls?.length > 1}
+                  user={{
+                    name: profileUserData?.fullName,
+                    username: profileUserData?.username,
+                    profileImage: profileUserData?.imgUrl,
+                  }}
+                />
               ))
             ) : (
-              <p className="text-center w-full text-gray-500 mt-4">No saved posts found</p>
+              <p className="text-center w-full text-gray-500 mt-4">
+                No saved posts found
+              </p>
             )}
           </div>
         )}
       </div>
+      {isPostOpen && (
+        <div className="fixed inset-0 bg-black/60 z-1000 flex items-center justify-center">
+          <Post postId={selectedPostId} setOpenPost={setIsPostOpen} />
+        </div>
+      )}
     </div>
   );
 };

@@ -153,7 +153,7 @@ export const DeletePost = async (postId) => {
       });
     }
     await update(ref(db), updates);
-    toast.warn("Post and all related data deleted.");
+    toast.warn("Post deleted.");
   } catch (error) {
     console.error("Error removing post- ", error.message);
   }

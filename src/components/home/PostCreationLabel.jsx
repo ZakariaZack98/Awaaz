@@ -2,9 +2,9 @@ import React, { useContext, useState } from "react";
 import { _ } from "../../lib/lib";
 import { IoMdCloseCircle } from "react-icons/io";
 import { GetTimeNow } from "../../utils/date.utils";
-import { uploadFiles } from "../../utils/fileuploads.utils"; // Import the uploadPhotos function
+import { uploadFiles } from "../../utils/fileuploads.utils";
 import { toast } from "react-toastify";
-import { push, ref, set } from "firebase/database";
+import { ref, set } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
 
@@ -162,7 +162,7 @@ const PostCreationLabel = () => {
         </div>
       </div>
       {openUploadPrompt && (
-        <div className="absolute -bottom-53 left-0 w-full p-3 shadow-md rounded-md bg-white h-50">
+        <div className="absolute -bottom-53 left-0 w-full p-3 shadow-md rounded-md bg-white h-50 border-2 border-blue-500">
           <div className="flex h-8 gap-x-2 w-full">
             <label
               htmlFor="upload"

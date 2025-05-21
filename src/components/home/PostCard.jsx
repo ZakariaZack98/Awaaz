@@ -8,6 +8,7 @@ import Post from "../../pages/Post/Post";
 import PostActionIcons from "../common/PostActionIcons";
 import CommentField from "../common/CommentField";
 import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
+import FSUserList from "../common/FSUserList";
 
 const PostCard = ({ postData }) => {
   const { id, text, posterId, posterName, imgUrls, videoUrl } = postData;
@@ -20,6 +21,7 @@ const PostCard = ({ postData }) => {
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
   const [displayComment, setDisplayComment] = useState("");
+  const [showLikersList, setShowLikersList] = useState(false);
 
   // TODO: FETCH POST METADATA ==================================
   useEffect(() => {
@@ -62,6 +64,9 @@ const PostCard = ({ postData }) => {
       {
         openPost && <Post setOpenPost={setOpenPost} postId={postData.id}/>
       }
+      {
+        showLikersList && <FSUserList postId={id} setShowUserList={setShowLikersList}/>
+      }
       {/* //================ HEADING ====================== */}
       <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
       {/* ==================ONLY TEXT POST'S TEXT CONTENT ======================= */}
@@ -77,7 +82,7 @@ const PostCard = ({ postData }) => {
         <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave}/>
       </div>
       {/* ============= LIKES & COMMENTS ============== */}
-      <p className="font-semibold text-sm">{likesCount} likes</p>
+      <p className="font-semibold text-sm cursor-pointer" onClick={() => setShowLikersList(true)}>{likesCount} likes</p>
       {
         !onlyText && (
           <>

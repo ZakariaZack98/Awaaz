@@ -24,8 +24,8 @@ const Index = () => {
 
   return (
     <div className="w-full h-full overflow-y-scroll ">
-      <div className="flex w-9/10 h-full  mx-auto ">
-        <div className="feed w-2/3 px-10 mt-5">
+      <div className='flex w-9/10 h-full  mx-auto '>
+        <div className="feed pe-10 w-2/3  mt-5">
           <PostCreationLabel />
           <div className="feed my-3">
             {feedPostData && feedPostData.length > 0 ? (

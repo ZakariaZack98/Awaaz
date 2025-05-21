@@ -7,9 +7,7 @@ import {
   AiOutlineHeart,
   AiOutlinePlusSquare,
 } from "react-icons/ai";
-import { MdOutlineOndemandVideo } from "react-icons/md";
 import { FiSend } from "react-icons/fi";
-import { CgProfile } from "react-icons/cg";
 import { BiMenu } from "react-icons/bi";
 import SidebarMenu from "./SidebarMenu";
 import { DataContext } from "../../contexts/DataContexts";
@@ -25,6 +23,7 @@ const Sidebar = () => {
   const { notificationsData, setNotificationsData } = useContext(DataContext);
   const [unreadNotificationsCount, setUnreadNotificationsCount] =
     useState(null);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)
@@ -59,10 +58,9 @@ const Sidebar = () => {
     { label: "Home", icon: AiFillHome, path: "/" },
     { label: "Search", icon: AiOutlineSearch, path: "/search" },
     { label: "Explore", icon: AiOutlineCompass, path: "/explore" },
-    { label: "Reels", icon: MdOutlineOndemandVideo, path: "/reels" },
     { label: "Messages", icon: FiSend, path: "/messages" },
     { label: "Notifications", icon: AiOutlineHeart, path: "/notifications" },
-    { label: "Create", icon: AiOutlinePlusSquare, path: "/create" },
+    { label: "Add Story", icon: AiOutlinePlusSquare, path: "/add_story" },
     {
       label: "Profile",
       icon: "profile",
@@ -94,10 +92,15 @@ const Sidebar = () => {
                     navigate(path);
                   }
                 }}
-                className={`flex items-center gap-4 px-4 py-2 rounded-lg cursor-pointer transition-all
+                className={` flex items-center gap-4 px-4 py-2 rounded-lg cursor-pointer transition-all
                 ${isActive ? "font-semibold bg-gray-100" : "hover:bg-gray-100"}
                 ${isLast ? "mt-8 relative" : ""}`}
               >
+                {showSidebarMenu && isLast && (
+            <div className="absolute bottom-0 left-0 z-1000">
+              <SidebarMenu setShowSidebarMenu={setShowSidebarMenu}/>
+            </div>
+          )}
                 {label === "Profile" && img ? (
                   <img
                     src={img}
@@ -113,6 +116,13 @@ const Sidebar = () => {
                     {unreadNotificationsCount}
                   </p>
                 )}
+                {
+                  label === 'Notifications' && unreadNotificationCount > 0 && (
+                    <span className="w-5 h-5 bg-red-500 rounded-full flex justify-center items-center text-sm font-bold text-white">
+                      {unreadNotificationCount}
+                    </span>
+                  )
+                }
               </div>
             );
           })}

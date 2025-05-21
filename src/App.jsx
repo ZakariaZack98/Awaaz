@@ -4,10 +4,11 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Index from "./pages/Home";
 import CommonLayout from "./pages/CommonLayout";
 import Profile from "./pages/Profile/Profile";
-import AllUsers from "./pages/Profile/AllUsers";
 import Settings from "./pages/Settings/Settings";
 import SignIn from "./pages/SignIn/SignIn";
 import Notifications from "./pages/Notifications/Notifications";
+import AccessDenied from "./pages/Error/AccessDenied";
+import AddStory from "./pages/AddStory/AddStory";
 
 const App = () => {
   return (
@@ -16,12 +17,14 @@ const App = () => {
         <Route path="" element={<CommonLayout />}>
           <Route index element={<Index />} />
           <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="/all-users" element={<AllUsers />} />
+          <Route path={`/profile/:userId/saved`} element={<Profile defaultTab="saved"/>} />
+          <Route path="/add_story" element={<AddStory />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/notifications" element={<Notifications />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/accessdenied" element={<AccessDenied />} />
       </Routes>
     </BrowserRouter>
   );

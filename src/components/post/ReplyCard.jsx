@@ -6,12 +6,14 @@ import { auth } from "../../../Database/Firebase.config";
 import ReplyPrompt from "./ReplyPrompt";
 import { CheckIfReplyLiked, DeleteReply, LikeReply, UnlikeReply } from "../../utils/actions.utils";
 import { FetchReplyLikesCount } from "../../utils/fetchData.utils";
+import FSUserList from "../common/FSUserList";
 
 const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) => {
   const { id, text, replierId, replierName, replierImgUrl, createdAt, commentId, commenterName } = replyData;
   const [likesCount, setLikesCount] = useState(0);
   const [liked, setLiked] = useState(false);
   const [openReplyPrompt, setOpenReplyPrompt] = useState(false);
+  const [showLikersList, setShowLikersList] = useState(false);
 
   // TODO: FETCH LIKED OR NOT & LIKES COUNT OF THE REPLY ===
   useEffect(() => {
@@ -35,6 +37,7 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
 
   return (
     <div className="flex gap-x-2 py-3 w-full">
+      {showLikersList && <FSUserList replyId={id} setShowUserList={setShowLikersList}/>}
       <div className="left">
         <picture>
           <img src={replierImgUrl} className="min-w-9 w-9 h-9 rounded-full object-cover object-center" />
@@ -50,11 +53,11 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
             <strong className="text-red-700">{commentData.commenterName !== commenterName ? `@${commenterName} ` : ''}</strong>{text}
           </p>
         </div>
-        <div className="bottom w-full flex justify-between gap-x-2 text-sm opacity-70">
+        <div className="bottom w-full flex justify-between gap-x-2 text-xs opacity-70">
           <div className="flex gap-x-2">
             <p>{moment(createdAt).fromNow()}</p>
             <GoDotFill className="translate-y-0.5" />
-            <p className="font-medium">{likesCount} Likes</p>
+            <p className="font-medium cursor-pointer" onClick={likesCount > 0 ? () => setShowLikersList(true) : null}>{likesCount} Likes</p>
             <GoDotFill className="translate-y-0.5" />
             <p className="font-medium cursor-pointer" onClick={() => setOpenReplyPrompt((prev) => !prev)}>Reply</p>
           </div>

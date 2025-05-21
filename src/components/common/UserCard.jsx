@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { CheckIfFollowed, Follow, Unfollow } from "../../utils/actions.utils";
 import avatar from "../../assets/avatar.jpg";
 import { useNavigate } from "react-router-dom";
+import UserCardSkeleton from "../Skeleton/UserCardSkeleton";
+import { auth } from "../../../Database/Firebase.config";
 const UserCard = ({ singleUserData }) => {
   const { userId, username, fullName, imgUrl, isLocked } = singleUserData;
   const [isFollowed, setisFollowed] = useState(false);
@@ -12,6 +14,10 @@ const UserCard = ({ singleUserData }) => {
       .then((res) => setisFollowed(res))
       .catch(console.error);
   }, [userId, isFollowed]);
+
+  if (!singleUserData) {
+    return <UserCardSkeleton />;
+  }
 
   return (
     <div className="flex items-center justify-between mb-2" key={userId}>
@@ -28,7 +34,7 @@ const UserCard = ({ singleUserData }) => {
           <p className="text-xs text-gray-500">@{username}</p>
         </div>
       </div>
-      {isLocked ? (
+      {isLocked || singleUserData.userId === auth.currentUser.uid ? (
         ""
       ) : isFollowed ? (
         <button

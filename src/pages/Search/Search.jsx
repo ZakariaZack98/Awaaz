@@ -4,19 +4,17 @@ import UserCard from "../../components/common/UserCard";
 
 const Search = () => {
   const [searchValue, setSearchValue] = useState("");
-  const { userData, setUserData } = useContext(DataContext);
+  const { userData } = useContext(DataContext);
 
   const searcDataArr = userData?.filter((item) =>
-    item.fullName.toLocaleLowerCase().startsWith(searchValue.toLowerCase())
+    item.fullName.toLocaleLowerCase().includes(searchValue.toLowerCase())
   );
 
   return (
     <div className="py-8 px-20 h-[100%] w-full flex items-center justify-center">
       <div className="w-[45%] h-full rounded-md">
         <div
-          className={`flex w-full ${
-            searchValue !== "" && searcDataArr.length > 0 ? "border-b-2 border-gray-200" : " "
-          }`}
+          className={`flex w-full`}
         >
           <input
             onChange={(e) => setSearchValue(e.target.value)}
@@ -25,11 +23,11 @@ const Search = () => {
             placeholder="Search by Name"
           />
         </div>
-        <div className="h-[90%] overflow-y-scroll mt-2">
+        <div className="overflow-y-scroll mt-2" style={{scrollbarWidth: 'none'}}>
           {searchValue !== "" &&
             searcDataArr.length > 0 &&
             searcDataArr.map((singleSearchData) => (
-              <div className="mr-2">
+          git    <div className="mr-2">
                 <UserCard
                   key={singleSearchData.userId}
                   singleUserData={singleSearchData}

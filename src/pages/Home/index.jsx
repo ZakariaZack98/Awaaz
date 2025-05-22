@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from 'react'
-import PostCreationLabel from '../../components/home/PostCreationLabel'
-import PostCard from '../../components/home/PostCard'
-import { onValue, ref } from 'firebase/database';
-import { db } from '../../../Database/Firebase.config';
-import PeopleSuggestion from '../../components/home/PeopleSuggestion';
+import React, { useEffect, useState } from "react";
+import PostCreationLabel from "../../components/home/PostCreationLabel";
+import PostCard from "../../components/home/PostCard";
+import { onValue, ref } from "firebase/database";
+import { db } from "../../../Database/Firebase.config";
+import PeopleSuggestion from "../../components/home/PeopleSuggestion";
 
 const Index = () => {
   const [feedPostData, setFeedPostData] = useState([]);
 
   useEffect(() => {
     const postsRef = ref(db, `posts/`);
-    const unsub = onValue(postsRef, snapshot => {
+    const unsub = onValue(postsRef, (snapshot) => {
       if (snapshot.exists()) {
-          const postArr = [];
-          snapshot.forEach(postSnapshot => {
-            postArr.push(postSnapshot.val());
-          })
-          setFeedPostData(postArr.sort((a, b) => b.timeStamp - a.timeStamp))
-        }
-    })
+        const postArr = [];
+        snapshot.forEach((postSnapshot) => {
+          postArr.push(postSnapshot.val());
+        });
+        setFeedPostData(postArr.sort((a, b) => b.timeStamp - a.timeStamp));
+      }
+    });
     return () => unsub();
-  }, [])
+  }, []);
 
   return (
     <div className="w-full h-full overflow-y-scroll ">
@@ -28,19 +28,17 @@ const Index = () => {
         <div className="feed pe-10 w-2/3 max-w-180 ms-1/10 mt-5">
           <PostCreationLabel />
           <div className="feed my-3">
-            {
-              feedPostData && feedPostData.length > 0 ? (
-                <div className='flex flex-col gap-y-3'>
-                  {
-                    feedPostData.map(postData => <PostCard key={postData.id} postData={postData} />)
-                  }
-                </div>
-              ) : (
-                <div>
-                  <p>No posts found</p>
-                </div>
-              )
-            }
+            {feedPostData && feedPostData.length > 0 ? (
+              <div className="flex flex-col gap-y-3">
+                {feedPostData.map((postData) => (
+                  <PostCard key={postData.id} postData={postData} />
+                ))}
+              </div>
+            ) : (
+              <div>
+                <p>No posts found</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="min-w-[22%] h-20">
@@ -51,7 +49,7 @@ const Index = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;

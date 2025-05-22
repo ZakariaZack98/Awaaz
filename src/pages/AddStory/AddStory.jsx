@@ -76,10 +76,9 @@ const AddStory = () => {
   }
 
   return (
-    <div className='h-full w-8/10 mx-auto p-3'>
-      <h1 className='text-3xl font-light mb-5 text-blue-500'>Create a story</h1>
-      <div className="flex h-[85dvh] gap-x-8">
-        <div className="preview relative full aspect-[9/16] overflow-hidden rounded-2xl border-2 flex justify-center items-center bg-black">
+    <div className='h-screen w-8/10 mx-auto p-3 flex items-center'>
+      <div className="flex items-stretch gap-x-8">
+        <div className="preview relative h-[90dvh] aspect-[9/16] overflow-hidden rounded-2xl border-2 flex justify-center items-center bg-black">
           <div 
             className="uploaderLabel absolute flex flex-col justify-center items-center bg-[rgba(0,0,0,0.43)] rounded-md p-3 cursor-pointer hover:scale-110 duration-200" title='Upload/Change file'
             onClick={handleUploaderClick}
@@ -120,16 +119,18 @@ const AddStory = () => {
           />
         </div>
         <div className="text flex flex-col gap-y-5">
+          <h1 className='text-3xl mb-5 text-blue-500 font-medium'>Create a story</h1>
           <div className="flex flex-col gap-y-2">
             <div className="flex">
               <h2 className='text-xl'>Add caption: (optional)</h2>
-              <span className='text-sm ms-3 text-blue-500'>*Maximum 160 charecters</span>
+              <span className='text-xs ms-3 text-red-500'>*Maximum 160 charecters</span>
             </div>
             <textarea name="caption" id="" maxLength={160} value={caption} className='w-100 border rounded h-30 p-2 focus:outline-0' onChange={(e) => setCaption(e.target.value)}></textarea>
+            <p className={`text-xs ${caption.length >= 160 ? 'text-red-500 font-bold' : ''}`}>{caption.length} / 160</p>
           </div>
           <button 
             onClick={handleAddStory}
-            className='bg-blue-500 text-white px-5 py-1 rounded hover:bg-blue-700 duration-200 cursor-pointer'
+            className='bg-blue-500 text-white px-5 py-1.5 rounded hover:bg-blue-700 duration-200 cursor-pointer font-medium'
           >
             Add to Story
           </button>

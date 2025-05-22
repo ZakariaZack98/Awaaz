@@ -75,8 +75,8 @@ const PostCard = ({ postData }) => {
       }
       {/* ========== MEDIA PART =========== */}
       {imgUrls && imgUrls.length > 1 && <ImageSlider imgUrlArray={imgUrls}/>}
-      {imgUrls && imgUrls.length === 1 && <img src={imgUrls[0]} alt="" className="w-full object-cover object-center"/>}
-      {videoUrl && videoUrl.length > 0 && <video src={videoUrl} controls className="w-full"></video>}
+      {imgUrls && imgUrls.length === 1 && <img src={imgUrls[0]} alt="" className="w-full object-cover object-center rounded-md overflow-hidden"/>}
+      {videoUrl && videoUrl.length > 0 && <video src={videoUrl} controls className="w-full rounded-md overflow-hidden"></video>}
       {/* ========== ICONS ================== */}
       <div className="py-2">
         <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave}/>

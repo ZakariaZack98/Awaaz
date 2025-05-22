@@ -24,8 +24,8 @@ const Index = () => {
 
   return (
     <div className="w-full h-full overflow-y-scroll ">
-      <div className='flex w-9/10 h-full  mx-auto '>
-        <div className="feed pe-10 w-2/3  mt-5">
+      <div className='flex justify-around w-9/10 h-full  mx-auto'>
+        <div className="feed pe-10 w-2/3 max-w-180 ms-1/10 mt-5">
           <PostCreationLabel />
           <div className="feed my-3">
             {feedPostData && feedPostData.length > 0 ? (
@@ -40,6 +40,9 @@ const Index = () => {
               </div>
             )}
           </div>
+        </div>
+        <div className="min-w-[22%] h-20">
+          
         </div>
         <div className="people min-w-[22%] fixed top-4 right-20 max-h-[90dvh]">
           <PeopleSuggestion />

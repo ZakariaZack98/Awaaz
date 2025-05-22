@@ -4,11 +4,14 @@ import PostCard from "../../components/home/PostCard";
 import { onValue, ref } from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
 import PeopleSuggestion from "../../components/home/PeopleSuggestion";
+import HomeSkeleton from "../../components/Skeleton/HomeSkeleton";
 
 const Index = () => {
   const [feedPostData, setFeedPostData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     const postsRef = ref(db, `posts/`);
     const unsub = onValue(postsRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -18,9 +21,14 @@ const Index = () => {
         });
         setFeedPostData(postArr.sort((a, b) => b.timeStamp - a.timeStamp));
       }
+      setIsLoading(false);
     });
     return () => unsub();
   }, []);
+
+  if (isLoading) {
+    return <HomeSkeleton />;
+  }
 
   return (
     <div className="w-full h-full overflow-y-scroll ">
@@ -42,7 +50,7 @@ const Index = () => {
           </div>
         </div>
         <div className="min-w-[22%] h-20">
-          
+
         </div>
         <div className="people min-w-[22%] fixed top-4 right-20 max-h-[90dvh]">
           <PeopleSuggestion />

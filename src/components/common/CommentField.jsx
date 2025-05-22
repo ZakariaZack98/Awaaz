@@ -3,10 +3,17 @@ import React, { useEffect, useRef, useState } from "react";
 import { CiFaceSmile } from "react-icons/ci";
 import { AddComment } from "../../utils/actions.utils";
 
-const CommentField = ({postId, posterId, inPost, setDisplayComment, commentsCount, setCommentsCount }) => {
+const CommentField = ({ postId, posterId, inPost, setDisplayComment, commentsCount, setCommentsCount, active }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [comment, setComment] = useState('')
+  const [comment, setComment] = useState('');
   const emojiPickerRef = useRef(null);
+  const inputRef = useRef(null); 
+
+  useEffect(() => {
+    if (active && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [active]);
 
   // TODO: DISPLAY COMMENT ON POSTCARD & POST COMMENT TO POST DB
   const handleComment = async (postId, posterId) => {
@@ -16,10 +23,10 @@ const CommentField = ({postId, posterId, inPost, setDisplayComment, commentsCoun
     }
     try {
       await AddComment(postId, posterId, comment);
-      if(setDisplayComment) {
+      if (setDisplayComment) {
         setDisplayComment(comment);
       }
-      if(commentsCount && setCommentsCount) {
+      if (commentsCount && setCommentsCount) {
         setCommentsCount(commentsCount + 1);
       }
     } catch (error) {
@@ -54,6 +61,7 @@ const CommentField = ({postId, posterId, inPost, setDisplayComment, commentsCoun
   return (
     <div className={`comment flex pb-2 pt-4 justify-between ${inPost ? '' : 'border-b border-[rgba(0,0,0,0.18)]'} relative`}>
       <input
+        ref={inputRef} // Add the ref here
         type="text"
         value={comment}
         placeholder="Add a comment"

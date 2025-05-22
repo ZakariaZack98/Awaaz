@@ -1,44 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import PostCreationLabel from "../../components/home/PostCreationLabel";
 import PostCard from "../../components/home/PostCard";
-import { onValue, ref } from "firebase/database";
-import { db } from "../../../Database/Firebase.config";
 import PeopleSuggestion from "../../components/home/PeopleSuggestion";
 import HomeSkeleton from "../../components/Skeleton/HomeSkeleton";
+import { DataContext } from "../../contexts/DataContexts";
 
 const Index = () => {
-  const [feedPostData, setFeedPostData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-    const postsRef = ref(db, `posts/`);
-    const unsub = onValue(postsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const postArr = [];
-        snapshot.forEach((postSnapshot) => {
-          postArr.push(postSnapshot.val());
-        });
-        setFeedPostData(postArr.sort((a, b) => b.timeStamp - a.timeStamp));
-      }
-      setIsLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  if (isLoading) {
+  const { feedData } = useContext(DataContext);
+  if (!feedData) {
     return <HomeSkeleton />;
   }
-
   return (
     <div className="w-full h-full overflow-y-scroll ">
       <div className='flex justify-around w-9/10 h-full  mx-auto'>
         <div className="feed pe-10 w-2/3 max-w-180 ms-1/10 mt-5">
           <PostCreationLabel />
           <div className="feed my-3">
-            {feedPostData && feedPostData.length > 0 ? (
+            {feedData && feedData.length > 0 ? (
               <div className="flex flex-col gap-y-3">
-                {feedPostData.map((postData) => (
+                {feedData.map((postData) => (
                   <PostCard key={postData.id} postData={postData} />
                 ))}
               </div>

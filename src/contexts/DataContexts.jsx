@@ -7,6 +7,7 @@ export const DataProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [notificationsData, setNotificationsData] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [feedData, setFeedData] = useState(null);
 
   const contextValue = {
     currentUser,
@@ -14,7 +15,9 @@ export const DataProvider = ({ children }) => {
     notificationsData,
     setNotificationsData,
     userData, 
-    setUserData
+    setUserData,
+    feedData, 
+    setFeedData
   };
 
   return (

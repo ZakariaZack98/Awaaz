@@ -13,13 +13,13 @@ import SidebarMenu from "./SidebarMenu";
 import { DataContext } from "../../contexts/DataContexts";
 import { FetchUserData } from "../../utils/fetchData.utils";
 import { auth, db } from "../../../Database/Firebase.config";
-import { onValue, ref } from "firebase/database";
+import { get, onValue, ref } from "firebase/database";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
-  const { currentUser, setCurrentUser } = useContext(DataContext);
+  const { currentUser, setCurrentUser, feedData, setFeedData } = useContext(DataContext);
   const { notificationsData, setNotificationsData } = useContext(DataContext);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
@@ -29,7 +29,63 @@ const Sidebar = () => {
       .catch(console.error);
   }, [auth.currentUser?.uid]);
 
-  // Fetch all notificationData from DB
+  // TODO: FETCH DATA FOR NEWSFEED
+  // useEffect(() => {
+  //   const fetchFeedData = async () => {
+  //     try {
+  //       const followingsRef = ref(db, `followings/${auth.currentUser.uid}`);
+  //       const followingsSnapshot = await get(followingsRef);
+  //       if (!followingsSnapshot.exists()) {
+  //         setFeedData([]);
+  //         return;
+  //       }
+  //       const followingIds = Object.keys(followingsSnapshot.val());
+  //       // Listen for posts
+  //       const postsRef = ref(db, 'posts');
+  //       const unsubscribe = onValue(postsRef, async (snapshot) => {
+  //         if (!snapshot.exists()) {
+  //           setFeedData([]);
+  //           return;
+  //         }
+  //         const posts = [];
+  //         snapshot.forEach((postSnapshot) => {
+  //           const post = postSnapshot.val();
+  //           if ((followingIds.includes(post.posterId) || post.posterId === auth.currentUser.uid)
+  //             && post.visibility !== 'private') {
+  //             posts.push({
+  //               ...post,
+  //               id: postSnapshot.key
+  //             });
+  //           }
+  //         });
+  //         const sortedPosts = posts.sort((a, b) => b.timeStamp - a.timeStamp);
+  //         setFeedData(sortedPosts);
+  //       });
+
+  //       return () => unsubscribe();
+  //     } catch (error) {
+  //       console.error('Error fetching feed:', error);
+  //       setFeedData([]);
+  //     }
+  //   };
+
+  //   fetchFeedData();
+  // }, [auth.currentUser?.uid, setFeedData]);
+  useEffect(() => {
+    const postsRef = ref(db, `posts/`);
+    const unsub = onValue(postsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const postArr = [];
+        snapshot.forEach((postSnapshot) => {
+          postArr.push(postSnapshot.val());
+        });
+        setFeedData(postArr.sort((a, b) => b.timeStamp - a.timeStamp).filter(post => post.visibility !== 'private'));
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // TODO: Fetch all notificationData from DB
   useEffect(() => {
     const notificationRef = ref(db, `notifications/${auth?.currentUser.uid}`);
     onValue(notificationRef, (snapshot) => {
@@ -96,10 +152,10 @@ const Sidebar = () => {
                 ${isLast ? "mt-8 relative" : ""}`}
               >
                 {showSidebarMenu && isLast && (
-            <div className="absolute bottom-0 left-0 z-1000">
-              <SidebarMenu setShowSidebarMenu={setShowSidebarMenu}/>
-            </div>
-          )}
+                  <div className="absolute bottom-0 left-0 z-1000">
+                    <SidebarMenu setShowSidebarMenu={setShowSidebarMenu} />
+                  </div>
+                )}
                 {label === "Profile" && img ? (
                   <img
                     src={img}

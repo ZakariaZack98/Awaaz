@@ -10,9 +10,11 @@ import ReplyPrompt from "./ReplyPrompt";
 import { equalTo, onValue, orderByChild, query, ref } from "firebase/database";
 import ReplyCard from "./ReplyCard";
 import FSUserList from "../common/FSUserList";
+import { Link } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
-  const {id, text, commenterName, commenterImgUrl, createdAt, postId } = commentData;
+  const {id, text, commenterName, commenterImgUrl, commenterId, createdAt, postId } = commentData;
   const [likesCount, setLikesCount] = useState(0);
   const [repliesCount, setRepliesCount] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -20,6 +22,7 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
   const [showReplies, setShowReplies] = useState(false);
   const [repliesData, setRepliesData] = useState([]);
   const [showLikersList, setShowLikersList] = useState(false);
+  const navigate = useNavigate();
 
   // TODO: FETCH COMMENT'S REPLIES =================================
   useEffect(() => {
@@ -67,8 +70,8 @@ const CommentCard = ({ commentData, commentsDataArr, setCommentsDataArr }) => {
       </div>
       <div className="right w-9/10">
         <div className="top flex gap-x-4">
-          <p className="text-sm">
-            <strong className="me-2">{commenterName}<FaAngleRight className=" inline mb-0.5 ms-2 opacity-60"/></strong>
+          <p className="text-sm cursor-pointer" >
+            <strong className="me-2" onClick={() => navigate(`/profile/${commenterId}`)}>{commenterName}<FaAngleRight className=" inline mb-0.5 ms-2 opacity-60"/></strong>
             {text}
           </p>
         </div>

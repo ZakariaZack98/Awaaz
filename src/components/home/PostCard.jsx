@@ -24,6 +24,7 @@ const PostCard = ({ postData }) => {
   const [displayComment, setDisplayComment] = useState("");
   const [showLikersList, setShowLikersList] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeCommentField, setActiveCommentField] = useState(false);
 
   // TODO: FETCH POST METADATA ==================================
   useEffect(() => {
@@ -86,7 +87,7 @@ const PostCard = ({ postData }) => {
       {videoUrl && videoUrl.length > 0 && <video src={videoUrl} controls className="w-full rounded-md overflow-hidden"></video>}
       {/* ========== ICONS ================== */}
       <div className="py-2">
-        <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave} />
+        <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave} activeCommentField={activeCommentField} setActiveCommentField={setActiveCommentField}/>
       </div>
       {/* ============= LIKES & COMMENTS ============== */}
       <p className="font-semibold text-sm cursor-pointer" onClick={() => setShowLikersList(true)}>{likesCount} likes</p>
@@ -106,7 +107,7 @@ const PostCard = ({ postData }) => {
           <p className="text-sm py-1">{displayComment}</p>
         </div>
       )}
-      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount} />
+      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount} active={activeCommentField}/>
     </div>
   );
 };

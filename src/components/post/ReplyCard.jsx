@@ -7,6 +7,7 @@ import ReplyPrompt from "./ReplyPrompt";
 import { CheckIfReplyLiked, DeleteReply, LikeReply, UnlikeReply } from "../../utils/actions.utils";
 import { FetchReplyLikesCount } from "../../utils/fetchData.utils";
 import FSUserList from "../common/FSUserList";
+import { useNavigate } from "react-router-dom";
 
 const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) => {
   const { id, text, replierId, replierName, replierImgUrl, createdAt, commentId, commenterName } = replyData;
@@ -14,6 +15,7 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
   const [liked, setLiked] = useState(false);
   const [openReplyPrompt, setOpenReplyPrompt] = useState(false);
   const [showLikersList, setShowLikersList] = useState(false);
+  const navigate = useNavigate();
 
   // TODO: FETCH LIKED OR NOT & LIKES COUNT OF THE REPLY ===
   useEffect(() => {
@@ -45,8 +47,8 @@ const ReplyCard = ({ replyData, commentData, repliesCount, setRepliesCount }) =>
       </div>
       <div className="right w-9/10">
         <div className="top flex gap-x-4">
-          <p className="text-sm">
-            <strong className="me-2">
+          <p className="text-sm cursor-pointer" >
+            <strong className="me-2" onClick={() => navigate(`/profile/${replierId}`)}>
               {replierName}
               <FaAngleRight className=" inline mb-0.5  opacity-60" />
             </strong>

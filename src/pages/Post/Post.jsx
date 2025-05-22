@@ -44,6 +44,7 @@ const Post = ({ postId, setOpenPost }) => {
   const [commentsData, setCommentsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLikersList, setShowLikersList] = useState(false);
+  const [activeCommentField, setActiveCommentField] = useState(false)
 
   // TODO: FETCH ALL THE NECESSARY DATA TO RENDER POST POPUP ===
   useEffect(() => {
@@ -228,6 +229,8 @@ const Post = ({ postId, setOpenPost }) => {
                   saved={saved}
                   handleLike={handleLike}
                   handleSave={handleSave}
+                  activeCommentField={activeCommentField}
+                  setActiveCommentField={setActiveCommentField}
                 />
                 {likesCount === 0 && <p className="text-sm">No likes yet</p>}
                 {likesCount === 1 && (
@@ -252,7 +255,7 @@ const Post = ({ postId, setOpenPost }) => {
               </div>
             </div>
             <div className="commentField h-13 border-t border-[rgba(0,0,0,0.26)] px-3">
-              <CommentField postId={postId} posterId={posterId} inPost />
+              <CommentField postId={postId} posterId={posterId} inPost active={activeCommentField}/>
             </div>
           </div>
         </div>

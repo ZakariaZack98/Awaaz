@@ -10,6 +10,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Explore from "./pages/Explore/Explore";
 import AccessDenied from "./pages/Error/AccessDenied";
 import AddStory from "./pages/AddStory/AddStory";
+import Search from "./pages/Search/search";
 
 const App = () => {
   return (
@@ -23,8 +24,9 @@ const App = () => {
             element={<Profile defaultTab="saved" />}
           />
           <Route path="/add_story" element={<AddStory />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/explore" element={<Explore />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />

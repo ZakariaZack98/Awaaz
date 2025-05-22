@@ -11,9 +11,9 @@ import { toast } from "react-toastify";
 const PeopleSuggestion = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(DataContext);
-  const [userData, setUserData] = useState();
-  const [maxUser, setMaxUser] = useState(5)
-  const [expendedData, setExpendedData] = useState(false)
+  const { userData, setUserData } = useContext(DataContext);
+  const [maxUser, setMaxUser] = useState(5);
+  const [expendedData, setExpendedData] = useState(false);
 
   const handleLogOut = () => {
     signOut(auth)
@@ -26,33 +26,38 @@ const PeopleSuggestion = () => {
       });
   };
 
+  // fetch data from users in db
   useEffect(() => {
     const usersRef = ref(db, "users/");
-    get(usersRef).then((snapshot) => {
-      const userArr = [];
-      snapshot.forEach((userSnapshot) => {
-        if (userSnapshot.key !== auth.currentUser.uid) {
-          userArr.push(userSnapshot.val());
-        }
-      });
-      setUserData(userArr);
-    }).catch(console.error);
+    get(usersRef)
+      .then((snapshot) => {
+        const userArr = [];
+        snapshot.forEach((userSnapshot) => {
+          // store only others user data
+          if (userSnapshot.key !== auth.currentUser.uid) {
+            userArr.push(userSnapshot.val());
+          }
+        });
+        setUserData(userArr);
+      })
+      .catch(console.error);
   }, []);
 
   const handleSeeMore = () => {
-    setExpendedData(!expendedData)
+    setExpendedData(!expendedData);
     if (!expendedData) {
-      setMaxUser(userData.length)
+      setMaxUser(userData.length);
+    } else {
+      setMaxUser(5);
     }
-    else {
-      setMaxUser(5)
-    }
-  }
+  };
 
   return (
     <>
-      {!userData ? (<PeopleSuggestionSkeleton />) :
-        (<div className="max-w-120 h-[95dvh] p-4 rounded-xl space-y-4 bg">
+      {!userData ? (
+        <PeopleSuggestionSkeleton />
+      ) : (
+        <div className="max-w-120 h-[85dvh] p-4 rounded-xl space-y-4 bg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -64,7 +69,7 @@ const PeopleSuggestion = () => {
                 <p className="text-sm font-bold text-gray- 800">
                   {currentUser?.fullName}
                 </p>
-                <p className="text-xs text-gray-500">{currentUser?.username}</p>
+                <p className="text-xs text-gray-500">@{currentUser?.username}</p>
               </div>
             </div>
             <button
@@ -76,20 +81,30 @@ const PeopleSuggestion = () => {
           </div>
 
           <div className="flex justify-between items-center">
-            <p className="text-sm font-semibold text-gray-500">Suggested for you</p>
-            <button onClick={() => handleSeeMore()} className="text-xs text-blue-500 font-semibold cursor-pointer">{expendedData ? "See Less" : "See More"}</button>
+            <p className="text-sm font-semibold text-gray-500">
+              Suggested for you
+            </p>
+            <button
+              onClick={() => handleSeeMore()}
+              className="text-xs text-blue-500 font-semibold cursor-pointer"
+            >
+              {expendedData ? "See Less" : "See More"}
+            </button>
           </div>
           {/* UserCard Component */}
-          <div className="max-h-9/10  overflow-y-scroll " style={{scrollbarWidth: 'none'}}>
+          <div
+            className="max-h-9/10  overflow-y-scroll "
+            style={{ scrollbarWidth: "none" }}
+          >
             <UserList userListData={userData} maxUser={maxUser} />
           </div>
           {/* UserCard Component */}
 
           <footer className=" text-[10px] text-gray-400">
-            <p className="pt-2">© 2025 Awaaz</p>
+            <p className="">© 2025 Awaaz</p>
           </footer>
-        </div>)
-      }
+        </div>
+      )}
     </>
   );
 };

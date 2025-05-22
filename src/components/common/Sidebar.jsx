@@ -23,7 +23,7 @@ const Sidebar = () => {
   const { notificationsData, setNotificationsData } = useContext(DataContext);
   const [unreadNotificationsCount, setUnreadNotificationsCount] =
     useState(null);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  // const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)

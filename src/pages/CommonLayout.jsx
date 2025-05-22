@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/common/Sidebar";
 import { Outlet } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { DataProvider } from "../contexts/DataContexts";
 import UserNotVerified from "./Error/UserNotVerified";
+import { auth } from "../../Database/Firebase.config";
 
 const CommonLayout = () => {
-  const auth = getAuth();
   const [userVerified, setuserVerifed] = useState(false);
 
   useEffect(() => {

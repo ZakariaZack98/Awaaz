@@ -149,7 +149,7 @@ const PostCreationLabel = () => {
               }
             }}
           />
-          <button className="rounded-full bg-blue-500 text-white p-3 cursor-pointer">
+          <button className="rounded-full bg-blue-500 text-white p-3 cursor-pointer" onClick={() => !isUploading ? handlePostUpload() : null}>
             <FaPaperPlane/>
           </button>
         </div>

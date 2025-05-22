@@ -78,10 +78,6 @@ const SignUp = () => {
       }
     }
 
-    // Implement your signup logic here with Firebase Auth or your backend
-    // ...additional sign-up logic...
-
-    // Create User in Database/Firebase
     createUserWithEmailAndPassword(auth, formData.email, formData.password)
       .then((userInfo) => {
         sendEmailVerification(auth.currentUser);
@@ -113,7 +109,7 @@ const SignUp = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-5">
       <div className="bg-white p-6 w-full max-w-md rounded-md shadow-md border border-gray-200">
-        <h2 className="text-2xl text-center font-semibold text-gray-800 mb-6">Awaaz</h2>
+        <h2 className="text-5xl text-center font-semibold  mb-6  text-red-800 cookie">Awaaz</h2>
         <div className="space-y-3 mb-4">
           {/* Social Sign In Options */}
           <div className="space-y-4 mb-6">

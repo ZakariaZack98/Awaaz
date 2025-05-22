@@ -10,6 +10,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Explore from "./pages/Explore/Explore";
 import AccessDenied from "./pages/Error/AccessDenied";
 import AddStory from "./pages/AddStory/AddStory";
+import NotFound from "./pages/Error/NotFound";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/accessdenied" element={<AccessDenied />} />
+        <Route path="/*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

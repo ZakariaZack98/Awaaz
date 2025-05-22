@@ -51,8 +51,9 @@ const SidebarMenu = ({ setShowSidebarMenu }) => {
     >
       {menuItems.map((item, index) => (
         <div
-          key={index}
-          onClick={() => {
+          key={item.label}
+          onClick={(e) => {
+            e.stopPropagation()
             if (item.label === "Log out") {
               handleLogOut();
             } else {

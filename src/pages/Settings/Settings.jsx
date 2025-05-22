@@ -1,5 +1,5 @@
-import React, {  useState } from "react";
-import { getDatabase, ref, set } from "firebase/database";
+import React, { useState, useEffect } from "react";
+import { getDatabase, ref, set, update, query, orderByChild, equalTo, get } from "firebase/database";
 import { getAuth, updateProfile } from "firebase/auth";
 import { FiEdit } from "react-icons/fi";
 import { IoMdDoneAll } from "react-icons/io";
@@ -24,21 +24,35 @@ const Settings = () => {
   const auth = getAuth();
   const { currentUser } = useContext(DataContext);
 
-  // State for handle edited profile. also updaet & hold fetch data
-  const [fullname, setFullname] = useState(currentUser?.fullName || "Name missing");
+  // State declarations
+  const [fullname, setFullname] = useState("");
   const [editFullname, seteditFullname] = useState(false);
-  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState(currentUser?.imgUrl);
-  const [theme, setTheme] = useState(currentUser?.defaultTheme || "Light");
-  const [followersVisibility, setFollowersVisibility] = useState(currentUser?.followersVisibility || "Public");
-  const [followingVisibility, setFollowingVisibility] = useState(currentUser?.followingVisibility || "Public");
-  const [profileVisibility, setProfileVisibility] = useState(currentUser?.isLocked || false);
-  const [bio, setBio] = useState(currentUser?.bio || "");
-  const [gender, setGender] = useState(currentUser?.gender || "Unselected");
-
-  // State for Social handle
-  const [socialHandelsVisibility, setSocialHandelsVisibility] = useState(false);
-  const [socialHandels, setSocialHandels] = useState(currentUser?.socialHandles || {});
+  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState("");
+  const [theme, setTheme] = useState("Light");
+  const [followersVisibility, setFollowersVisibility] = useState("Public");
+  const [followingVisibility, setFollowingVisibility] = useState("Public");
+  const [profileVisibility, setProfileVisibility] = useState(true);
+  const [bio, setBio] = useState("");
+  const [gender, setGender] = useState("Unselected");
+  const [socialHandelsVisibility, setSocialHandelsVisibility] = useState('Public');
+  const [socialHandels, setSocialHandels] = useState({});
   const [socialLink, setSocialLink] = useState("");
+
+  // Add this useEffect to update state when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setFullname(currentUser.fullName || "Name missing");
+      setProfilePicUpdateUrl(currentUser.imgUrl);
+      setTheme(currentUser.defaultTheme || "Light");
+      setFollowersVisibility(currentUser.followersVisibility || "Public");
+      setFollowingVisibility(currentUser.followingVisibility || "Public");
+      setProfileVisibility(!currentUser.isLocked || true);
+      setBio(currentUser.bio || "");
+      setGender(currentUser.gender || "Unselected");
+      setSocialHandels(currentUser.socialHandles || {});
+      console.log(!currentUser.isLocked)
+    }
+  }, [currentUser]);
 
   // Update profile picture
   const handleFileChange = async (e) => {
@@ -61,39 +75,50 @@ const Settings = () => {
     }
   };
 
-  const handleUpdateUser = () => {
-    toast.info("Updating Profile");
-    set(ref(db, `users/${auth.currentUser.uid}`), {
-      userId: auth.currentUser.uid,
-      username: currentUser.username,
-      fullName: fullname || "Set name",
-      email: currentUser.email,
-      imgUrl: profilePicUpdateUrl,
-      gender: gender,
-      bio: bio,
-      defaultTheme: theme,
-      isLocked: profileVisibility,
-      followersVisibility: followersVisibility,
-      followingVisibility: followingVisibility,
-      socialHandles: socialHandels,
-      // {
-      //     facebook: { name: "Facebook", url: "https://fb.com/xyz" },
-      //     twitter: { name: "Twitter", url: "https://twitter.com/xyz" },
-      // }
-    }).then(() => {
-      // Update auth
-      updateProfile(auth.currentUser, {
+  const handleUpdateUser = async () => {
+    try {
+      toast.info("Updating Profile");
+
+      // Update user profile
+      await set(ref(db, `users/${auth.currentUser.uid}`), {
+        userId: auth.currentUser.uid,
+        username: currentUser.username,
+        fullName: fullname || "Set name",
+        email: currentUser.email,
+        imgUrl: profilePicUpdateUrl,
+        gender: gender,
+        bio: bio,
+        defaultTheme: theme,
+        isLocked: profileVisibility,
+        followersVisibility: followersVisibility,
+        followingVisibility: followingVisibility,
+        socialHandles: socialHandels,
+      });
+
+      // Update posts visibility based on profile visibility
+      const postsRef = ref(db, 'posts');
+      const userPostsQuery = query(postsRef, orderByChild('posterId'), equalTo(auth.currentUser.uid));
+      const postsSnapshot = await get(userPostsQuery);
+
+      if (postsSnapshot.exists()) {
+        console.log('sent vsblty- ', profileVisibility)
+        const updates = {};
+        postsSnapshot.forEach((postSnapshot) => {
+          updates[`posts/${postSnapshot.key}/visibility`] = profileVisibility ? 'public' : 'private';
+        });
+        await update(ref(db), updates);
+      }
+
+      await updateProfile(auth.currentUser, {
         displayName: fullname,
         photoURL: profilePicUpdateUrl,
-      })
-    })
-      .then(() => {
-        setSocialLink("");
-        toast.success("Profile is updated");
-      })
-      .catch((err) => {
-        console.log("user update error", err);
       });
+      setSocialLink("");
+      toast.success("Profile and posts visibility updated");
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("Failed to update profile");
+    }
   };
 
   return (
@@ -172,22 +197,25 @@ const Settings = () => {
                 </label>
                 <div className="flex justify-between border border-gray-300 rounded-md p-2">
                   <label className="block font-medium mb-1">
-                    Switch to {profileVisibility ? "Unlocked" : "Locked"}
+                    {!profileVisibility ? "Locked" : "Unlocked"}
                   </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       className="sr-only peer"
-                      checked={profileVisibility}
+                      checked={!profileVisibility}
                       onChange={() =>
+                      {
                         setProfileVisibility(!profileVisibility)
+                        console.log('now- ', profileVisibility)
+                      }
                       }
                     />
-                    <div className="w-11 h-6 rounded-full relative bg bg-blue-400">
+                    <div className={`w-11 h-6 rounded-full relative bg ${profileVisibility ? 'bg-blue-500' : 'bg-red-400'}`}>
                       <div
-                        className={`absolute flex justify-center items-center top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${profileVisibility ? "translate-x-5" : ""
+                        className={`absolute flex justify-center items-center top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition ${!profileVisibility ? "translate-x-5" : ""
                           }`}
-                      >{profileVisibility ? <FaLock className="text-black p-[1px]" /> : <ImUnlocked className="text-black p-[1px]" />
+                      >{!profileVisibility ?  <FaLock className="text-black p-[1px]" /> : <ImUnlocked className="text-black p-[1px]" />
                         }</div>
                     </div>
                   </label>

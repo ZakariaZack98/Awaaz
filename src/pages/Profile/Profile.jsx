@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaFacebookF, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaInstagram, FaXTwitter } from "react-icons/fa6";
 import { BiGridAlt } from "react-icons/bi";
 import { BsBookmark } from "react-icons/bs";
 import { RiFolderVideoFill } from "react-icons/ri";
@@ -75,7 +75,9 @@ const Profile = ({ defaultTab = "posts" }) => {
             })
           );
 
-          setProfileUserPost(postsWithCounts);
+          if (userId === auth.currentUser.uid) {
+            setProfileUserPost(postsWithCounts);
+          } else setProfileUserPost(postsWithCounts.filter(post => post.visibility !== 'private'));
         } else {
           setProfileUserPost([]);
         }
@@ -215,9 +217,8 @@ const Profile = ({ defaultTab = "posts" }) => {
               <>
                 <button
                   onClick={handleFollowToggle}
-                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${
-                    isFollowing ? "bg-gray-200 text-black" : ""
-                  }`}
+                  className={`px-3 py-1 border cursor-pointer rounded text-sm font-medium ${isFollowing ? "bg-gray-200 text-black" : ""
+                    }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>
@@ -230,9 +231,10 @@ const Profile = ({ defaultTab = "posts" }) => {
               </>
             )}
           </div>
-          <div className="-mt-2.5">
+          <div className="-mt-2.5 text-sm">
             <h2>@{profileUserData?.username}</h2>
           </div>
+          <i className="text-blue-800">"{profileUserData.bio || ''}"</i>
           <div className="flex gap-6 text-sm mt-2.5 mb-1">
             <span>
               <span className="font-bold">{profileUserPost?.length || 0}</span>{" "}
@@ -251,6 +253,7 @@ const Profile = ({ defaultTab = "posts" }) => {
               <span className="font-bold">{followingCount}</span> following
             </span>
           </div>
+          
 
           <div className="font-medium text-sm">
             <div className="flex gap-4 mt-2 text-xl">
@@ -290,6 +293,15 @@ const Profile = ({ defaultTab = "posts" }) => {
                   <FaWhatsapp className="text-[#25D366] hover:scale-110 transition-transform cursor-pointer" />
                 </a>
               )}
+              {profileUserData?.socialHandles?.instagram?.url && (
+                <a
+                  href={profileUserData.socialHandles.instagram.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FaInstagram className="text-[#cf560f] hover:scale-110 transition-transform cursor-pointer" />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -299,11 +311,10 @@ const Profile = ({ defaultTab = "posts" }) => {
       <div className="flex justify-center border-t mt-6 text-sm font-medium">
         <div
           onClick={() => setActiveTab("posts")}
-          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${
-            activeTab === "posts"
+          className={`flex items-center gap-2 px-2 py-1 cursor-pointer ${activeTab === "posts"
               ? "text-black border-t-2 border-black font-bold"
               : "text-gray-500"
-          }`}
+            }`}
         >
           <BiGridAlt />
           <span>Posts</span>
@@ -311,11 +322,10 @@ const Profile = ({ defaultTab = "posts" }) => {
 
         <div
           onClick={() => setActiveTab("video")}
-          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
-            activeTab === "video"
+          className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "video"
               ? "text-black border-t-2 border-black font-bold"
               : "text-gray-500"
-          }`}
+            }`}
         >
           <RiFolderVideoFill />
           <span>Videos</span>
@@ -324,11 +334,10 @@ const Profile = ({ defaultTab = "posts" }) => {
         {currentUser?.userId === userId && (
           <div
             onClick={() => setActiveTab("saved")}
-            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${
-              activeTab === "saved"
+            className={`flex items-center gap-2 px-4 py-2 cursor-pointer ${activeTab === "saved"
                 ? "text-black border-t-2 border-black font-bold"
                 : "text-gray-500"
-            }`}
+              }`}
           >
             <BsBookmark />
             <span>Saved</span>
@@ -403,8 +412,8 @@ const Profile = ({ defaultTab = "posts" }) => {
                 const type = post.videoUrl
                   ? "video"
                   : isTextPost
-                  ? "text"
-                  : "image";
+                    ? "text"
+                    : "image";
 
                 return (
                   <PostThumbnail
@@ -415,8 +424,8 @@ const Profile = ({ defaultTab = "posts" }) => {
                       post.videoUrl
                         ? post.videoUrl
                         : !isTextPost
-                        ? post.imgUrls[0]
-                        : ""
+                          ? post.imgUrls[0]
+                          : ""
                     }
                     likes={post.likesCount || 0}
                     comments={post.commentsCount || 0}

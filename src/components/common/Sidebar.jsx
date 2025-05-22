@@ -21,9 +21,7 @@ const Sidebar = () => {
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
   const { currentUser, setCurrentUser } = useContext(DataContext);
   const { notificationsData, setNotificationsData } = useContext(DataContext);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] =
-    useState(null);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)
@@ -54,6 +52,7 @@ const Sidebar = () => {
       );
     }
   }, [notificationsData]);
+
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },
     { label: "Search", icon: AiOutlineSearch, path: "/search" },
@@ -119,11 +118,6 @@ const Sidebar = () => {
               </div>
             );
           })}
-          {showSidebarMenu && (
-            <div className="absolute z-1000">
-              <SidebarMenu />
-            </div>
-          )}
         </nav>
       </div>
     </div>

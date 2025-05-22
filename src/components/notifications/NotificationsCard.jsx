@@ -1,10 +1,9 @@
 import moment from "moment";
 import React, { useState } from "react";
 import { AiFillLike } from "react-icons/ai";
-import { BiSolidCommentCheck, BiSolidCommentDetail } from "react-icons/bi";
+import { BiSolidCommentDetail } from "react-icons/bi";
 import { FaComment } from "react-icons/fa";
 import { IoIosPersonAdd } from "react-icons/io";
-import { TbFileLike } from "react-icons/tb";
 import {
   handleRead,
   readNotificationUpdateDb,
@@ -25,11 +24,12 @@ const NotificationsCard = ({ SingleNotificationData }) => {
     read,
     Key,
   } = SingleNotificationData;
-  const [readDone, setReadDone] = useState(true);
   const [showPost, setShowPost] = useState(false);
   const navigate = useNavigate();
   // update
-  readNotificationUpdateDb(receiverId, Key);
+  if(!read) {
+    readNotificationUpdateDb(receiverId, Key);
+  }
 
   let message = "";
   let navigateTo = "";
@@ -53,7 +53,7 @@ const NotificationsCard = ({ SingleNotificationData }) => {
     case "likeOnComment":
       message = `${triggererName} likes your comment - "${data}"`;
       icon = (
-        <BiSolidCommentCheck className="bg-blue-600 text-white rounded-full p-[3px] text-lg" />
+        <AiFillLike className="bg-blue-600 text-white rounded-full p-[3px] text-lg" />
       );
       break;
 
@@ -67,7 +67,7 @@ const NotificationsCard = ({ SingleNotificationData }) => {
     case "likeOnReply":
       message = `${triggererName} likes your reply - "${data}"`;
       icon = (
-        <TbFileLike className="bg-blue-500 text-white rounded-full p-[3px] text-lg" />
+        <AiFillLike className="bg-blue-600 text-white rounded-full p-[3px] text-lg" />
       );
       break;
 
@@ -82,7 +82,6 @@ const NotificationsCard = ({ SingleNotificationData }) => {
       message = "You have a new notification.";
   }
 
-  // console.log(showPost);
 
   return (
     <div
@@ -92,12 +91,10 @@ const NotificationsCard = ({ SingleNotificationData }) => {
             ? ""
             : type == "follow"
             ? handleRead(navigate, navigateTo)
-            : setShowPost(true);
+            : setShowPost(true);`;`
         }
       }}
-      className={`cursor-pointer flex items-center  p-2 justify-between mb-2 rounded ${
-        readDone ? "" : "font-bold"
-      }`}
+      className={`cursor-pointer flex items-center  p-2 justify-between mb-2 rounded `}
       key=""
     >
       {showPost && <Post setOpenPost={setShowPost} postId={postId} />}

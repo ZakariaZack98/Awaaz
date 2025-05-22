@@ -52,7 +52,7 @@ const Index = () => {
         <div className="min-w-[22%] h-20">
 
         </div>
-        <div className="people min-w-[22%] fixed top-4 right-20 max-h-[90dvh]">
+        <div className="people min-w-[22%] fixed top-4 right-10 max-h-[90dvh]">
           <PeopleSuggestion />
         </div>
       </div>

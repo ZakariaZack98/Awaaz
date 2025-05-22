@@ -20,7 +20,7 @@ const UserCard = ({ singleUserData }) => {
   }
 
   return (
-    <div className="flex items-center justify-between mb-2" key={userId}>
+    <div className="flex items-center justify-between mb-3 mt-1" key={userId}>
       <div className="flex items-center gap-3">
         <picture>
           <img
@@ -39,14 +39,14 @@ const UserCard = ({ singleUserData }) => {
       ) : isFollowed ? (
         <button
           onClick={() => Unfollow(userId).then(() => setisFollowed(false))}
-          className="text-xs font-semibold text-blue-500 cursor-pointer"
+          className="text-xs font-semibold w-[55px] text-blue-500 cursor-pointer"
         >
           Unfollow
         </button>
       ) : (
         <button
           onClick={() => Follow(userId).then(() => setisFollowed(true))}
-          className="text-xs font-semibold text-blue-500 cursor-pointer"
+          className="text-xs font-semibold w-[55px] text-blue-500 cursor-pointer"
         >
           Follow
         </button>

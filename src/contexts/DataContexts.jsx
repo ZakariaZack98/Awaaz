@@ -1,20 +1,20 @@
 import React, { createContext, useState } from "react";
-const DataContext = createContext();
-const DataProvider = ({ children }) => {
+export const DataContext = createContext(null);
+
+export const DataProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [notificationsData, setNotificationsData] = useState(null);
+  
+  const contextValue = {
+    currentUser,
+    setCurrentUser,
+    notificationsData, 
+    setNotificationsData,
+  };
+
   return (
-    <DataContext.Provider
-      value={{
-        currentUser,
-        setCurrentUser,
-        notificationsData,
-        setNotificationsData,
-      }}
-    >
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
 };
-
-export { DataContext, DataProvider };

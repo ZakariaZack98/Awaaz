@@ -27,7 +27,7 @@ const Search = () => {
           {searchValue !== "" &&
             searcDataArr.length > 0 &&
             searcDataArr.map((singleSearchData) => (
-          git    <div className="mr-2">
+          <div className="mr-2">
                 <UserCard
                   key={singleSearchData.userId}
                   singleUserData={singleSearchData}

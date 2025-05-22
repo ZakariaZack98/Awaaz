@@ -5,28 +5,29 @@ import UserCard from "../../components/common/UserCard";
 const Search = () => {
   const [searchValue, setSearchValue] = useState("");
   const { userData, setUserData } = useContext(DataContext);
-  console.log("Form search", userData);
 
   const searcDataArr = userData?.filter((item) =>
     item.fullName.toLocaleLowerCase().startsWith(searchValue.toLowerCase())
   );
-  console.log(searcDataArr);
 
   return (
-    <div className="py-10 px-20 h-[90%]">
-      <h1 className="text-4xl font-bold mb-5">Search</h1>
-      <div className="w-[50%] h-full">
-        <div className="flex w-full">
+    <div className="py-8 px-20 h-[100%] w-full flex items-center justify-center">
+      <div className="w-[45%] h-full rounded-md">
+        <div
+          className={`flex w-full ${
+            searchValue !== "" && searcDataArr.length > 0 ? "border-b-2 border-gray-200" : " "
+          }`}
+        >
           <input
             onChange={(e) => setSearchValue(e.target.value)}
-            className=" p-2 rounded border-[2px] w-full mb-2 bg-gray-200 border-gray-300"
+            className=" px-5 py-2 w-full mb-2  rounded-3xl focus:outline-0 bg-white shadow-sm"
             type="text"
             placeholder="Search by Name"
           />
         </div>
-        <div className="h-[90%] overflow-y-scroll">
+        <div className="h-[90%] overflow-y-scroll mt-2">
           {searchValue !== "" &&
-            searcDataArr &&
+            searcDataArr.length > 0 &&
             searcDataArr.map((singleSearchData) => (
               <div className="mr-2">
                 <UserCard

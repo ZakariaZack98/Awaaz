@@ -21,9 +21,7 @@ const Sidebar = () => {
   const [showSidebarMenu, setShowSidebarMenu] = useState(false);
   const { currentUser, setCurrentUser } = useContext(DataContext);
   const { notificationsData, setNotificationsData } = useContext(DataContext);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] =
-    useState(null);
-  // const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   useEffect(() => {
     FetchUserData(auth.currentUser?.uid)
@@ -54,6 +52,7 @@ const Sidebar = () => {
       );
     }
   }, [notificationsData]);
+
   const navItems = [
     { label: "Home", icon: AiFillHome, path: "/" },
     { label: "Search", icon: AiOutlineSearch, path: "/search" },
@@ -75,7 +74,7 @@ const Sidebar = () => {
   return (
     <div className="w-1/5 h-screen overflow-hidden p-5 border-gray-300 text-mainfontColor">
       <div className="w-64 h-full py-4 flex flex-col">
-        <h1 className="text-2xl font-bold mb-10 font-sans">Awaaz</h1>
+        <h1 className="text-[60px] ms-3 font-black mb-10 font-sans cookie text-red-800" >Awaaz</h1>
 
         <nav className="flex flex-col gap-2">
           {navItems.map(({ label, icon: Icon, path, img }, index) => {
@@ -119,11 +118,6 @@ const Sidebar = () => {
               </div>
             );
           })}
-          {showSidebarMenu && (
-            <div className="absolute z-1000">
-              <SidebarMenu />
-            </div>
-          )}
         </nav>
       </div>
     </div>

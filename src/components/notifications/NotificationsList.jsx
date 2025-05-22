@@ -2,8 +2,6 @@ import React from "react";
 import NotificationsCard from "./NotificationsCard";
 
 const NotificationsList = ({ NotificationDataArr }) => {
-  // console.log(NotificationDataArr);
-
   return (
     <div className="flex flex-col ">
       {NotificationDataArr?.slice().reverse().map((item, index, arr) => (

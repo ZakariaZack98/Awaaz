@@ -109,10 +109,27 @@ const Profile = ({ defaultTab = "posts" }) => {
           const allPostsSnap = await get(ref(db, "posts"));
           if (allPostsSnap.exists()) {
             const allPosts = allPostsSnap.val();
-            const filtered = savedKeys
-              .map((key) => allPosts[key])
-              .filter(Boolean);
-            setSavedPosts(filtered);
+
+            const filtered = await Promise.all(
+              savedKeys.map(async (key) => {
+                const post = allPosts[key];
+                if (!post) return null;
+
+                const [likesCount, commentsCount] =
+                  await FetchLikesCommentsCount(key);
+
+                return {
+                  ...post,
+                  id: key,
+                  likesCount,
+                  commentsCount,
+                };
+              })
+            );
+
+            setSavedPosts(filtered.filter(Boolean));
+          } else {
+            setSavedPosts([]);
           }
         } else {
           setSavedPosts([]);
@@ -121,6 +138,7 @@ const Profile = ({ defaultTab = "posts" }) => {
         console.error("Error fetching saved posts:", error);
       }
     };
+
     fetchSavedPosts();
   }, [activeTab, userId, navigate]);
 
@@ -151,8 +169,20 @@ const Profile = ({ defaultTab = "posts" }) => {
   };
   return (
     <div className="max-w-4xl mx-auto p-4 h-screen overflow-y-auto custom-scrollbar">
-      {showFollowersList && <FSUserList initialHeading="followers" userId={profileUserData.userId} setShowUserList={setShowFollowersList}/>}
-      {showFollowingsList && <FSUserList initialHeading="followings" userId={profileUserData.userId} setShowUserList={setShowFollowingsList}/>}
+      {showFollowersList && (
+        <FSUserList
+          initialHeading="followers"
+          userId={profileUserData.userId}
+          setShowUserList={setShowFollowersList}
+        />
+      )}
+      {showFollowingsList && (
+        <FSUserList
+          initialHeading="followings"
+          userId={profileUserData.userId}
+          setShowUserList={setShowFollowingsList}
+        />
+      )}
       {/* Profile Header */}
       <div className="flex items-start pt-5">
         <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500 via-yellow-500 to-purple-600 p-[3px]">
@@ -208,10 +238,16 @@ const Profile = ({ defaultTab = "posts" }) => {
               <span className="font-bold">{profileUserPost?.length || 0}</span>{" "}
               posts
             </span>
-            <span className="cursor-pointer" onClick={() => setShowFollowersList(true)}>
+            <span
+              className="cursor-pointer"
+              onClick={() => setShowFollowersList(true)}
+            >
               <span className="font-bold">{followersCount}</span> followers
             </span>
-            <span className="cursor-pointer" onClick={() => setShowFollowingsList(true)}>
+            <span
+              className="cursor-pointer"
+              onClick={() => setShowFollowingsList(true)}
+            >
               <span className="font-bold">{followingCount}</span> following
             </span>
           </div>
@@ -304,25 +340,29 @@ const Profile = ({ defaultTab = "posts" }) => {
         {activeTab === "posts" && (
           <div className="flex flex-wrap -m-1">
             {profileUserPost
-              .filter((post) => post?.imgUrls && post.imgUrls.length > 0)
+              .filter((post) => !post.videoUrl)
               .reverse()
-              .map((post, index) => (
-                <PostThumbnail
-                  key={post.id || index}
-                  onClick={() => handlePostClick(post.id)}
-                  type="image"
-                  src={post.imgUrls[0]}
-                  likes={post.likesCount || 0}
-                  comments={post.commentsCount || 0}
-                  caption={post.caption || ""}
-                  hasMultipleImages={post.imgUrls.length > 1}
-                  user={{
-                    name: profileUserData?.fullName,
-                    username: profileUserData?.username,
-                    profileImage: profileUserData?.imgUrl,
-                  }}
-                />
-              ))}
+              .map((post, index) => {
+                const isTextPost = !post.imgUrls || post.imgUrls.length === 0;
+                return (
+                  <PostThumbnail
+                    key={post.id || index}
+                    onClick={() => handlePostClick(post.id)}
+                    type={isTextPost ? "text" : "image"}
+                    src={!isTextPost ? post.imgUrls[0] : ""}
+                    likes={post.likesCount || 0}
+                    comments={post.commentsCount || 0}
+                    caption={post.text || ""}
+                    text={post.text || ""}
+                    hasMultipleImages={!isTextPost && post.imgUrls.length > 1}
+                    user={{
+                      name: profileUserData?.fullName,
+                      username: profileUserData?.username,
+                      profileImage: profileUserData?.imgUrl,
+                    }}
+                  />
+                );
+              })}
           </div>
         )}
 
@@ -358,23 +398,39 @@ const Profile = ({ defaultTab = "posts" }) => {
         {activeTab === "saved" && (
           <div className="flex flex-wrap -m-1">
             {savedPosts.length > 0 ? (
-              savedPosts.map((post, index) => (
-                <PostThumbnail
-                  onClick={() => handlePostClick(post.id)}
-                  key={post.id || index}
-                  type={post.videoUrl ? "video" : "image"}
-                  src={post.videoUrl || post?.imgUrls?.[0]}
-                  likes={post.likesCount || 0}
-                  comments={post.commentsCount || 0}
-                  caption={post.caption || ""}
-                  hasMultipleImages={post.imgUrls?.length > 1}
-                  user={{
-                    name: profileUserData?.fullName,
-                    username: profileUserData?.username,
-                    profileImage: profileUserData?.imgUrl,
-                  }}
-                />
-              ))
+              savedPosts.map((post, index) => {
+                const isTextPost = !post.imgUrls || post.imgUrls.length === 0;
+                const type = post.videoUrl
+                  ? "video"
+                  : isTextPost
+                  ? "text"
+                  : "image";
+
+                return (
+                  <PostThumbnail
+                    onClick={() => handlePostClick(post.id)}
+                    key={post.id || index}
+                    type={type}
+                    src={
+                      post.videoUrl
+                        ? post.videoUrl
+                        : !isTextPost
+                        ? post.imgUrls[0]
+                        : ""
+                    }
+                    likes={post.likesCount || 0}
+                    comments={post.commentsCount || 0}
+                    caption={post.caption || ""}
+                    text={post.text || ""}
+                    hasMultipleImages={!isTextPost && post.imgUrls.length > 1}
+                    user={{
+                      name: profileUserData?.fullName,
+                      username: profileUserData?.username,
+                      profileImage: profileUserData?.imgUrl,
+                    }}
+                  />
+                );
+              })
             ) : (
               <p className="text-center w-full text-gray-500 mt-4">
                 No saved posts found

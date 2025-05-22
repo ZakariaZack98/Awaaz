@@ -31,7 +31,7 @@ const SignIn = () => {
         <div className="bg-white p-8 border border-gray-300 rounded mb-4">
           {/* Logo and App Name */}
           <div className="flex flex-col items-center mb-8">
-            <h1 className="text-5xl font-semibold mb-4 font-serif tracking-wider">Awaaz</h1>
+            <h1 className="text-5xl font-semibold mb-4 text-red-800 cookie">Awaaz</h1>
             <p className="text-gray-500 text-sm text-center">
               Sign in to see photos and videos from your friends
             </p>

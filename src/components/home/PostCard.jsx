@@ -9,6 +9,7 @@ import PostActionIcons from "../common/PostActionIcons";
 import CommentField from "../common/CommentField";
 import { FetchLikesCommentsCount } from "../../utils/fetchData.utils";
 import FSUserList from "../common/FSUserList";
+import PostCardSkeleton from "../Skeleton/PostCardSkeleton";
 
 const PostCard = ({ postData }) => {
   const { id, text, posterId, posterName, imgUrls, videoUrl } = postData;
@@ -22,64 +23,70 @@ const PostCard = ({ postData }) => {
   const [commentsCount, setCommentsCount] = useState(0);
   const [displayComment, setDisplayComment] = useState("");
   const [showLikersList, setShowLikersList] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // TODO: FETCH POST METADATA ==================================
   useEffect(() => {
-  Promise.all([
-    FetchLikesCommentsCount(id),
-    CheckIfLiked(id),
-    CheckIfSaved(id),
-    CheckIfFollowed(postData.posterId)
-  ])
-  .then(([data, liked, saved, followed]) => {
-    const [likes, comments] = data;
-    if(likes) {
-      setLikesCount(likes)
-    } else setLikesCount(0)
-    if(comments) {
-      setCommentsCount(comments)
-    } else setCommentsCount(0)
-    setLiked(liked)
-    setSaved(saved)
-    setFollowed(followed)
-  })
-  .catch(err => console.error(err))
-}, [])
+    setIsLoading(true);
+    Promise.all([
+      FetchLikesCommentsCount(id),
+      CheckIfLiked(id),
+      CheckIfSaved(id),
+      CheckIfFollowed(postData.posterId)
+    ])
+      .then(([data, liked, saved, followed]) => {
+        const [likes, comments] = data;
+        setLikesCount(likes || 0);
+        setCommentsCount(comments || 0);
+        setLiked(liked);
+        setSaved(saved);
+        setFollowed(followed);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, [id, postData.posterId]);
 
   // TODO: HANDLE POST LIKE ====================================
   const handleLike = async () => {
-    liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1)
+    liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1);
     setLiked(liked ? false : true);
-    liked ? await UnlikePost(id) : await LikePost(id, posterId)
+    liked ? await UnlikePost(id) : await LikePost(id, posterId);
   };
-  
+
   // TODO: HANDLE POST SAVE ====================================
   const handleSave = async () => {
     setSaved(saved ? false : true);
     saved ? await RemoveSavedPost(id) : await SavePost(id).then(() => toast.success('Post saved'));
   };
 
+  if (isLoading) {
+    return <PostCardSkeleton />;
+  }
+
   return (
     <div className="py-3 px-4 bg-white rounded-md shadow-md">
       {
-        openPost && <Post setOpenPost={setOpenPost} postId={postData.id}/>
+        openPost && <Post setOpenPost={setOpenPost} postId={postData.id} />
       }
       {
-        showLikersList && <FSUserList postId={id} setShowUserList={setShowLikersList}/>
+        showLikersList && <FSUserList postId={id} setShowUserList={setShowLikersList} />
       }
       {/* //================ HEADING ====================== */}
-      <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed}/>
+      <PostHeader postData={postData} openPostActions={openPostActions} setOpenPostActions={setOpenPostActions} saved={saved} setSaved={setSaved} followed={followed} setFollowed={setFollowed} />
       {/* ==================ONLY TEXT POST'S TEXT CONTENT ======================= */}
       {
         onlyText && <p className="postcardCaption text-2xl text-black cursor-pointer" onClick={() => setOpenPost(true)}>{text}</p>
       }
       {/* ========== MEDIA PART =========== */}
-      {imgUrls && imgUrls.length > 1 && <ImageSlider imgUrlArray={imgUrls}/>}
-      {imgUrls && imgUrls.length === 1 && <img src={imgUrls[0]} alt="" className="w-full object-cover object-center rounded-md overflow-hidden"/>}
+      {imgUrls && imgUrls.length > 1 && <ImageSlider imgUrlArray={imgUrls} />}
+      {imgUrls && imgUrls.length === 1 && <img src={imgUrls[0]} alt="" className="w-full object-cover object-center rounded-md overflow-hidden" />}
       {videoUrl && videoUrl.length > 0 && <video src={videoUrl} controls className="w-full rounded-md overflow-hidden"></video>}
       {/* ========== ICONS ================== */}
       <div className="py-2">
-        <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave}/>
+        <PostActionIcons liked={liked} saved={saved} handleLike={handleLike} handleSave={handleSave} />
       </div>
       {/* ============= LIKES & COMMENTS ============== */}
       <p className="font-semibold text-sm cursor-pointer" onClick={() => setShowLikersList(true)}>{likesCount} likes</p>
@@ -99,7 +106,7 @@ const PostCard = ({ postData }) => {
           <p className="text-sm py-1">{displayComment}</p>
         </div>
       )}
-      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount}/>
+      <CommentField postId={id} posterId={posterId} setDisplayComment={setDisplayComment} commentsCount={commentsCount} setCommentsCount={setCommentsCount} />
     </div>
   );
 };

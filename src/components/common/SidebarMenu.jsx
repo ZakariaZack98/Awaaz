@@ -13,6 +13,7 @@ import { auth } from "../../../Database/Firebase.config";
 const SidebarMenu = ({ setShowSidebarMenu }) => {
   const navigate = useNavigate();
   const menuRef = useRef(null);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -26,7 +27,7 @@ const SidebarMenu = ({ setShowSidebarMenu }) => {
   const handleLogOut = () => {
     signOut(auth)
       .then(() => {
-        navigate("signin");
+        navigate("/signin");
         console.log("User signed out.");
       })
       .catch((error) => {
@@ -36,7 +37,7 @@ const SidebarMenu = ({ setShowSidebarMenu }) => {
 
   const menuItems = [
     { label: "Settings", icon: <FiSettings />, path: "/settings" },
-    { label: "Saved", icon: <FiBookmark />, path: `/profile/${auth.currentUser.uid}/saved` },
+    { label: "Saved", icon: <FiBookmark />, path: `/profile/${auth.currentUser?.uid}/saved` },
     { label: "Switch appearance", icon: <FiSun />, path: "/appearance" },
     { label: "Report a problem", icon: <FiAlertCircle />, path: "/report" },
     { label: "Log out", icon: <FiLogOut />, path: "logout" },
@@ -50,8 +51,9 @@ const SidebarMenu = ({ setShowSidebarMenu }) => {
     >
       {menuItems.map((item, index) => (
         <div
-          key={index}
-          onClick={() => {
+          key={item.label}
+          onClick={(e) => {
+            e.stopPropagation()
             if (item.label === "Log out") {
               handleLogOut();
             } else {

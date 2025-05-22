@@ -112,17 +112,10 @@ const Sidebar = () => {
                 )}
                 <span>{label}</span>
                 {label === "Notifications" && unreadNotificationsCount > 0 && (
-                  <p className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center font-bold justify-center text-xs ml-1">
+                  <p className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center font-bold justify-center text-xs ml-1">
                     {unreadNotificationsCount}
                   </p>
                 )}
-                {
-                  label === 'Notifications' && unreadNotificationCount > 0 && (
-                    <span className="w-5 h-5 bg-red-500 rounded-full flex justify-center items-center text-sm font-bold text-white">
-                      {unreadNotificationCount}
-                    </span>
-                  )
-                }
               </div>
             );
           })}

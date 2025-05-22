@@ -6,9 +6,9 @@ const NotificationsList = ({ NotificationDataArr }) => {
 
   return (
     <div className="flex flex-col ">
-      {NotificationDataArr?.map((item, index, arr) => (
+      {NotificationDataArr?.slice().reverse().map((item, index, arr) => (
         <div className={index < arr.length - 1 ? "border-b border-gray-300" : ""}>
-          <NotificationsCard Key={item.id} SingleNotificationData={item} />
+          <NotificationsCard Key={index} SingleNotificationData={item} />
         </div>
       ))}
     </div>

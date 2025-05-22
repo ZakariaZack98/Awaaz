@@ -5,7 +5,10 @@ import { BiSolidCommentCheck, BiSolidCommentDetail } from "react-icons/bi";
 import { FaComment } from "react-icons/fa";
 import { IoIosPersonAdd } from "react-icons/io";
 import { TbFileLike } from "react-icons/tb";
-import { handleRead } from "../../utils/notifications.utils";
+import {
+  handleRead,
+  readNotificationUpdateDb,
+} from "../../utils/notifications.utils";
 import { useNavigate } from "react-router-dom";
 import Post from "../../pages/Post/Post";
 
@@ -22,9 +25,11 @@ const NotificationsCard = ({ SingleNotificationData }) => {
     read,
     Key,
   } = SingleNotificationData;
-  const [readDone, setReadDone] = useState(read);
+  const [readDone, setReadDone] = useState(true);
   const [showPost, setShowPost] = useState(false);
   const navigate = useNavigate();
+  // update
+  readNotificationUpdateDb(receiverId, Key);
 
   let message = "";
   let navigateTo = "";
@@ -75,16 +80,21 @@ const NotificationsCard = ({ SingleNotificationData }) => {
       break;
     default:
       message = "You have a new notification.";
-      navigateTo = "/";
   }
 
-  // console.log(openPost);
+  // console.log(showPost);
 
   return (
     <div
-      onClick={() =>
-        setShowPost(true)
-      }
+      onClick={() => {
+        {
+          showPost
+            ? ""
+            : type == "follow"
+            ? handleRead(navigate, navigateTo)
+            : setShowPost(true);
+        }
+      }}
       className={`cursor-pointer flex items-center  p-2 justify-between mb-2 rounded ${
         readDone ? "" : "font-bold"
       }`}

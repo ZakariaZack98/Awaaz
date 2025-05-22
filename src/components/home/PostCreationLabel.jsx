@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import { ref, set } from "firebase/database";
 import { auth, db } from "../../../Database/Firebase.config";
 import { DataContext } from "../../contexts/DataContexts";
+import { FaPaperPlane } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 const PostCreationLabel = () => {
   const iconsAndLabels = _.postCreationIconsAndLabels;
@@ -18,6 +20,7 @@ const PostCreationLabel = () => {
   const [videoPath, setVideoPath] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const { currentUser } = useContext(DataContext);
+  const navigate = useNavigate()
 
   // TODO: SHOW THE PREVIEW OF THE UPLOADED PHOTOS UNDER THE UPLOAD PROPMPT
   const handlePreview = (e, filetype) => {
@@ -123,7 +126,7 @@ const PostCreationLabel = () => {
     <div className="relative w-full z-50">
       <div className="flex flex-col p-3 rounded-md shadow-md bg-white">
         <div className="top flex items-center justify-between gap-x-2 pb-3 border-b border-gray-200">
-          <picture className="w-10 h-10">
+          <picture className="min-w-10 h-10">
             <img
               src={
                 currentUser?.imgUrl ||
@@ -146,13 +149,16 @@ const PostCreationLabel = () => {
               }
             }}
           />
+          <button className="rounded-full bg-blue-500 text-white p-3 cursor-pointer">
+            <FaPaperPlane/>
+          </button>
         </div>
         <div className="bottom flex justify-between items-center px-3 pt-2 text-mainfontColor">
           {iconsAndLabels?.map((item, idx) => (
             <div
               key={item.label}
               className={`flex items-center gap-x-2 cursor-pointer hover:bg-gray-100 duration-200 rounded-md px-2 py-0.5 ${idx === 1 && openUploadPrompt ? 'bg-gray-200' : ''}`}
-              onClick={idx === 1 ? () => setOpenUploadPrompt((prev) => !prev) : null}>
+              onClick={idx === 1 ? () => setOpenUploadPrompt((prev) => !prev) : idx === 2 ? () => navigate('/add_story') : null}>
               <span className={`text-3xl ${item.colorClass}`}>
                 <item.icon />
               </span>

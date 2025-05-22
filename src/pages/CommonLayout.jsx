@@ -7,12 +7,18 @@ import UserNotVerified from "./Error/UserNotVerified";
 import { auth } from "../../Database/Firebase.config";
 
 const CommonLayout = () => {
-  const [userVerified, setuserVerifed] = useState(false);
+  const [userVerified, setUserVerified] = useState(false);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setuserVerifed(user.emailVerified);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserVerified(user.emailVerified);
+      } else {
+        setUserVerified(false);
+      }
     });
+
+    return () => unsubscribe();
   }, []);
 
   return (

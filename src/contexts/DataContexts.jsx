@@ -17,16 +17,6 @@ export const DataProvider = ({ children }) => {
         setUserData,
       }}
     >
-  
-  const contextValue = {
-    currentUser,
-    setCurrentUser,
-    notificationsData, 
-    setNotificationsData,
-  };
-
-  return (
-    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );

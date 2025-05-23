@@ -144,10 +144,7 @@ const Post = ({ postId, setOpenPost }) => {
       <div className="absolute top-5 right-5 cursor-pointer text-white">
         <span className="text-3xl">
           <MdClose
-            onClick={() => {
-              setOpenPost(false);
-              console.log("worked close");
-            }}
+            onClick={() => setOpenPost(false)}
           />
         </span>
       </div>
@@ -214,6 +211,7 @@ const Post = ({ postId, setOpenPost }) => {
               <div className="commentSec my-4">
                 {commentsData?.map((comment) => (
                   <CommentCard
+                    key={comment.id}
                     commentData={comment}
                     commentsDataArr={commentsData}
                     setCommentsDataArr={setCommentsData}

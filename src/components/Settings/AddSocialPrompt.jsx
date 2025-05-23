@@ -1,17 +1,15 @@
-import React, { useState } from 'react'
-
-// Define platforms array outside component
-const platforms = [
-  "Facebook",
-  "X (Twitter)", 
-  "YouTube",
-  "Instagram",
-  "LinkedIn",
-];
+import React, { useState } from 'react';
 
 const AddSocialPrompt = ({ setSocialHandels, socialLink, setSocialLink }) => {
-  // Keep useState hook inside component
   const [selectedPlatform, setSelectedPlatform] = useState("Facebook");
+
+  const platforms = [
+    "Facebook",
+    "X (Twitter)", 
+    "YouTube",
+    "Instagram",
+    "LinkedIn",
+  ];
 
   const handleSocialLink = (platform, updateValue) => {
     setSocialLink(updateValue);
@@ -67,7 +65,7 @@ const AddSocialPrompt = ({ setSocialHandels, socialLink, setSocialLink }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddSocialPrompt
+export default AddSocialPrompt;

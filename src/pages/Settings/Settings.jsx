@@ -25,34 +25,34 @@ const Settings = () => {
   const { currentUser } = useContext(DataContext);
 
   // State declarations
-  const [fullname, setFullname] = useState("");
+  const [fullname, setFullname] = useState(currentUser.fullName || "Name missing");
   const [editFullname, seteditFullname] = useState(false);
-  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState("");
-  const [theme, setTheme] = useState("Light");
-  const [followersVisibility, setFollowersVisibility] = useState("Public");
-  const [followingVisibility, setFollowingVisibility] = useState("Public");
+  const [profilePicUpdateUrl, setProfilePicUpdateUrl] = useState(currentUser.imgUrl);
+  const [theme, setTheme] = useState(currentUser.defaultTheme || "Light");
+  const [followersVisibility, setFollowersVisibility] = useState(currentUser.followersVisibility || "Public");
+  const [followingVisibility, setFollowingVisibility] = useState(currentUser.followingVisibility || "Public");
   const [profileVisibility, setProfileVisibility] = useState(true);
-  const [bio, setBio] = useState("");
-  const [gender, setGender] = useState("Unselected");
+  const [bio, setBio] = useState(currentUser.bio || null);
+  const [gender, setGender] = useState(currentUser.gender || "Unselected");
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState('Public');
-  const [socialHandels, setSocialHandels] = useState({});
+  const [socialHandels, setSocialHandels] = useState(currentUser.socialHandles || {});
   const [socialLink, setSocialLink] = useState("");
 
   // Add this useEffect to update state when currentUser changes
-  useEffect(() => {
-    if (currentUser) {
-      setFullname(currentUser.fullName || "Name missing");
-      setProfilePicUpdateUrl(currentUser.imgUrl);
-      setTheme(currentUser.defaultTheme || "Light");
-      setFollowersVisibility(currentUser.followersVisibility || "Public");
-      setFollowingVisibility(currentUser.followingVisibility || "Public");
-      setProfileVisibility(!currentUser.isLocked || true);
-      setBio(currentUser.bio || "");
-      setGender(currentUser.gender || "Unselected");
-      setSocialHandels(currentUser.socialHandles || {});
-      console.log(!currentUser.isLocked)
-    }
-  }, [currentUser]);
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     setFullname(currentUser.fullName || "Name missing");
+  //     setProfilePicUpdateUrl(currentUser.imgUrl);
+  //     setTheme(currentUser.defaultTheme || "Light");
+  //     setFollowersVisibility(currentUser.followersVisibility || "Public");
+  //     setFollowingVisibility(currentUser.followingVisibility || "Public");
+  //     setProfileVisibility(!currentUser.isLocked || true);
+  //     setBio(currentUser.bio || "");
+  //     setGender(currentUser.gender || "Unselected");
+  //     setSocialHandels(currentUser.socialHandles || {});
+  //     console.log(!currentUser.isLocked)
+  //   }
+  // }, [currentUser]);
 
   // Update profile picture
   const handleFileChange = async (e) => {

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Facebook, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { handlefacebook, handlegoogle } from '../../utils/Signupsignin.utils';
-import { toast } from 'react-toastify';
+import { auth } from '../../../Database/Firebase.config';
 
 
 const SignIn = () => {
-  const auth = getAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

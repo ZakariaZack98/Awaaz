@@ -234,7 +234,7 @@ const Profile = ({ defaultTab = "posts" }) => {
           <div className="-mt-2.5 text-sm">
             <h2>@{profileUserData?.username}</h2>
           </div>
-          <i className="text-blue-800">"{profileUserData.bio || ''}"</i>
+          {profileUserData.bio && <i className="text-blue-800">"{profileUserData.bio}"</i>}
           <div className="flex gap-6 text-sm mt-2.5 mb-1">
             <span>
               <span className="font-bold">{profileUserPost?.length || 0}</span>{" "}

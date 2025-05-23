@@ -12,6 +12,7 @@ import AccessDenied from "./pages/Error/AccessDenied";
 import AddStory from "./pages/AddStory/AddStory";
 import Search from "./pages/Search/search";
 import NotFound from "./pages/Error/NotFound";
+import "../Database/Firebase.config";
 
 const App = () => {
   return (

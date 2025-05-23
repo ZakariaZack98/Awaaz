@@ -6,15 +6,15 @@ const PostActionIcons = ({ liked, saved, handleLike, handleSave, activeCommentFi
   return (
     <div className="icons flex justify-between text-2xl">
       <div className="flex items-center gap-x-4">
-        <span>
+        <span onClick={() => handleLike()}>
           {liked ? (
-            <FaHeart className="text-red-600 cursor-pointer" onClick={() => handleLike()} />
+            <FaHeart className="text-red-600 cursor-pointer"/>
           ) : (
-            <FaRegHeart className="cursor-pointer" onClick={() => handleLike()} />
+            <FaRegHeart className="cursor-pointer"  />
           )}
         </span>
         <span>
-          <IoChatbubbleOutline className={`cursor-pointer ${activeCommentField ? 'text-blue-500' : ''}`} onClick={() => setActiveCommentField(true)}/>
+          <IoChatbubbleOutline className={`cursor-pointer ${activeCommentField ? 'text-blue-500' : ''}`} onClick={() => setActiveCommentField(!activeCommentField)}/>
         </span>
         <span>
           <PiPaperPlaneTilt className=" cursor-pointer" />

@@ -3,29 +3,13 @@ import ImageSlider from "../../components/common/ImageSlider";
 import PostHeader from "../../components/common/PostHeader";
 import { MdClose } from "react-icons/md";
 import PostActionIcons from "../../components/common/PostActionIcons";
-import {
-  equalTo,
-  get,
-  limitToFirst,
-  onValue,
-  orderByChild,
-  query,
-  ref,
-} from "firebase/database";
+import { equalTo, get, limitToFirst, onValue, orderByChild, query, ref,} from "firebase/database";
 import { db } from "../../../Database/Firebase.config";
-import {
-  FetchLikesCommentsCount,
-  FetchPostData,
-  FetchUserData,
-} from "../../utils/fetchData.utils";
+import { FetchLikesCommentsCount, FetchPostData, FetchUserData } from "../../utils/fetchData.utils";
 import CommentField from "../../components/common/CommentField";
 import CommentCard from "../../components/post/CommentCard";
 import PostSkeleton from "../../components/post/PostSekeleton";
-import {
-  CheckIfFollowed,
-  CheckIfLiked,
-  CheckIfSaved,
-} from "../../utils/actions.utils";
+import { CheckIfFollowed, CheckIfLiked, CheckIfSaved, LikePost, RemoveSavedPost, SavePost, UnlikePost } from "../../utils/actions.utils";
 import { toast } from "react-toastify";
 import { mockData } from "../../lib/mockData";
 import FSUserList from "../../components/common/FSUserList";
@@ -119,14 +103,14 @@ const Post = ({ postId, setOpenPost }) => {
   const handleLike = async () => {
     liked ? setLikesCount(likesCount - 1) : setLikesCount(likesCount + 1);
     setLiked(liked ? false : true);
-    liked ? await UnlikePost(postId) : await LikePost(postId, posterId);
-    toast.success("Post saved.");
+    liked ? await UnlikePost(postId) : await LikePost(postId, posterId)
   };
 
   // TODO: HANDLE POST SAVE ====================================
   const handleSave = async () => {
     setSaved(saved ? false : true);
-    saved ? await RemoveSavedPost(postId) : await SavePost(postId);
+    saved ? await RemoveSavedPost(postId) : await SavePost(postId)
+    saved ? toast.success('Post saved') : null;
   };
 
   if (isLoading) {

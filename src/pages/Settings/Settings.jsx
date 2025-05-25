@@ -31,7 +31,7 @@ const Settings = () => {
   const [theme, setTheme] = useState(currentUser.defaultTheme || "Light");
   const [followersVisibility, setFollowersVisibility] = useState(currentUser.followersVisibility || "Public");
   const [followingVisibility, setFollowingVisibility] = useState(currentUser.followingVisibility || "Public");
-  const [profileVisibility, setProfileVisibility] = useState(true);
+  const [profileVisibility, setProfileVisibility] = useState(!currentUser.isLocked || true);
   const [bio, setBio] = useState(currentUser.bio || null);
   const [gender, setGender] = useState(currentUser.gender || "Unselected");
   const [socialHandelsVisibility, setSocialHandelsVisibility] = useState('Public');

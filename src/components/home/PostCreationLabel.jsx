@@ -104,7 +104,7 @@ const PostCreationLabel = () => {
           operations.push(set(ref(db, `hashTags/${hashTag}/${postId}`), true))
         });
       }
-
+      toast.info('Post is being uploaded')
       await Promise.all(operations);
       toast.success("Posting successful");
       setOpenUploadPrompt(false);

@@ -52,3 +52,11 @@ _.darkBgColors = [
   "bg-[#3b0764]",
   "bg-[#0f172a]",
 ];
+
+_.platforms = [
+    "Facebook",
+    "X (Twitter)", 
+    "YouTube",
+    "Instagram",
+    "LinkedIn",
+  ];

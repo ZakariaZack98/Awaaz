@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
+import { _ } from "../../lib/lib"
 
 const AddSocialPrompt = ({ setSocialHandels, socialLink, setSocialLink }) => {
   const [selectedPlatform, setSelectedPlatform] = useState("Facebook");
-
-  const platforms = [
-    "Facebook",
-    "X (Twitter)", 
-    "YouTube",
-    "Instagram",
-    "LinkedIn",
-  ];
 
   const handleSocialLink = (platform, updateValue) => {
     setSocialLink(updateValue);
@@ -34,7 +27,7 @@ const AddSocialPrompt = ({ setSocialHandels, socialLink, setSocialLink }) => {
           }}
           className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
         >
-          {platforms.map((platform) => (
+          {_.platforms.map((platform) => (
             <option key={platform} value={platform}>
               {platform}
             </option>

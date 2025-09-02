@@ -42,6 +42,7 @@ const FSUserList = ({ postId, commentId, replyId, userId, setShowUserList, initi
         let users = [];
         if (postId) {
           users = await fetchUsersList('post', postId);
+          console.log(users);
         } else if (commentId) {
           users = await fetchUsersList('comment', commentId);
         } else if (replyId) {

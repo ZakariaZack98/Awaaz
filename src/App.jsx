@@ -10,7 +10,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Explore from "./pages/Explore/Explore";
 import AccessDenied from "./pages/Error/AccessDenied";
 import AddStory from "./pages/AddStory/AddStory";
-import Search from "./pages/Search/search";
+import Search from "./pages/Search/Search";
 import NotFound from "./pages/Error/NotFound";
 import "../Database/Firebase.config";
 
